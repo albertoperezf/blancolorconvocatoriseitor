@@ -1,7 +1,8 @@
 import { createDb, type Db } from '../src/lib/db/create';
-import { faqs, users } from '../src/lib/db/schema';
+import { faqs, matches, users } from '../src/lib/db/schema';
 import { hashPassword } from '../src/lib/auth/password';
 import { getSettings } from '../src/lib/match/queries';
+import { currentMatchStart } from '../src/lib/match/schedule';
 
 // Usernames and long-term absences as shown on the legacy public page (13/10/2026).
 const LEGACY_PLAYERS = [
@@ -79,6 +80,17 @@ async function seedFaqs(db: Db) {
   console.log('FAQs seeded.');
 }
 
+async function seedPastMatches(db: Db, count: number) {
+  const settings = await getSettings(db);
+  const current = currentMatchStart(new Date(), settings);
+  const rows = Array.from({ length: count }, (_, i) => ({
+    startsAt: new Date(current.getTime() - (i + 1) * 7 * 86_400_000),
+    venue: settings.venue,
+  }));
+  await db.insert(matches).values(rows).onConflictDoNothing();
+  console.log(`Past matches ensured (${count}). Set RESULTS_FROM earlier than them to see them in /resultados.`);
+}
+
 async function main() {
   const handle = await createDb();
   await handle.migrate('drizzle');
@@ -86,6 +98,8 @@ async function main() {
   await seedFaqs(handle.db);
   await seedAdmin(handle.db);
   if (!process.argv.includes('--no-legacy')) await seedLegacyPlayers(handle.db);
+  const past = process.argv.find((a) => a.startsWith('--past-matches='));
+  if (past) await seedPastMatches(handle.db, Number(past.split('=')[1]));
   await handle.close();
 }
 

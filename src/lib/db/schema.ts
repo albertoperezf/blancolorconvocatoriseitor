@@ -64,6 +64,9 @@ export const matches = pgTable('matches', {
   id: uuid().primaryKey().defaultRandom(),
   startsAt: timestamp({ withTimezone: true }).notNull().unique(),
   venue: varchar({ length: 100 }).notNull(),
+  // Null until an admin records the result.
+  blancosGoals: smallint(),
+  colorGoals: smallint(),
 });
 
 export const attendances = pgTable(

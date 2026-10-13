@@ -13,6 +13,7 @@
     "logout": "Salir",
     "main": "Principal",
     "darkTheme": "Tema oscuro",
+    "results": "Resultados",
     "beta": "Beta",
     "pendingRequests": "{count, plural, one {solicitud de contraseña pendiente} other {solicitudes de contraseña pendientes}}"
   },
@@ -72,6 +73,21 @@
     "submit": "Entrar",
     "forgot": "¿Has olvidado tu contraseña?",
     "invalid": "Usuario o contraseña incorrectos."
+  },
+  "results": {
+    "title": "Resultados",
+    "intro": "Todos los partidos desde el 15 de octubre, del más reciente al más antiguo.",
+    "empty": "Todavía no se ha jugado ningún partido.",
+    "pending": "Pendiente",
+    "resultLabel": "Resultado",
+    "winner": { "blancos": "Blancos", "color": "Color", "draw": "Empate" },
+    "blancos": "BLANCOS",
+    "color": "COLOR",
+    "legend": "Resultado del {date}",
+    "blancosGoals": "Goles de Blancos",
+    "colorGoals": "Goles de Color",
+    "save": "Guardar",
+    "saved": "Resultado guardado."
   },
   "recover": {
     "title": "He olvidado mi contraseña",
@@ -181,6 +197,7 @@
     },
     "displayName": { "min": "Mínimo 2 caracteres.", "max": "Máximo 40 caracteres." },
     "settings": { "time": "Formato HH:MM." },
+    "result": { "required": "Pon los goles de este equipo.", "goals": "Entre 0 y 99 goles." },
     "required": "Campo obligatorio."
   },
   "faq": {

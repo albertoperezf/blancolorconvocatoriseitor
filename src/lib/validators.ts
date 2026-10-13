@@ -69,6 +69,15 @@ export const settingsSchema = z.object({
   rolloverHours: z.coerce.number().int().min(0).max(48),
 });
 
+const goalsSchema = z
+  .string()
+  .trim()
+  .min(1, 'result.required')
+  .regex(/^\d{1,2}$/, 'result.goals')
+  .transform(Number);
+
+export const resultSchema = z.object({ blancos: goalsSchema, color: goalsSchema });
+
 /** Maps zod issues to { field: messageKey } for form UIs. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const out: Record<string, string> = {};

@@ -17,7 +17,7 @@
     "db:migrate": "tsx --env-file-if-exists=.env scripts/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
     "db:server": "pglite-server --db=.data/dev --port=54329",
-    "e2e:serve": "tsx scripts/seed.ts --no-legacy && next start"
+    "e2e:serve": "tsx scripts/seed.ts --no-legacy --past-matches=2 && next start"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

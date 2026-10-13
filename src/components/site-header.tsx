@@ -29,6 +29,11 @@ export async function SiteHeader() {
         <ThemeToggle initial={theme} />
         <nav aria-label={t('main')}>
           <ul className="flex flex-wrap items-center gap-1 text-sm sm:text-base">
+            <li>
+              <Link className={link} href="/resultados">
+                {t('results')}
+              </Link>
+            </li>
             {user ? (
               <>
                 <li>

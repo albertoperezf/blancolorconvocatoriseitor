@@ -173,6 +173,34 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await page.reload();
   await expect(page.getByRole('region', { name: /olvidado su contraseña/ })).toHaveCount(0);
 
+  // Results: admins record and correct scores; the winner is derived; players only read them.
+  await page.getByRole('link', { name: 'Resultados' }).click();
+  await expect(page).toHaveURL(/\/resultados$/);
+  const latest = page.locator('main li').first();
+  await latest.getByLabel('Goles de Blancos').fill('3');
+  await latest.getByLabel('Goles de Color').fill('');
+  await latest.getByRole('button', { name: 'Guardar' }).click();
+  await expect(latest.getByText('Pon los goles de este equipo.')).toBeVisible();
+  await expect(latest.getByLabel('Goles de Blancos')).toHaveValue('3');
+
+  await latest.getByLabel('Goles de Color').fill('1');
+  await latest.getByRole('button', { name: 'Guardar' }).click();
+  await expect(latest.getByRole('status')).toHaveText('Resultado guardado.');
+  await expect(latest).toContainText('Resultado: Blancos');
+  await expect(latest).toContainText('3 – 1');
+
+  await latest.getByLabel('Goles de Blancos').fill('2');
+  await latest.getByLabel('Goles de Color').fill('2');
+  await latest.getByRole('button', { name: 'Guardar' }).click();
+  await expect(latest).toContainText('Resultado: Empate');
+  await expect(latest).toContainText('2 – 2');
+  await expectNoA11yViolations(page);
+
+  await player.goto('/resultados');
+  await expect(player.locator('main li').first()).toContainText('Resultado: Empate');
+  await expect(player.getByRole('button', { name: 'Guardar' })).toHaveCount(0);
+  await expectNoA11yViolations(player);
+
   // Leave the shared admin as it started for the next project.
   await page.goto('/perfil');
   await page.getByLabel('Juego con').selectOption('color');

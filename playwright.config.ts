@@ -37,6 +37,8 @@ export default defineConfig({
       ADMIN_USERNAME: E2E_ADMIN.username,
       ADMIN_DISPLAY_NAME: 'Admin E2E',
       ADMIN_TEMP_PASSWORD: E2E_ADMIN.password,
+      // The seeded past matches predate the real start date (15 Oct 2026).
+      RESULTS_FROM: '2000-01-01T00:00:00Z',
     },
   },
 });
