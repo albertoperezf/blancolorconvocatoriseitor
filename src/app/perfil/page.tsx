@@ -13,7 +13,8 @@ export default async function ProfilePage() {
     <div className="mx-auto max-w-xl">
       <h1 className="text-2xl font-extrabold tracking-tight">{t('title')}</h1>
       <p className="mt-1 text-muted">
-        {user.displayName} · {user.username}
+        {user.displayName}
+        {user.displayName.toLowerCase() !== user.username.toLowerCase() && ` · ${user.username}`}
       </p>
       <section aria-labelledby="team-heading" className="card mt-4">
         <h2 id="team-heading" className="mb-3 text-xl font-extrabold">
