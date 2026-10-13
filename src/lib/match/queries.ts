@@ -39,6 +39,7 @@ export async function getSquad(db: Db, matchId: string): Promise<Squad> {
       id: users.id,
       displayName: users.displayName,
       team: users.team,
+      position: users.position,
       longTermAbsence: users.longTermAbsence,
       decision: attendances.decision,
     })

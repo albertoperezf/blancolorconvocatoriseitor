@@ -11,14 +11,17 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
+import { POSITIONS } from '../positions';
 
 export const roleEnum = pgEnum('role', ['player', 'admin']);
 export const teamEnum = pgEnum('team', ['blancos', 'color']);
 export const decisionEnum = pgEnum('decision', ['going', 'maybe', 'not_going']);
+export const positionEnum = pgEnum('position', POSITIONS);
 
 export type Role = (typeof roleEnum.enumValues)[number];
 export type Team = (typeof teamEnum.enumValues)[number];
 export type Decision = (typeof decisionEnum.enumValues)[number];
+export type Position = (typeof positionEnum.enumValues)[number];
 
 const createdAt = () => timestamp({ withTimezone: true }).notNull().defaultNow();
 
@@ -32,6 +35,7 @@ export const users = pgTable('users', {
   mustChangePassword: boolean().notNull().default(false),
   role: roleEnum().notNull().default('player'),
   team: teamEnum(),
+  position: positionEnum(),
   longTermAbsence: boolean().notNull().default(false),
   absenceNote: varchar({ length: 200 }),
   active: boolean().notNull().default(true),

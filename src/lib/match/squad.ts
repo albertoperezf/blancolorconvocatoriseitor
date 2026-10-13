@@ -1,9 +1,10 @@
-import type { Decision, Team } from '@/lib/db/schema';
+import type { Decision, Position, Team } from '@/lib/db/schema';
 
 export type SquadPlayer = {
   id: string;
   displayName: string;
   team: Team | null;
+  position?: Position | null;
   longTermAbsence: boolean;
   decision: Decision | null;
 };

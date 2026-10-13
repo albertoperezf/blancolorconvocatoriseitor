@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { enrolSchema, guestNameSchema, loginSchema, newPasswordSchema, settingsSchema } from '@/lib/validators';
+import {
+  enrolSchema,
+  guestNameSchema,
+  loginSchema,
+  newPasswordSchema,
+  positionSchema,
+  settingsSchema,
+} from '@/lib/validators';
 
 describe('validators', () => {
   it('accepts Spanish guest names and normalises spaces', () => {
@@ -25,6 +32,11 @@ describe('validators', () => {
     const mismatch = newPasswordSchema.safeParse({ password: 'a-long-password', confirm: 'another-one!!' });
     expect(mismatch.success).toBe(false);
     expect(mismatch.error?.issues[0]).toMatchObject({ message: 'password.mismatch', path: ['confirm'] });
+  });
+
+  it('accepts only the four positions', () => {
+    for (const p of ['portero', 'defensa', 'mediocampo', 'delantero']) expect(positionSchema.parse(p)).toBe(p);
+    expect(positionSchema.safeParse('libero').success).toBe(false);
   });
 
   it('validates match settings', () => {

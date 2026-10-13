@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { POSITIONS } from './positions';
 
 export const TEAMS = ['blancos', 'color'] as const;
 export const DECISIONS = ['going', 'maybe', 'not_going'] as const;
@@ -32,6 +33,8 @@ export const changePasswordSchema = z
   .refine((v) => v.password === v.confirm, { message: 'password.mismatch', path: ['confirm'] });
 
 export const teamSchema = z.enum(TEAMS, { message: 'team.required' });
+
+export const positionSchema = z.enum(POSITIONS, { message: 'position.required' });
 
 export const decisionSchema = z.enum(DECISIONS).nullable();
 

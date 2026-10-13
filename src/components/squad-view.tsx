@@ -1,12 +1,16 @@
 import { getTranslations } from 'next-intl/server';
+import type { Position } from '@/lib/db/schema';
 import { goingCount, type Squad, type SquadPlayer } from '@/lib/match/squad';
-import { ShirtIcon } from './icons';
+import { POSITIONS } from '@/lib/positions';
+import { PositionIcon, ShirtIcon } from './icons';
+
+type Name = { key: string; label: string; hint?: string; position?: Position | null; positionLabel?: string };
 
 type GroupProps = {
   id: string;
   title: string;
   count: number;
-  names: { key: string; label: string; hint?: string }[];
+  names: Name[];
   empty: string;
   open?: boolean;
   icon?: React.ReactNode;
@@ -30,8 +34,13 @@ function Group({ id, title, count, names, empty, open = true, icon, accent = 'bo
       ) : (
         <ul aria-labelledby={id} className="flex flex-wrap gap-2">
           {names.map((n) => (
-            <li key={n.key} className="rounded-lg bg-bg px-2.5 py-1 text-sm font-medium">
+            <li
+              key={n.key}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-bg px-2.5 py-1 text-sm font-medium"
+            >
+              {n.position && <PositionIcon position={n.position} className="size-4 shrink-0 text-muted" />}
               {n.label}
+              {n.positionLabel && <span className="sr-only">, {n.positionLabel}</span>}
               {n.hint && <span className="text-muted"> · {n.hint}</span>}
             </li>
           ))}
@@ -63,17 +72,30 @@ function Group({ id, title, count, names, empty, open = true, icon, accent = 'bo
   );
 }
 
-const players = (list: SquadPlayer[]) => list.map((p) => ({ key: p.id, label: p.displayName }));
-
 export async function SquadView({ squad }: { squad: Squad }) {
-  const t = await getTranslations('squad');
+  const [t, tPos] = await Promise.all([getTranslations('squad'), getTranslations('positions')]);
   const empty = t('empty');
+  const players = (list: SquadPlayer[]): Name[] =>
+    list.map((p) => ({
+      key: p.id,
+      label: p.displayName,
+      position: p.position,
+      positionLabel: p.position ? tPos(p.position) : undefined,
+    }));
 
   return (
     <section aria-labelledby="squad-heading" className="mt-8">
       <h2 id="squad-heading" className="text-xl font-extrabold">
         {t('heading')} <span className="font-semibold text-muted tabular-nums">({goingCount(squad)})</span>
       </h2>
+      <ul aria-label={t('positionsLegend')} className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+        {POSITIONS.map((p) => (
+          <li key={p} className="inline-flex items-center gap-1.5">
+            <PositionIcon position={p} className="size-4" />
+            {tPos(p)}
+          </li>
+        ))}
+      </ul>
       <div className="mt-3 grid gap-3 md:grid-cols-3">
         <Group
           id="g-blancos"

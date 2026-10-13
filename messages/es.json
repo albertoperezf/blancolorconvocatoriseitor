@@ -42,7 +42,8 @@
     "absent": "BAJAS LARGA DURACIÓN",
     "undecided": "NO SE HAN DECIDIDO",
     "empty": "Nadie todavía",
-    "guestOf": "invitado de {host}"
+    "guestOf": "invitado de {host}",
+    "positionsLegend": "Posiciones"
   },
   "status": {
     "legend": "Tu respuesta",
@@ -107,6 +108,9 @@
     "teamHeading": "Mi equipo",
     "team": "Juego con",
     "teamSaved": "Equipo guardado.",
+    "positionHeading": "Mi posición",
+    "position": "Juego de",
+    "positionSaved": "Posición guardada.",
     "save": "Guardar",
     "passwordHeading": "Cambiar contraseña",
     "current": "Contraseña actual",
@@ -118,6 +122,12 @@
     "sessionsHint": "Cierra la sesión en todos los demás dispositivos.",
     "closeOthers": "Cerrar otras sesiones",
     "closedOthers": "Otras sesiones cerradas."
+  },
+  "positions": {
+    "portero": "Portero",
+    "defensa": "Defensa",
+    "mediocampo": "Mediocampo",
+    "delantero": "Delantero"
   },
   "teams": {
     "blancos": "Blancos",
@@ -190,6 +200,7 @@
       "mismatch": "Las contraseñas no coinciden."
     },
     "team": { "required": "Elige un equipo." },
+    "position": { "required": "Elige una posición." },
     "guest": {
       "min": "Mínimo 2 letras.",
       "max": "Máximo 30 caracteres.",

@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
-import { attendances, guests, users, type Decision, type Team } from '@/lib/db/schema';
+import { attendances, guests, users, type Decision, type Position, type Team } from '@/lib/db/schema';
 
 export class DomainError extends Error {
   constructor(public readonly code: 'not_found' | 'forbidden' | 'duplicate' | 'self_lockout') {
@@ -54,4 +54,8 @@ export async function getMyGuests(db: Db, hostId: string, matchId: string) {
 
 export async function setTeam(db: Db, userId: string, team: Team) {
   await db.update(users).set({ team }).where(eq(users.id, userId));
+}
+
+export async function setPosition(db: Db, userId: string, position: Position) {
+  await db.update(users).set({ position }).where(eq(users.id, userId));
 }

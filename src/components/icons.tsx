@@ -81,3 +81,25 @@ export const ShirtIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) =>
     <path d="M20.4 6.6 16 3a4 4 0 0 1-8 0L3.6 6.6a1 1 0 0 0-.2 1.3l1.9 3a1 1 0 0 0 1.3.3L8 10.4V21h8V10.4l1.4.8a1 1 0 0 0 1.3-.3l1.9-3a1 1 0 0 0-.2-1.3Z" />
   </svg>
 );
+
+// Portero = glove, Defensa = shield, Mediocampo = two-way arrows, Delantero = target.
+const POSITION_PATHS = {
+  portero: (
+    <path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+  ),
+  defensa: (
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+  ),
+  mediocampo: <path d="m18 8 4 4-4 4M2 12h20M6 8l-4 4 4 4" />,
+  delantero: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </>
+  ),
+} as const;
+
+export const PositionIcon = ({ position, ...p }: IconProps & { position: keyof typeof POSITION_PATHS }) => (
+  <svg {...base(p)}>{POSITION_PATHS[position]}</svg>
+);

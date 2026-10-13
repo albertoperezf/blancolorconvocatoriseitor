@@ -128,7 +128,7 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await next.fill('otra contraseña larga');
   await confirm.fill('otra contraseña distinta');
   await showNext.check();
-  await player.getByRole('button', { name: 'Guardar' }).nth(1).click();
+  await player.getByRole('region', { name: 'Cambiar contraseña' }).getByRole('button', { name: 'Guardar' }).click();
   await expect(player.getByText('Las contraseñas no coinciden.')).toBeVisible();
   await expect(current).toHaveValue(NEW_PASSWORD);
   await expect(next).toHaveValue('otra contraseña larga');
@@ -136,11 +136,26 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(next).toHaveAttribute('type', 'text');
 
   await confirm.fill('otra contraseña larga');
-  await player.getByRole('button', { name: 'Guardar' }).nth(1).click();
+  await player.getByRole('region', { name: 'Cambiar contraseña' }).getByRole('button', { name: 'Guardar' }).click();
   await expect(player.getByText(/Contraseña cambiada/)).toBeVisible();
   await expect(next).toHaveValue('');
   await expect(showNext).not.toBeChecked();
   await expect(next).toHaveAttribute('type', 'password');
+
+  // Position: chosen in the profile, shown with its icon next to the name in every squad group.
+  const positionSection = player.getByRole('region', { name: 'Mi posición' });
+  await positionSection.getByText('Portero', { exact: true }).click();
+  await expect(player.getByRole('radio', { name: 'Portero' })).toBeChecked();
+  await player.getByRole('region', { name: 'Mi posición' }).getByRole('button', { name: 'Guardar' }).click();
+  await expect(player.getByText('Posición guardada.')).toBeVisible();
+  await expectNoA11yViolations(player);
+  await player.goto('/');
+  await expect(
+    player
+      .getByRole('region', { name: 'DUDOSITOS' })
+      .getByRole('listitem')
+      .filter({ hasText: `Nuevo ${suffix}` }),
+  ).toContainText(`Nuevo ${suffix}, Portero`);
 
   // Profile: change own team.
   await page.goto('/perfil');

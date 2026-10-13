@@ -29,6 +29,13 @@
       "when": 1791891693834,
       "tag": "0003_match_results",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791894122222,
+      "tag": "0004_player_position",
+      "breakpoints": true
     }
   ]
 }

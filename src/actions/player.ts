@@ -6,8 +6,15 @@ import { getSessionToken, requireUser } from '@/lib/auth/current';
 import { changePassword } from '@/lib/auth/service';
 import { invalidateUserSessions } from '@/lib/auth/sessions';
 import { ensureCurrentMatch } from '@/lib/match/queries';
-import { addGuest, DomainError, removeGuest, setAttendance, setTeam } from '@/lib/services/player';
-import { changePasswordSchema, decisionSchema, fieldErrors, guestNameSchema, teamSchema } from '@/lib/validators';
+import { addGuest, DomainError, removeGuest, setAttendance, setPosition, setTeam } from '@/lib/services/player';
+import {
+  changePasswordSchema,
+  decisionSchema,
+  fieldErrors,
+  guestNameSchema,
+  positionSchema,
+  teamSchema,
+} from '@/lib/validators';
 import type { FormState } from './form-state';
 
 export async function setAttendanceAction(decision: unknown): Promise<{ ok: boolean; error?: string }> {
@@ -52,6 +59,15 @@ export async function updateTeamAction(_prev: FormState, formData: FormData): Pr
   await setTeam(await getDb(), user.id, team.data);
   refresh();
   return { status: 'success', message: 'profile.teamSaved' };
+}
+
+export async function updatePositionAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const position = positionSchema.safeParse(formData.get('position'));
+  if (!position.success) return { status: 'error', errors: { position: 'position.required' } };
+  await setPosition(await getDb(), user.id, position.data);
+  refresh();
+  return { status: 'success', message: 'profile.positionSaved' };
 }
 
 export async function changePasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
