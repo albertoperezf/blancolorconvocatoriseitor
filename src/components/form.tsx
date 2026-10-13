@@ -1,7 +1,16 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useId, useState, type InputHTMLAttributes } from 'react';
+import { startTransition, useEffect, useId, useRef, useState, type FormEvent, type InputHTMLAttributes } from 'react';
+
+/** `<form action>` auto-resets after every submit, even on validation errors; onSubmit keeps the values. */
+export function useSubmitKeepingValues(dispatch: (formData: FormData) => void) {
+  return (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(() => dispatch(formData));
+  };
+}
 
 /** Resolves a message key from a FormState: tries `errors.<key>` first, then the key itself. */
 export function useMessage() {
@@ -56,8 +65,19 @@ export function Field({ label, name, error, hint, id, ...input }: FieldProps) {
 export function PasswordField(props: Omit<FieldProps, 'type'>) {
   const t = useTranslations('login');
   const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // A native form reset unticks the checkbox without React noticing; hide the password again too.
+  useEffect(() => {
+    const form = ref.current?.closest('form');
+    if (!form) return;
+    const hide = () => setVisible(false);
+    form.addEventListener('reset', hide);
+    return () => form.removeEventListener('reset', hide);
+  }, []);
+
   return (
-    <div>
+    <div ref={ref}>
       <Field {...props} type={visible ? 'text' : 'password'} />
       <label className="mt-2 inline-flex min-h-6 cursor-pointer items-center gap-2 text-sm">
         <input type="checkbox" className="size-5" checked={visible} onChange={(e) => setVisible(e.target.checked)} />

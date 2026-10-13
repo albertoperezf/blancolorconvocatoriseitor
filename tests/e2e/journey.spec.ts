@@ -31,8 +31,21 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   }
   if (await welcome.isVisible()) {
     await expectNoA11yViolations(page);
+    const newPassword = page.getByLabel('Nueva contraseña', { exact: true });
+    const showNew = page.getByLabel('Mostrar contraseña').first();
     await page.getByLabel('Juego con').selectOption('color');
-    await page.getByLabel('Nueva contraseña', { exact: true }).fill(NEW_PASSWORD);
+    await newPassword.fill(NEW_PASSWORD);
+    await showNew.check();
+    await page.getByLabel('Repite la nueva contraseña').fill('no es la misma');
+    await page.getByRole('button', { name: 'Guardar y continuar' }).click();
+
+    // A mismatch keeps what was typed and the show-password state.
+    await expect(page.getByText('Las contraseñas no coinciden.')).toBeVisible();
+    await expect(newPassword).toHaveValue(NEW_PASSWORD);
+    await expect(newPassword).toHaveAttribute('type', 'text');
+    await expect(showNew).toBeChecked();
+    await expect(page.getByLabel('Juego con')).toHaveValue('color');
+
     await page.getByLabel('Repite la nueva contraseña').fill(NEW_PASSWORD);
     await page.getByRole('button', { name: 'Guardar y continuar' }).click();
   }
@@ -104,6 +117,30 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await player.reload();
   await expect(player.getByRole('radio')).toHaveCount(3);
   await expect(player.getByRole('region', { name: 'DUDOSITOS' }).getByText(`Nuevo ${suffix}`)).toBeVisible();
+
+  // The player changes his password: a mismatch keeps the values, success clears and hides them.
+  await player.goto('/perfil');
+  const current = player.getByLabel('Contraseña actual');
+  const next = player.getByLabel('Nueva contraseña', { exact: true });
+  const confirm = player.getByLabel('Repite la nueva contraseña');
+  const showNext = player.getByLabel('Mostrar contraseña').nth(1);
+  await current.fill(NEW_PASSWORD);
+  await next.fill('otra contraseña larga');
+  await confirm.fill('otra contraseña distinta');
+  await showNext.check();
+  await player.getByRole('button', { name: 'Guardar' }).nth(1).click();
+  await expect(player.getByText('Las contraseñas no coinciden.')).toBeVisible();
+  await expect(current).toHaveValue(NEW_PASSWORD);
+  await expect(next).toHaveValue('otra contraseña larga');
+  await expect(showNext).toBeChecked();
+  await expect(next).toHaveAttribute('type', 'text');
+
+  await confirm.fill('otra contraseña larga');
+  await player.getByRole('button', { name: 'Guardar' }).nth(1).click();
+  await expect(player.getByText(/Contraseña cambiada/)).toBeVisible();
+  await expect(next).toHaveValue('');
+  await expect(showNext).not.toBeChecked();
+  await expect(next).toHaveAttribute('type', 'password');
 
   // Profile: change own team.
   await page.goto('/perfil');

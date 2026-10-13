@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useEffect, useRef } from 'react';
 import { idle, type FormState } from '@/actions/form-state';
 import { changePasswordAction, closeOtherSessionsAction, updateTeamAction } from '@/actions/player';
-import { Notice, PasswordField, TeamSelect, useMessage } from '@/components/form';
+import { Notice, PasswordField, TeamSelect, useMessage, useSubmitKeepingValues } from '@/components/form';
 
 function Result({ state }: { state: FormState }) {
   const msg = useMessage();
@@ -34,6 +34,7 @@ export function ChangePasswordForm({ username }: { username: string }) {
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(changePasswordAction, idle);
+  const onSubmit = useSubmitKeepingValues(formAction);
   const formRef = useRef<HTMLFormElement>(null);
   const err = (f: string) => msg(state.errors?.[f]);
 
@@ -42,7 +43,7 @@ export function ChangePasswordForm({ username }: { username: string }) {
   }, [state]);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-4" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <input type="text" name="username" value={username} autoComplete="username" readOnly hidden />
       <PasswordField
         name="current"

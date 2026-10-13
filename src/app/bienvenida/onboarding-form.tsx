@@ -4,16 +4,17 @@ import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 import { completeOnboardingAction } from '@/actions/auth';
 import { idle } from '@/actions/form-state';
-import { PasswordField, TeamSelect, useMessage } from '@/components/form';
+import { PasswordField, TeamSelect, useMessage, useSubmitKeepingValues } from '@/components/form';
 
 export function OnboardingForm({ needsPassword, team }: { needsPassword: boolean; team: string | null }) {
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(completeOnboardingAction, idle);
+  const onSubmit = useSubmitKeepingValues(formAction);
   const err = (field: string) => msg(state.errors?.[field]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4" noValidate>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <TeamSelect label={t('profile.team')} defaultValue={team} error={err('team')} />
       {needsPassword && (
         <>
