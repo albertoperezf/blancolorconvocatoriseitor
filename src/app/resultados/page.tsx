@@ -7,7 +7,11 @@ import { getSettings } from '@/lib/match/queries';
 import { listPlayedMatches, matchWinner, type Winner } from '@/lib/match/results';
 import { ResultForm } from './result-form';
 
-export const metadata: Metadata = { title: 'Resultados' };
+export const metadata: Metadata = {
+  title: 'Resultados',
+  description: 'Resultados de los partidos de los jueves entre Blancos y Color.',
+  alternates: { canonical: '/resultados' },
+};
 
 const BADGE: Record<Winner, string> = {
   blancos: 'border-fg/40 bg-surface text-fg',

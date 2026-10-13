@@ -89,6 +89,33 @@ test('login rejects bad credentials without revealing whether the user exists', 
   await expectNoA11yViolations(page);
 });
 
+test('public pages are indexable, private ones are not, and robots/sitemap/OG image exist', async ({ page }) => {
+  for (const path of ['/', '/resultados']) {
+    const response = await page.goto(path);
+    expect(response?.headers()['x-robots-tag']).toBeUndefined();
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      new RegExp(`^https?://[^/]+${path === '/' ? '/?' : path}$`),
+    );
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /opengraph-image/);
+  }
+  for (const path of ['/login', '/recuperar']) {
+    const response = await page.goto(path);
+    expect(response?.headers()['x-robots-tag']).toBe('noindex, nofollow');
+  }
+  const robots = await (await page.request.get('/robots.txt')).text();
+  expect(robots).toContain('Disallow: /api/');
+  expect(robots).toMatch(/Sitemap: .*\/sitemap\.xml/);
+  expect(await (await page.request.get('/sitemap.xml')).text()).toContain('/resultados</loc>');
+  const og = await page.request.get('/opengraph-image');
+  expect(og.headers()['content-type']).toBe('image/png');
+
+  await page.goto('/');
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /\/icon\.svg/);
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', /\/apple-icon/);
+  expect((await page.request.get('/favicon.ico')).status()).toBe(404);
+});
+
 test('private pages redirect anonymous visitors to login', async ({ page }) => {
   for (const path of ['/partido', '/perfil', '/admin', '/admin/usuarios']) {
     await page.goto(path);

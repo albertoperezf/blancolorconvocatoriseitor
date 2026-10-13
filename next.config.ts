@@ -7,8 +7,18 @@ const securityHeaders = [
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
   { key: 'X-Frame-Options', value: 'DENY' },
-  // Names are public on purpose, but the group doesn't want to be found on search engines.
-  { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+];
+
+// Only the squad (/) and /resultados are meant for search engines.
+const PRIVATE_ROUTES = [
+  '/login',
+  '/recuperar',
+  '/bienvenida',
+  '/partido',
+  '/perfil',
+  '/admin/:path*',
+  '/restablecer/:path*',
+  '/api/:path*',
 ];
 
 const nextConfig: NextConfig = {
@@ -27,7 +37,10 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      ...PRIVATE_ROUTES.map((source) => ({ source, headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] })),
+    ];
   },
 };
 

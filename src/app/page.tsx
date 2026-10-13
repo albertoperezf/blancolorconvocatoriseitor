@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { AutoRefresh } from '@/components/auto-refresh';
@@ -9,6 +10,8 @@ import { getDb } from '@/lib/db';
 import { ensureCurrentMatch, getSettings, getSquad } from '@/lib/match/queries';
 import { goingCount } from '@/lib/match/squad';
 import { listFaqs } from '@/lib/services/content';
+
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 
 export default async function HomePage() {
   const db = await getDb();

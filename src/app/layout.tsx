@@ -2,17 +2,25 @@ import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { SiteHeader } from '@/components/site-header';
+import { siteUrl } from '@/lib/site-url';
 import { getTheme } from '@/lib/theme';
 import './globals.css';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('meta');
   return {
+    metadataBase: new URL(siteUrl()),
     title: { default: t('title'), template: `%s · Blancolores` },
     description: t('description'),
-    robots: { index: false, follow: false },
     applicationName: 'Blancolores',
     appleWebApp: { title: 'Blancolores', capable: true, statusBarStyle: 'default' },
+    openGraph: {
+      type: 'website',
+      siteName: 'Blancolores',
+      locale: 'es_ES',
+      title: t('title'),
+      description: t('description'),
+    },
   };
 }
 
