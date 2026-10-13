@@ -6,12 +6,14 @@ import { getDb } from '@/lib/db';
 import { countResetRequests } from '@/lib/services/admin';
 import { getTheme } from '@/lib/theme';
 import { BallIcon } from './icons';
+import { NavLink } from './nav-link';
 import { ThemeToggle } from './theme-toggle';
 
 export async function SiteHeader() {
   const [t, user, theme] = await Promise.all([getTranslations('nav'), getCurrentUser(), getTheme()]);
   const pendingRequests = user?.role === 'admin' ? await countResetRequests(await getDb()) : 0;
-  const link = 'inline-flex min-h-11 items-center rounded-lg px-2 font-semibold hover:bg-bg sm:px-3';
+  const link =
+    'inline-flex min-h-11 items-center rounded-lg px-2 font-semibold hover:bg-bg sm:px-3 aria-[current=page]:bg-brand aria-[current=page]:text-brand-fg';
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
@@ -30,25 +32,29 @@ export async function SiteHeader() {
         <nav aria-label={t('main')}>
           <ul className="flex flex-wrap items-center gap-1 text-sm sm:text-base">
             <li>
-              <Link className={link} href="/resultados">
+              <NavLink className={link} href="/resultados">
                 {t('results')}
-              </Link>
+              </NavLink>
             </li>
             {user ? (
               <>
                 <li>
-                  <Link className={link} href="/partido">
+                  <NavLink className={link} href="/partido">
                     {t('match')}
-                  </Link>
+                  </NavLink>
                 </li>
                 <li>
-                  <Link className={link} href="/perfil">
+                  <NavLink className={link} href="/perfil">
                     {t('profile')}
-                  </Link>
+                  </NavLink>
                 </li>
                 {user.role === 'admin' && (
                   <li>
-                    <Link className={`${link} gap-1.5`} href={pendingRequests ? '/admin/usuarios' : '/admin'}>
+                    <NavLink
+                      className={`${link} gap-1.5`}
+                      href={pendingRequests ? '/admin/usuarios' : '/admin'}
+                      section="/admin"
+                    >
                       {t('admin')}
                       {pendingRequests > 0 && (
                         <span className="rounded-full bg-maybe px-1.5 text-xs font-bold text-on-status tabular-nums">
@@ -56,7 +62,7 @@ export async function SiteHeader() {
                           <span className="sr-only"> {t('pendingRequests', { count: pendingRequests })}</span>
                         </span>
                       )}
-                    </Link>
+                    </NavLink>
                   </li>
                 )}
                 <li>

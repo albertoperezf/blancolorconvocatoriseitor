@@ -16,6 +16,14 @@ export function matchWinner(blancosGoals: number, colorGoals: number): Winner {
   return 'draw';
 }
 
+export function seasonSummary(played: { blancosGoals: number | null; colorGoals: number | null }[]) {
+  const summary: Record<Winner, number> = { blancos: 0, color: 0, draw: 0 };
+  for (const m of played) {
+    if (m.blancosGoals !== null && m.colorGoals !== null) summary[matchWinner(m.blancosGoals, m.colorGoals)]++;
+  }
+  return { ...summary, total: summary.blancos + summary.color + summary.draw };
+}
+
 /** Matches that have already kicked off since results started, newest first. */
 export function listPlayedMatches(db: Db, now: Date = new Date()) {
   return db

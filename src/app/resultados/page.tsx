@@ -4,7 +4,7 @@ import { ShirtIcon } from '@/components/icons';
 import { getCurrentUser } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { getSettings } from '@/lib/match/queries';
-import { listPlayedMatches, matchWinner, type Winner } from '@/lib/match/results';
+import { listPlayedMatches, matchWinner, seasonSummary, type Winner } from '@/lib/match/results';
 import { ResultForm } from './result-form';
 
 export const metadata: Metadata = {
@@ -29,11 +29,42 @@ export default async function ResultsPage() {
     listPlayedMatches(db),
   ]);
   const isAdmin = user?.role === 'admin';
+  const summary = seasonSummary(played);
 
   return (
     <>
       <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{t('title')}</h1>
       <p className="mt-1 text-muted">{t('intro')}</p>
+      {summary.total > 0 && (
+        <section aria-labelledby="summary-heading" className="card mt-4">
+          <h2 id="summary-heading" className="font-extrabold">
+            {t('summaryHeading', { count: summary.total })}
+          </h2>
+          <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
+            {(
+              [
+                ['blancos', t('summaryBlancos'), <ShirtIcon key="b" className="mx-auto size-5" />],
+                ['color', t('summaryColor'), <ShirtIcon key="c" filled className="mx-auto size-5 text-brand" />],
+                [
+                  'draw',
+                  t('summaryDraw'),
+                  <span key="d" aria-hidden className="mx-auto flex size-5 items-center justify-center font-extrabold">
+                    =
+                  </span>,
+                ],
+              ] as const
+            ).map(([key, label, icon]) => (
+              <div key={key} className="rounded-xl bg-bg px-2 py-3">
+                <dt className="flex flex-col items-center gap-1 text-sm text-muted">
+                  {icon}
+                  {label}
+                </dt>
+                <dd className="text-3xl font-extrabold tabular-nums">{summary[key]}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
       {played.length === 0 ? (
         <p className="card mt-4 text-muted">{t('empty')}</p>
       ) : (

@@ -59,6 +59,7 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await page.getByText('VOY', { exact: true }).click();
   await expect(status).toHaveText('Guardado: VOY.Deshacer');
   await expect(page.getByRole('region', { name: 'COLOR' }).getByText('Admin E2E')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'COLOR' }).getByText('(tú)')).toBeVisible();
   await page.getByRole('button', { name: 'Deshacer' }).click();
   await expect(status).toHaveText('Guardado: DUDA.');
   await expect(page.getByRole('region', { name: 'DUDOSITOS' }).getByText('Admin E2E')).toBeVisible();
@@ -155,7 +156,21 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
       .getByRole('region', { name: 'DUDOSITOS' })
       .getByRole('listitem')
       .filter({ hasText: `Nuevo ${suffix}` }),
-  ).toContainText(`Nuevo ${suffix}, Portero`);
+  ).toContainText(`Nuevo ${suffix} (tú), Portero`);
+
+  // Hovering the icon shows the position; the home CTA reflects the player's answer.
+  const chip = player
+    .getByRole('region', { name: 'DUDOSITOS' })
+    .getByRole('listitem')
+    .filter({ hasText: `Nuevo ${suffix}` });
+  const icon = chip.locator('.cursor-help');
+  if (info.project.name === 'mobile') await icon.tap();
+  else await icon.hover();
+  await expect(chip.getByText('Portero', { exact: true })).toBeVisible();
+  await expect(player.getByText('Tu respuesta: DUDA')).toBeVisible();
+  await expect(player.getByRole('link', { name: 'Cambiar mi respuesta' })).toBeVisible();
+  await player.getByRole('link', { name: 'Cambiar mi respuesta' }).click();
+  await expect(player.getByRole('link', { name: 'Mi partido' })).toHaveAttribute('aria-current', 'page');
 
   // Profile: change own team.
   await page.goto('/perfil');
@@ -209,6 +224,7 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await latest.getByRole('button', { name: 'Guardar' }).click();
   await expect(latest).toContainText('Resultado: Empate');
   await expect(latest).toContainText('2 – 2');
+  await expect(page.getByRole('region', { name: /^Temporada/ })).toContainText('Empates');
   await expectNoA11yViolations(page);
 
   await player.goto('/resultados');

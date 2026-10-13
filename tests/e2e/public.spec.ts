@@ -9,6 +9,8 @@ test('public page shows the weekly match, the squad groups and the FAQ', async (
   await expect(page.getByRole('heading', { level: 1, name: 'Convocatoria' })).toBeVisible();
   await expect(page.getByText('Polideportivo La Concepción').first()).toBeVisible();
   await expect(page.getByText(/jueves/i).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Apúntate al partido' })).toHaveAttribute('href', '/login');
+  await expect(page.getByRole('link', { name: 'Resultados' })).not.toHaveAttribute('aria-current');
   for (const label of ['BLANCOS', 'COLOR', 'INVITADOS', 'DUDOSITOS', 'MARIQUITAS QUE NO VAN']) {
     await expect(page.getByRole('heading', { name: new RegExp(label) })).toBeVisible();
   }
@@ -42,10 +44,29 @@ test('the match can be added to a calendar', async ({ page }) => {
   await expect(google).toHaveAttribute('href', /^https:\/\/calendar\.google\.com\/calendar\/render\?action=TEMPLATE/);
 });
 
+test('the match can be shared on WhatsApp with a ready-made message', async ({ page }) => {
+  await page.goto('/');
+  const share = page.getByRole('link', { name: 'Compartir por WhatsApp' });
+  const href = (await share.getAttribute('href'))!;
+  expect(href).toMatch(/^https:\/\/wa\.me\/\?text=/);
+  const text = new URL(href).searchParams.get('text')!;
+  expect(text).toContain('Polideportivo La Concepción');
+  expect(text).toMatch(/Van \d+/);
+});
+
+test('the squad shows when it was updated and can be refreshed by hand', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText(/^Actualizado /)).toBeVisible();
+  await page.getByRole('button', { name: 'Actualizar' }).click();
+  await expect(page.getByText(/^Actualizado /)).toBeVisible();
+});
+
 test('opening one collapsed group does not open or stretch its neighbour', async ({ page }) => {
   await page.goto('/');
   const undecided = page.locator('details', { hasText: 'NO SE HAN DECIDIDO' });
   const absent = page.locator('details', { hasText: 'BAJAS LARGA DURACIÓN' });
+  // The page streams in behind the loading skeleton; measure once it is shown.
+  await expect(absent).toBeVisible();
   const closedHeight = (await absent.boundingBox())!.height;
   await undecided.locator('summary').click();
   await expect(undecided).toHaveAttribute('open', '');

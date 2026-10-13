@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { AutoRefresh } from '@/components/auto-refresh';
 import { FaqList } from '@/components/faq-list';
 import { MatchHeader } from '@/components/match-header';
 import { SquadView } from '@/components/squad-view';
@@ -10,37 +9,55 @@ import { getDb } from '@/lib/db';
 import { ensureCurrentMatch, getSettings, getSquad } from '@/lib/match/queries';
 import { goingCount } from '@/lib/match/squad';
 import { listFaqs } from '@/lib/services/content';
+import { getMyDecision } from '@/lib/services/player';
 
 export const metadata: Metadata = { alternates: { canonical: '/' } };
 
+const DECISION_COLOR = { going: 'text-going', maybe: 'text-maybe', not_going: 'text-notgoing' } as const;
+
 export default async function HomePage() {
   const db = await getDb();
-  const [t, user, settings, match, faqs] = await Promise.all([
+  const [t, tStatus, user, settings, match, faqs] = await Promise.all([
     getTranslations('match'),
+    getTranslations('status'),
     getCurrentUser(),
     getSettings(db),
     ensureCurrentMatch(db),
     listFaqs(db),
   ]);
-  const squad = await getSquad(db, match.id);
+  const [squad, decision] = await Promise.all([
+    getSquad(db, match.id),
+    user ? getMyDecision(db, user.id, match.id) : null,
+  ]);
 
   return (
     <>
       <div className="card flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <MatchHeader match={match} timezone={settings.timezone} address={settings.address} />
+        <MatchHeader
+          match={match}
+          timezone={settings.timezone}
+          address={settings.address}
+          counts={{ going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length }}
+        />
         <div className="flex flex-col gap-2 sm:items-end">
           <p className="font-semibold tabular-nums">
             {t('summary', { going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length })}
           </p>
+          {decision && (
+            <p className="text-sm">
+              {t.rich('yourAnswer', {
+                status: tStatus(decision),
+                strong: (chunks) => <strong className={DECISION_COLOR[decision]}>{chunks}</strong>,
+              })}
+            </p>
+          )}
           <Link href={user ? '/partido' : '/login'} className="btn-primary">
-            {t('answerCta')}
+            {decision ? t('changeCta') : t('answerCta')}
           </Link>
         </div>
       </div>
-      <SquadView squad={squad} />
-      <p className="mt-3 text-sm text-muted">{t('liveHint')}</p>
+      <SquadView squad={squad} meId={user?.id} ctaHref={user ? '/partido' : '/login'} />
       <FaqList faqs={faqs} />
-      <AutoRefresh />
     </>
   );
 }

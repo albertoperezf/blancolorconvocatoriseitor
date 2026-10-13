@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DbHandle } from '@/lib/db/create';
 import { matches } from '@/lib/db/schema';
-import { listPlayedMatches, matchWinner, setMatchResult } from '@/lib/match/results';
+import { listPlayedMatches, matchWinner, seasonSummary, setMatchResult } from '@/lib/match/results';
 import { freshDb, insertUser } from './helpers/db';
 
 let h: DbHandle;
@@ -25,6 +25,19 @@ describe('matchWinner', () => {
     expect(matchWinner(3, 1)).toBe('blancos');
     expect(matchWinner(0, 2)).toBe('color');
     expect(matchWinner(4, 4)).toBe('draw');
+  });
+});
+
+describe('seasonSummary', () => {
+  it('counts wins per team and draws, skipping matches without a result', () => {
+    const g = (blancosGoals: number | null, colorGoals: number | null) => ({ blancosGoals, colorGoals });
+    expect(seasonSummary([g(3, 1), g(0, 2), g(1, 1), g(2, 0), g(null, null)])).toEqual({
+      blancos: 2,
+      color: 1,
+      draw: 1,
+      total: 4,
+    });
+    expect(seasonSummary([]).total).toBe(0);
   });
 });
 

@@ -2,17 +2,19 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import { appOrigin } from '@/lib/auth/current';
 import { googleCalendarUrl, matchCalendarEvent } from '@/lib/match/calendar';
 import type { Match } from '@/lib/match/queries';
-import { CalendarIcon, CalendarPlusIcon, MapPinIcon } from './icons';
+import { CalendarIcon, CalendarPlusIcon, MapPinIcon, ShareIcon } from './icons';
 
 export async function MatchHeader({
   match,
   timezone,
   address,
+  counts,
   headingLevel = 1,
 }: {
   match: Match;
   timezone: string;
   address?: string;
+  counts?: { going: number; maybe: number; notGoing: number };
   headingLevel?: 1 | 2;
 }) {
   const [t, format, origin] = await Promise.all([getTranslations('match'), getFormatter(), appOrigin()]);
@@ -37,6 +39,11 @@ export async function MatchHeader({
     { title: t('eventTitle'), description: t('eventDescription', { url: origin }) },
     origin,
   );
+  const whatsappUrl = counts
+    ? `https://wa.me/?text=${encodeURIComponent(
+        t('shareText', { day: weekday, time, venue: match.venue, ...counts, url: origin }),
+      )}`
+    : undefined;
 
   return (
     <div>
@@ -77,6 +84,18 @@ export async function MatchHeader({
           {t('googleCalendar')}
           <span className="sr-only"> ({t('opensNewTab')})</span>
         </a>
+        {whatsappUrl && (
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-secondary min-h-11 px-4 text-sm"
+          >
+            <ShareIcon className="size-5 text-going" />
+            {t('shareWhatsapp')}
+            <span className="sr-only"> ({t('opensNewTab')})</span>
+          </a>
+        )}
       </div>
     </div>
   );

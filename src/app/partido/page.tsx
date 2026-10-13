@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { setAttendanceAction } from '@/actions/player';
-import { AutoRefresh } from '@/components/auto-refresh';
 import { GuestManager } from '@/components/guest-manager';
 import { MatchHeader } from '@/components/match-header';
 import { SquadView } from '@/components/squad-view';
@@ -9,6 +8,7 @@ import { StatusSelector } from '@/components/status-selector';
 import { requireUser } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { ensureCurrentMatch, getSettings, getSquad } from '@/lib/match/queries';
+import { goingCount } from '@/lib/match/squad';
 import { getMyDecision, getMyGuests } from '@/lib/services/player';
 
 export const metadata: Metadata = { title: 'Mi partido' };
@@ -27,14 +27,18 @@ export default async function MatchPage() {
     <>
       <p className="text-lg font-semibold">{t('match.greeting', { name: user.displayName })}</p>
       <div className="card mt-2">
-        <MatchHeader match={match} timezone={settings.timezone} address={settings.address} />
+        <MatchHeader
+          match={match}
+          timezone={settings.timezone}
+          address={settings.address}
+          counts={{ going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length }}
+        />
       </div>
       <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
       <GuestManager guests={guests} />
-      <SquadView squad={squad} />
+      <SquadView squad={squad} meId={user.id} ctaHref="#tu-respuesta" />
       {/* Room for the fixed status bar on mobile. */}
       <div aria-hidden className="h-40 md:hidden" />
-      <AutoRefresh />
     </>
   );
 }

@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "Cargando…"
+  },
   "meta": {
     "title": "Blancolores · Convocatoria",
     "description": "Convocatorias y convocatorizator de jurgol para Blancolor y Blancolores."
@@ -24,12 +27,15 @@
     "openMap": "abre la ubicación en tu app de mapas",
     "addToCalendar": "Añadir al calendario",
     "googleCalendar": "Google Calendar",
+    "shareWhatsapp": "Compartir por WhatsApp",
+    "shareText": "⚽ Partido Blancolores · {day} a las {time}\n📍 {venue}\n✅ Van {going} · 🤔 Dudan {maybe} · ❌ No van {notGoing}\n¿Te apuntas? {url}",
     "opensNewTab": "se abre en una pestaña nueva",
     "eventTitle": "Partido Blancolores",
     "eventDescription": "Di si vas, dudas o no vas: {url}",
     "summary": "{going} van · {maybe} en duda · {notGoing} no van",
-    "answerCta": "Responder a la convocatoria",
-    "liveHint": "La lista se actualiza sola cada 30 segundos."
+    "answerCta": "Apúntate al partido",
+    "changeCta": "Cambiar mi respuesta",
+    "yourAnswer": "Tu respuesta: <strong>{status}</strong>"
   },
   "squad": {
     "heading": "Quién va",
@@ -41,7 +47,18 @@
     "maybe": "DUDOSITOS",
     "absent": "BAJAS LARGA DURACIÓN",
     "undecided": "NO SE HAN DECIDIDO",
-    "empty": "Nadie todavía",
+    "empty": "Nadie todavía.",
+    "beFirst": "¡Sé el primero!",
+    "emptyGuests": "Sin fichajes esta semana.",
+    "emptyMaybe": "Nadie duda. ¡Así me gusta!",
+    "emptyNotGoing": "Nadie se ha rajado todavía.",
+    "emptyUndecided": "Todo el mundo ha respondido.",
+    "emptyAbsent": "Nadie de baja. ¡Todos en forma!",
+    "me": "tú",
+    "updated": "Actualizado {ago}",
+    "justNow": "ahora mismo",
+    "updating": "Actualizando…",
+    "refresh": "Actualizar",
     "guestOf": "invitado de {host}",
     "positionsLegend": "Posiciones"
   },
@@ -88,7 +105,11 @@
     "blancosGoals": "Goles de Blancos",
     "colorGoals": "Goles de Color",
     "save": "Guardar",
-    "saved": "Resultado guardado."
+    "saved": "Resultado guardado.",
+    "summaryHeading": "Temporada: {count, plural, one {# partido} other {# partidos}}",
+    "summaryBlancos": "Gana Blancos",
+    "summaryColor": "Gana Color",
+    "summaryDraw": "Empates"
   },
   "recover": {
     "title": "He olvidado mi contraseña",
