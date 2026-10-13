@@ -1,0 +1,81 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-bg: light-dark(#f6f7f9, #0f1216);
+  --color-surface: light-dark(#ffffff, #181c22);
+  --color-fg: light-dark(#14171c, #eef1f5);
+  --color-muted: light-dark(#4a5361, #a9b2c0);
+  --color-border: light-dark(#cfd5de, #3a424e);
+  --color-brand: light-dark(#0b5cad, #7ab8ff);
+  --color-brand-fg: light-dark(#ffffff, #0b1a2c);
+  --color-going: light-dark(#17703a, #6fdc98);
+  --color-maybe: light-dark(#8a4b00, #ffc266);
+  --color-notgoing: light-dark(#b42318, #ff8f85);
+  --color-danger: light-dark(#b42318, #ff8f85);
+  --color-success-bg: light-dark(#e7f5ec, #12301f);
+  --color-danger-bg: light-dark(#fdecea, #3a1714);
+  --color-on-status: light-dark(#ffffff, #000000);
+
+  --radius-card: 1rem;
+}
+
+/* No data-theme = follow the OS; the header toggle pins light or dark (stored in a cookie). */
+:root {
+  color-scheme: light dark;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 4rem;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@utility card {
+  @apply rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6;
+}
+@utility btn {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primary {
+  @apply btn bg-brand text-brand-fg hover:opacity-90;
+}
+@utility btn-secondary {
+  @apply btn border border-border bg-surface text-fg hover:bg-bg;
+}
+@utility btn-link {
+  @apply min-h-6 font-semibold text-brand underline underline-offset-4 hover:no-underline;
+}
+@utility input {
+  @apply block min-h-12 w-full rounded-xl border border-border bg-surface px-4 text-base text-fg placeholder:text-muted aria-[invalid=true]:border-danger;
+}
+@utility label {
+  @apply mb-1 block font-semibold;
+}

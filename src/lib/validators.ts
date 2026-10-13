@@ -1,0 +1,80 @@
+import { z } from 'zod';
+
+export const TEAMS = ['blancos', 'color'] as const;
+export const DECISIONS = ['going', 'maybe', 'not_going'] as const;
+
+export const usernameSchema = z
+  .string()
+  .trim()
+  .min(2, 'username.min')
+  .max(30, 'username.max')
+  .regex(/^[\p{L}\p{N}._-]+$/u, 'username.chars')
+  .transform((v) => v.toUpperCase());
+
+export const passwordSchema = z.string().min(12, 'password.min').max(128, 'password.max');
+
+export const loginSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(1)
+    .max(30)
+    .transform((v) => v.toUpperCase()),
+  password: z.string().min(1).max(128),
+});
+
+export const newPasswordSchema = z
+  .object({ password: passwordSchema, confirm: z.string() })
+  .refine((v) => v.password === v.confirm, { message: 'password.mismatch', path: ['confirm'] });
+
+export const changePasswordSchema = z
+  .object({ current: z.string().min(1).max(128), password: passwordSchema, confirm: z.string() })
+  .refine((v) => v.password === v.confirm, { message: 'password.mismatch', path: ['confirm'] });
+
+export const teamSchema = z.enum(TEAMS, { message: 'team.required' });
+
+export const decisionSchema = z.enum(DECISIONS).nullable();
+
+export const guestNameSchema = z
+  .string()
+  .trim()
+  .min(2, 'guest.min')
+  .max(30, 'guest.max')
+  .regex(/^[\p{L}][\p{L} .'-]*$/u, 'guest.chars')
+  .transform((v) => v.replace(/\s+/g, ' '));
+
+export const displayNameSchema = z.string().trim().min(2, 'displayName.min').max(40, 'displayName.max');
+
+export const enrolSchema = z.object({
+  username: usernameSchema,
+  displayName: displayNameSchema,
+  team: teamSchema.optional(),
+  role: z.enum(['player', 'admin']).default('player'),
+});
+
+export const adminUpdateUserSchema = z.object({
+  displayName: displayNameSchema,
+  team: teamSchema.nullable(),
+  role: z.enum(['player', 'admin']),
+  longTermAbsence: z.boolean(),
+  absenceNote: z.string().trim().max(200).nullable(),
+  active: z.boolean(),
+});
+
+export const settingsSchema = z.object({
+  weekday: z.coerce.number().int().min(0).max(6),
+  kickoffTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'settings.time'),
+  venue: z.string().trim().min(2).max(100),
+  address: z.string().trim().min(5).max(200),
+  rolloverHours: z.coerce.number().int().min(0).max(48),
+});
+
+/** Maps zod issues to { field: messageKey } for form UIs. */
+export function fieldErrors(error: z.ZodError): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = String(issue.path[0] ?? 'form');
+    out[key] ??= issue.message;
+  }
+  return out;
+}

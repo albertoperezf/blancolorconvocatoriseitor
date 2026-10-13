@@ -1,0 +1,174 @@
+{
+  "meta": {
+    "title": "Blancolores · Convocatoria",
+    "description": "Convocatorias y convocatorizator de jurgol para Blancolor y Blancolores."
+  },
+  "nav": {
+    "skip": "Saltar al contenido",
+    "home": "Convocatoria",
+    "match": "Mi partido",
+    "profile": "Perfil",
+    "admin": "Admin",
+    "login": "Entrar",
+    "logout": "Salir",
+    "main": "Principal",
+    "darkTheme": "Tema oscuro"
+  },
+  "match": {
+    "title": "Convocatoria",
+    "greeting": "Hola, {name}",
+    "venue": "Lugar",
+    "openMap": "abre la ubicación en tu app de mapas",
+    "summary": "{going} van · {maybe} en duda · {notGoing} no van",
+    "answerCta": "Responder a la convocatoria",
+    "liveHint": "La lista se actualiza sola cada 30 segundos."
+  },
+  "squad": {
+    "heading": "Quién va",
+    "blancos": "BLANCOS",
+    "color": "COLOR",
+    "noTeam": "VAN SIN EQUIPO",
+    "guests": "INVITADOS",
+    "notGoing": "MARIQUITAS QUE NO VAN",
+    "maybe": "DUDOSITOS",
+    "absent": "BAJAS LARGA DURACIÓN",
+    "undecided": "NO SE HAN DECIDIDO",
+    "empty": "Nadie todavía",
+    "guestOf": "invitado de {host}"
+  },
+  "status": {
+    "legend": "Tu respuesta",
+    "going": "VOY",
+    "maybe": "DUDA",
+    "not_going": "NO VOY",
+    "none": "Aún no has respondido.",
+    "saved": "Guardado: {status}.",
+    "cleared": "Respuesta borrada.",
+    "undo": "Deshacer",
+    "error": "No se ha podido guardar. Inténtalo otra vez."
+  },
+  "guests": {
+    "heading": "Mis fichajes",
+    "label": "Nombre del fichaje",
+    "hint": "Entre 2 y 30 letras.",
+    "add": "Añadir",
+    "remove": "Quitar a {name}",
+    "empty": "No has traído a nadie.",
+    "added": "{name} añadido.",
+    "removed": "Fichaje quitado."
+  },
+  "login": {
+    "title": "Introduce tu clave de acceso",
+    "username": "Usuario",
+    "password": "Contraseña",
+    "showPassword": "Mostrar contraseña",
+    "submit": "Entrar",
+    "forgot": "¿Has olvidado tu contraseña?",
+    "invalid": "Usuario o contraseña incorrectos."
+  },
+  "welcome": {
+    "title": "Bienvenido, {name}",
+    "intro": "Antes de empezar, elige tu equipo y crea tu contraseña.",
+    "introTeamOnly": "Antes de empezar, elige tu equipo.",
+    "submit": "Guardar y continuar"
+  },
+  "profile": {
+    "title": "Perfil",
+    "teamHeading": "Mi equipo",
+    "team": "Juego con",
+    "teamSaved": "Equipo guardado.",
+    "save": "Guardar",
+    "passwordHeading": "Cambiar contraseña",
+    "current": "Contraseña actual",
+    "new": "Nueva contraseña",
+    "confirm": "Repite la nueva contraseña",
+    "passwordSaved": "Contraseña cambiada. Hemos cerrado tus otras sesiones.",
+    "wrongCurrent": "La contraseña actual no es correcta.",
+    "sessionsHeading": "Sesiones",
+    "sessionsHint": "Cierra la sesión en todos los demás dispositivos.",
+    "closeOthers": "Cerrar otras sesiones",
+    "closedOthers": "Otras sesiones cerradas."
+  },
+  "teams": {
+    "blancos": "Blancos",
+    "color": "Color",
+    "choose": "Elige equipo",
+    "none": "Sin equipo"
+  },
+  "reset": {
+    "title": "Nueva contraseña",
+    "intro": "Hola, {name}. Crea tu nueva contraseña.",
+    "invalid": "Este enlace ha caducado o ya se ha usado. Pide otro a un admin.",
+    "submit": "Guardar contraseña"
+  },
+  "admin": {
+    "title": "Administración",
+    "users": "Jugadores",
+    "settings": "Partido semanal",
+    "usersIntro": "Da de alta jugadores, cambia equipos, marca bajas y genera enlaces de contraseña.",
+    "settingsIntro": "Día, hora y lugar del partido de cada semana.",
+    "enrolHeading": "Dar de alta un jugador",
+    "username": "Usuario",
+    "displayName": "Nombre visible",
+    "role": "Rol",
+    "roles": { "player": "Jugador", "admin": "Admin" },
+    "enrol": "Dar de alta",
+    "enrolled": "{name} dado de alta. Envíale este enlace para que cree su contraseña:",
+    "duplicate": "Ese usuario ya existe.",
+    "list": "Todos los jugadores ({count})",
+    "edit": "Editar a {name}",
+    "absent": "De baja",
+    "inactive": "Inactivo",
+    "noPassword": "Sin contraseña",
+    "editHeading": "Editar jugador",
+    "longTermAbsence": "Baja de larga duración",
+    "absenceNote": "Nota de la baja (solo admins)",
+    "active": "Cuenta activa",
+    "saved": "Cambios guardados.",
+    "selfLockout": "No puedes quitarte el rol de admin ni desactivarte a ti mismo.",
+    "resetHeading": "Restablecer contraseña",
+    "resetIntro": "Genera un enlace de un solo uso (caduca en 24 h). Al usarlo se cierran todas sus sesiones.",
+    "resetCreate": "Generar enlace",
+    "resetLink": "Enlace para {name}",
+    "copy": "Copiar enlace",
+    "copied": "Enlace copiado.",
+    "whatsapp": "Compartir por WhatsApp",
+    "whatsappText": "Hola {name}, crea tu contraseña de Blancolores aquí (caduca en 24 h): {url}",
+    "back": "Volver a jugadores",
+    "weekday": "Día de la semana",
+    "weekdays": ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
+    "kickoff": "Hora",
+    "address": "Dirección",
+    "venue": "Lugar",
+    "rollover": "Horas tras el inicio para pasar a la semana siguiente",
+    "settingsSaved": "Partido guardado."
+  },
+  "errors": {
+    "generic": "Algo ha fallado. Inténtalo otra vez.",
+    "username": {
+      "min": "Mínimo 2 caracteres.",
+      "max": "Máximo 30 caracteres.",
+      "chars": "Solo letras, números, punto, guion y guion bajo."
+    },
+    "password": {
+      "min": "Mínimo 12 caracteres.",
+      "max": "Máximo 128 caracteres.",
+      "mismatch": "Las contraseñas no coinciden."
+    },
+    "team": { "required": "Elige un equipo." },
+    "guest": {
+      "min": "Mínimo 2 letras.",
+      "max": "Máximo 30 caracteres.",
+      "chars": "Solo letras, espacios, punto, apóstrofo y guion."
+    },
+    "displayName": { "min": "Mínimo 2 caracteres.", "max": "Máximo 40 caracteres." },
+    "settings": { "time": "Formato HH:MM." },
+    "required": "Campo obligatorio."
+  },
+  "faq": {
+    "heading": "Preguntas frecuentes"
+  },
+  "footer": {
+    "text": "Blancolores · Hecho con cariño para los de los jueves."
+  }
+}

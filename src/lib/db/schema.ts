@@ -1,0 +1,120 @@
+import {
+  boolean,
+  integer,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  serial,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
+
+export const roleEnum = pgEnum('role', ['player', 'admin']);
+export const teamEnum = pgEnum('team', ['blancos', 'color']);
+export const decisionEnum = pgEnum('decision', ['going', 'maybe', 'not_going']);
+
+export type Role = (typeof roleEnum.enumValues)[number];
+export type Team = (typeof teamEnum.enumValues)[number];
+export type Decision = (typeof decisionEnum.enumValues)[number];
+
+const createdAt = () => timestamp({ withTimezone: true }).notNull().defaultNow();
+
+export const users = pgTable('users', {
+  id: uuid().primaryKey().defaultRandom(),
+  // Stored upper-cased, like the legacy site.
+  username: varchar({ length: 30 }).notNull().unique(),
+  displayName: varchar({ length: 40 }).notNull(),
+  // Null until the player sets a password through a reset link.
+  passwordHash: text(),
+  mustChangePassword: boolean().notNull().default(false),
+  role: roleEnum().notNull().default('player'),
+  team: teamEnum(),
+  longTermAbsence: boolean().notNull().default(false),
+  absenceNote: varchar({ length: 200 }),
+  active: boolean().notNull().default(true),
+  createdAt: createdAt(),
+});
+
+export const sessions = pgTable('sessions', {
+  // sha256(token); the raw token only lives in the cookie.
+  id: text().primaryKey(),
+  userId: uuid()
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  expiresAt: timestamp({ withTimezone: true }).notNull(),
+  createdAt: createdAt(),
+});
+
+export const settings = pgTable('settings', {
+  id: smallint().primaryKey().default(1),
+  weekday: smallint().notNull(),
+  kickoffTime: varchar({ length: 5 }).notNull(),
+  timezone: text().notNull().default('Europe/Madrid'),
+  venue: varchar({ length: 100 }).notNull(),
+  address: varchar({ length: 200 })
+    .notNull()
+    .default('C. de José del Hierro, 5, Ciudad Lineal, 28027 Concepción, Madrid'),
+  rolloverHours: smallint().notNull().default(2),
+});
+
+export const matches = pgTable('matches', {
+  id: uuid().primaryKey().defaultRandom(),
+  startsAt: timestamp({ withTimezone: true }).notNull().unique(),
+  venue: varchar({ length: 100 }).notNull(),
+});
+
+export const attendances = pgTable(
+  'attendances',
+  {
+    matchId: uuid()
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    decision: decisionEnum().notNull(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.matchId, t.userId] })],
+);
+
+export const guests = pgTable('guests', {
+  id: uuid().primaryKey().defaultRandom(),
+  matchId: uuid()
+    .notNull()
+    .references(() => matches.id, { onDelete: 'cascade' }),
+  hostId: uuid()
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar({ length: 30 }).notNull(),
+  createdAt: createdAt(),
+});
+
+export const faqs = pgTable('faqs', {
+  id: serial().primaryKey(),
+  question: text().notNull(),
+  answer: text().notNull(),
+  position: integer().notNull(),
+});
+
+export const passwordResetTokens = pgTable('password_reset_tokens', {
+  tokenHash: text().primaryKey(),
+  userId: uuid()
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdBy: uuid().references(() => users.id, { onDelete: 'set null' }),
+  expiresAt: timestamp({ withTimezone: true }).notNull(),
+  usedAt: timestamp({ withTimezone: true }),
+});
+
+export const auditLog = pgTable('audit_log', {
+  id: serial().primaryKey(),
+  actorId: uuid().references(() => users.id, { onDelete: 'set null' }),
+  action: varchar({ length: 50 }).notNull(),
+  targetId: uuid(),
+  details: text(),
+  at: createdAt(),
+});

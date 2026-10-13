@@ -1,0 +1,2 @@
+DROP TABLE "login_attempts" CASCADE;--> statement-breakpoint
+ALTER TABLE "settings" ADD COLUMN "address" varchar(200) DEFAULT 'C. de José del Hierro, 5, Ciudad Lineal, 28027 Concepción, Madrid' NOT NULL;
