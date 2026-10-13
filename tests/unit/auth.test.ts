@@ -2,7 +2,15 @@ import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DbHandle } from '@/lib/db/create';
 import { sessions, users } from '@/lib/db/schema';
-import { changePassword, consumeResetToken, createResetToken, findValidResetToken, login } from '@/lib/auth/service';
+import {
+  changePassword,
+  consumeResetToken,
+  createResetToken,
+  findValidResetToken,
+  login,
+  requestPasswordReset,
+} from '@/lib/auth/service';
+import { countResetRequests, dismissResetRequest, listResetRequests } from '@/lib/services/admin';
 import { createSession, validateSessionToken } from '@/lib/auth/sessions';
 import { freshDb, insertUser } from './helpers/db';
 
@@ -88,6 +96,28 @@ describe('password reset links', () => {
     const second = await createResetToken(h.db, user.id, null);
     expect(await findValidResetToken(h.db, first)).toBeNull();
     expect(await findValidResetToken(h.db, second, new Date(Date.now() + 25 * 3_600_000))).toBeNull();
+  });
+});
+
+describe('forgot-password requests', () => {
+  it('records one request per active player, ignores unknown users, and clears when a link is generated', async () => {
+    await requestPasswordReset(h.db, 'PLAYER');
+    await requestPasswordReset(h.db, 'PLAYER');
+    await requestPasswordReset(h.db, 'NOBODY');
+    await requestPasswordReset(h.db, 'GONE');
+    expect((await listResetRequests(h.db)).map((r) => r.username)).toEqual(['PLAYER']);
+    expect(await countResetRequests(h.db)).toBe(1);
+
+    const [user] = await h.db.select().from(users).where(eq(users.username, 'PLAYER'));
+    await createResetToken(h.db, user.id, null);
+    expect(await countResetRequests(h.db)).toBe(0);
+  });
+
+  it('lets admins dismiss a request', async () => {
+    const [user] = await h.db.select().from(users).where(eq(users.username, 'PLAYER'));
+    await requestPasswordReset(h.db, 'PLAYER');
+    await dismissResetRequest(h.db, user.id, user.id);
+    expect(await countResetRequests(h.db)).toBe(0);
   });
 });
 

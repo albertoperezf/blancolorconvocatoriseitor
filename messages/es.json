@@ -12,13 +12,20 @@
     "login": "Entrar",
     "logout": "Salir",
     "main": "Principal",
-    "darkTheme": "Tema oscuro"
+    "darkTheme": "Tema oscuro",
+    "beta": "Beta",
+    "pendingRequests": "{count, plural, one {solicitud de contraseña pendiente} other {solicitudes de contraseña pendientes}}"
   },
   "match": {
     "title": "Convocatoria",
     "greeting": "Hola, {name}",
     "venue": "Lugar",
     "openMap": "abre la ubicación en tu app de mapas",
+    "addToCalendar": "Añadir al calendario",
+    "googleCalendar": "Google Calendar",
+    "opensNewTab": "se abre en una pestaña nueva",
+    "eventTitle": "Partido Blancolores",
+    "eventDescription": "Di si vas, dudas o no vas: {url}",
     "summary": "{going} van · {maybe} en duda · {notGoing} no van",
     "answerCta": "Responder a la convocatoria",
     "liveHint": "La lista se actualiza sola cada 30 segundos."
@@ -65,6 +72,13 @@
     "submit": "Entrar",
     "forgot": "¿Has olvidado tu contraseña?",
     "invalid": "Usuario o contraseña incorrectos."
+  },
+  "recover": {
+    "title": "He olvidado mi contraseña",
+    "intro": "Es porque eres un botarate. Escribe tu usuario y avisaremos a los admins: te mandarán por WhatsApp un enlace para crear una contraseña nueva.",
+    "submit": "Avisar a los admins",
+    "sent": "Hecho. Si el usuario existe, los admins ya lo saben y te mandarán el enlace.",
+    "back": "Volver a entrar"
   },
   "welcome": {
     "title": "Bienvenido, {name}",
@@ -129,6 +143,10 @@
     "resetHeading": "Restablecer contraseña",
     "resetIntro": "Genera un enlace de un solo uso (caduca en 24 h). Al usarlo se cierran todas sus sesiones.",
     "resetCreate": "Generar enlace",
+    "requestsHeading": "{count, plural, one {# jugador ha olvidado su contraseña} other {# jugadores han olvidado su contraseña}}",
+    "requestsIntro": "Genera el enlace y envíaselo por WhatsApp. Al generarlo, la solicitud desaparece.",
+    "dismiss": "Descartar",
+    "dismissFor": "Descartar la solicitud de {name}",
     "resetLink": "Enlace para {name}",
     "copy": "Copiar enlace",
     "copied": "Enlace copiado.",

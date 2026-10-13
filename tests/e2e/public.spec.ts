@@ -28,6 +28,20 @@ test('the venue address opens in a maps app', async ({ page }) => {
   await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 });
 
+test('the match can be added to a calendar', async ({ page }) => {
+  await page.goto('/');
+  const ics = page.getByRole('link', { name: 'Añadir al calendario' });
+  await expect(ics).toHaveAttribute('href', '/api/calendario');
+  const response = await page.request.get('/api/calendario');
+  expect(response.headers()['content-type']).toContain('text/calendar');
+  const body = (await response.text()).replace(/\r\n /g, '');
+  expect(body).toMatch(/DTSTART:\d{8}T\d{6}Z/);
+  expect(body).toContain('LOCATION:Polideportivo La Concepción\\, C. de José del Hierro\\, 5');
+
+  const google = page.getByRole('link', { name: /Google Calendar/ });
+  await expect(google).toHaveAttribute('href', /^https:\/\/calendar\.google\.com\/calendar\/render\?action=TEMPLATE/);
+});
+
 test('opening one collapsed group does not open or stretch its neighbour', async ({ page }) => {
   await page.goto('/');
   const undecided = page.locator('details', { hasText: 'NO SE HAN DECIDIDO' });

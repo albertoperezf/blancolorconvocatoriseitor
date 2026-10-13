@@ -152,6 +152,27 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await page.getByText('VOY', { exact: true }).click();
   await expect(page.getByRole('region', { name: 'BLANCOS' }).getByText('Admin E2E')).toBeVisible();
 
+  // Forgot password: the player asks from the login page, an admin sees it and generates the link.
+  const forgetful = await newPage(browser, baseURL);
+  await forgetful.goto('/login');
+  await forgetful.getByRole('link', { name: '¿Has olvidado tu contraseña?' }).click();
+  await expect(forgetful).toHaveURL(/\/recuperar$/);
+  await expectNoA11yViolations(forgetful);
+  await forgetful.getByLabel('Usuario').fill(`nuevo${suffix.toLowerCase()}`);
+  await forgetful.getByRole('button', { name: 'Avisar a los admins' }).click();
+  await expect(forgetful.getByText(/los admins ya lo saben/)).toBeVisible();
+
+  await page.goto('/partido');
+  await page.getByRole('link', { name: /Admin.*solicitud/ }).click();
+  await expect(page).toHaveURL(/\/admin\/usuarios$/);
+  const requests = page.getByRole('region', { name: /olvidado su contraseña/ });
+  await expect(requests.getByText(`Nuevo ${suffix}`)).toBeVisible();
+  await expectNoA11yViolations(page);
+  await requests.getByRole('button', { name: 'Generar enlace' }).click();
+  await expect(requests.getByLabel(`Enlace para Nuevo ${suffix}`)).toHaveValue(/\/restablecer\//);
+  await page.reload();
+  await expect(page.getByRole('region', { name: /olvidado su contraseña/ })).toHaveCount(0);
+
   // Leave the shared admin as it started for the next project.
   await page.goto('/perfil');
   await page.getByLabel('Juego con').selectOption('color');

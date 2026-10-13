@@ -1,10 +1,37 @@
-import { asc, eq } from 'drizzle-orm';
+import { asc, count, eq } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Db } from '@/lib/db/create';
-import { auditLog, settings, users } from '@/lib/db/schema';
+import { auditLog, passwordResetRequests, settings, users } from '@/lib/db/schema';
 import type { adminUpdateUserSchema, enrolSchema, settingsSchema } from '@/lib/validators';
 import { invalidateUserSessions } from '@/lib/auth/sessions';
 import { DomainError } from './player';
+
+export async function listResetRequests(db: Db) {
+  return db
+    .select({
+      userId: passwordResetRequests.userId,
+      requestedAt: passwordResetRequests.requestedAt,
+      displayName: users.displayName,
+      username: users.username,
+    })
+    .from(passwordResetRequests)
+    .innerJoin(users, eq(users.id, passwordResetRequests.userId))
+    .orderBy(asc(passwordResetRequests.requestedAt));
+}
+
+export async function countResetRequests(db: Db): Promise<number> {
+  const [row] = await db.select({ n: count() }).from(passwordResetRequests);
+  return row?.n ?? 0;
+}
+
+export async function dismissResetRequest(db: Db, actorId: string, userId: string) {
+  const deleted = await db
+    .delete(passwordResetRequests)
+    .where(eq(passwordResetRequests.userId, userId))
+    .returning({ userId: passwordResetRequests.userId });
+  if (deleted.length)
+    await db.insert(auditLog).values({ actorId, action: 'reset_request_dismissed', targetId: userId });
+}
 
 export async function listUsers(db: Db) {
   return db

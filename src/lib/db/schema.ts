@@ -110,6 +110,14 @@ export const passwordResetTokens = pgTable('password_reset_tokens', {
   usedAt: timestamp({ withTimezone: true }),
 });
 
+export const passwordResetRequests = pgTable('password_reset_requests', {
+  // One pending request per player; asking again just refreshes the time.
+  userId: uuid()
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  requestedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
 export const auditLog = pgTable('audit_log', {
   id: serial().primaryKey(),
   actorId: uuid().references(() => users.id, { onDelete: 'set null' }),

@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/db';
 import { deleteSessionCookie, getCurrentUser, getSessionToken, setSessionCookie } from '@/lib/auth/current';
-import { consumeResetToken, login, setPassword } from '@/lib/auth/service';
+import { consumeResetToken, login, requestPasswordReset, setPassword } from '@/lib/auth/service';
 import { invalidateSession, invalidateUserSessions } from '@/lib/auth/sessions';
 import { setTeam } from '@/lib/services/player';
 import { fieldErrors, loginSchema, newPasswordSchema, teamSchema } from '@/lib/validators';
@@ -27,6 +27,14 @@ export async function logoutAction() {
   if (token) await invalidateSession(await getDb(), token);
   await deleteSessionCookie();
   redirect('/');
+}
+
+export async function requestResetAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = loginSchema.shape.username.safeParse(formData.get('username') ?? '');
+  if (!parsed.success) return { status: 'error', errors: { username: 'required' } };
+  await requestPasswordReset(await getDb(), parsed.data);
+  // Same answer whether or not the user exists, so the form can't be used to probe usernames.
+  return { status: 'success', message: 'recover.sent' };
 }
 
 export async function completeOnboardingAction(_prev: FormState, formData: FormData): Promise<FormState> {

@@ -55,6 +55,13 @@ export const CalendarIcon = (p: IconProps) => (
   </svg>
 );
 
+export const CalendarPlusIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18M12 14v5M9.5 16.5h5" />
+  </svg>
+);
+
 export const SunIcon = (p: IconProps) => (
   <svg {...base(p)}>
     <circle cx="12" cy="12" r="4" />

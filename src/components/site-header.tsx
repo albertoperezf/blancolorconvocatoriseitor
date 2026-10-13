@@ -2,12 +2,15 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { logoutAction } from '@/actions/auth';
 import { getCurrentUser } from '@/lib/auth/current';
+import { getDb } from '@/lib/db';
+import { countResetRequests } from '@/lib/services/admin';
 import { getTheme } from '@/lib/theme';
 import { BallIcon } from './icons';
 import { ThemeToggle } from './theme-toggle';
 
 export async function SiteHeader() {
   const [t, user, theme] = await Promise.all([getTranslations('nav'), getCurrentUser(), getTheme()]);
+  const pendingRequests = user?.role === 'admin' ? await countResetRequests(await getDb()) : 0;
   const link = 'inline-flex min-h-11 items-center rounded-lg px-2 font-semibold hover:bg-bg sm:px-3';
 
   return (
@@ -19,6 +22,9 @@ export async function SiteHeader() {
         >
           <BallIcon className="size-6 text-brand" />
           Blancolores
+          <span className="rounded-full border border-brand px-2 py-0.5 text-xs font-bold tracking-wide text-brand uppercase">
+            {t('beta')}
+          </span>
         </Link>
         <ThemeToggle initial={theme} />
         <nav aria-label={t('main')}>
@@ -37,8 +43,14 @@ export async function SiteHeader() {
                 </li>
                 {user.role === 'admin' && (
                   <li>
-                    <Link className={link} href="/admin">
+                    <Link className={`${link} gap-1.5`} href={pendingRequests ? '/admin/usuarios' : '/admin'}>
                       {t('admin')}
+                      {pendingRequests > 0 && (
+                        <span className="rounded-full bg-maybe px-1.5 text-xs font-bold text-on-status tabular-nums">
+                          {pendingRequests}
+                          <span className="sr-only"> {t('pendingRequests', { count: pendingRequests })}</span>
+                        </span>
+                      )}
                     </Link>
                   </li>
                 )}

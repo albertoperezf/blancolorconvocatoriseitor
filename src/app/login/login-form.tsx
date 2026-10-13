@@ -30,7 +30,7 @@ export function LoginForm() {
       <button type="submit" className="btn-primary w-full" disabled={pending}>
         {t('submit')}
       </button>
-      <Link href="/#faq" className="btn-link self-start">
+      <Link href="/recuperar" className="btn-link self-start">
         {t('forgot')}
       </Link>
     </form>

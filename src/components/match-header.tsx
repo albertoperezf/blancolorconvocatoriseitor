@@ -1,6 +1,8 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { appOrigin } from '@/lib/auth/current';
+import { googleCalendarUrl, matchCalendarEvent } from '@/lib/match/calendar';
 import type { Match } from '@/lib/match/queries';
-import { CalendarIcon, MapPinIcon } from './icons';
+import { CalendarIcon, CalendarPlusIcon, MapPinIcon } from './icons';
 
 export async function MatchHeader({
   match,
@@ -13,7 +15,7 @@ export async function MatchHeader({
   address?: string;
   headingLevel?: 1 | 2;
 }) {
-  const [t, format] = await Promise.all([getTranslations('match'), getFormatter()]);
+  const [t, format, origin] = await Promise.all([getTranslations('match'), getFormatter(), appOrigin()]);
   const Heading = `h${headingLevel}` as const;
   const weekday = format.dateTime(match.startsAt, {
     weekday: 'long',
@@ -29,6 +31,12 @@ export async function MatchHeader({
     : undefined;
   // Street and number only; the full address still feeds the map search.
   const shortAddress = address?.split(',').slice(0, 2).join(',').trim();
+  const event = matchCalendarEvent(
+    match,
+    address,
+    { title: t('eventTitle'), description: t('eventDescription', { url: origin }) },
+    origin,
+  );
 
   return (
     <div>
@@ -55,6 +63,21 @@ export async function MatchHeader({
           )}
         </span>
       </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <a href="/api/calendario" download className="btn-secondary min-h-11 px-4 text-sm">
+          <CalendarPlusIcon className="size-5 text-brand" />
+          {t('addToCalendar')}
+        </a>
+        <a
+          href={googleCalendarUrl(event)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary min-h-11 px-4 text-sm"
+        >
+          {t('googleCalendar')}
+          <span className="sr-only"> ({t('opensNewTab')})</span>
+        </a>
+      </div>
     </div>
   );
 }

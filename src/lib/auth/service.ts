@@ -1,6 +1,6 @@
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
-import { auditLog, passwordResetTokens, users } from '@/lib/db/schema';
+import { auditLog, passwordResetRequests, passwordResetTokens, users } from '@/lib/db/schema';
 import { hashPassword, verifyAgainstDummy, verifyPassword } from './password';
 import { createSession, invalidateUserSessions } from './sessions';
 import { generateToken, hashToken } from './tokens';
@@ -40,10 +40,25 @@ export async function setPassword(db: Db, userId: string, password: string) {
 
 const RESET_TTL_MS = 24 * 3_600_000;
 
+/** Records a "forgot password" request for admins; silently ignores unknown or inactive usernames. */
+export async function requestPasswordReset(db: Db, username: string, now = new Date()) {
+  const [user] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.username, username), eq(users.active, true)));
+  if (!user) return;
+  await db
+    .insert(passwordResetRequests)
+    .values({ userId: user.id, requestedAt: now })
+    .onConflictDoUpdate({ target: passwordResetRequests.userId, set: { requestedAt: now } });
+  await db.insert(auditLog).values({ actorId: null, action: 'reset_requested', targetId: user.id });
+}
+
 export async function createResetToken(db: Db, userId: string, actorId: string | null, now = new Date()) {
   const token = generateToken();
   // Only the latest link for a user stays valid.
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+  await db.delete(passwordResetRequests).where(eq(passwordResetRequests.userId, userId));
   await db.insert(passwordResetTokens).values({
     tokenHash: hashToken(token),
     userId,

@@ -38,7 +38,8 @@ const FAQS = [
   },
   {
     question: 'He olvidado mi contraseña',
-    answer: 'Es porque eres un botarate. Pídele a un admin un enlace para crear una nueva.',
+    answer:
+      'Es porque eres un botarate. Pulsa «¿Has olvidado tu contraseña?» en la pantalla de entrar y un admin te mandará un enlace para crear una nueva.',
   },
 ];
 

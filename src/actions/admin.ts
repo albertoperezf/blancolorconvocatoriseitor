@@ -5,7 +5,7 @@ import { getDb } from '@/lib/db';
 import { appOrigin, requireAdmin } from '@/lib/auth/current';
 import { createResetToken } from '@/lib/auth/service';
 import { DomainError } from '@/lib/services/player';
-import { enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
+import { dismissResetRequest, enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
 import { adminUpdateUserSchema, enrolSchema, fieldErrors, settingsSchema } from '@/lib/validators';
 import type { FormState } from './form-state';
 
@@ -68,6 +68,12 @@ export async function createResetLinkAction(userId: string): Promise<FormState> 
   if (!user) return { status: 'error', message: 'errors.generic' };
   const token = await createResetToken(db, userId, admin.id);
   return { status: 'success', data: { name: user.displayName, url: `${await appOrigin()}/restablecer/${token}` } };
+}
+
+export async function dismissResetRequestAction(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  await dismissResetRequest(await getDb(), admin.id, String(formData.get('userId') ?? ''));
+  refresh();
 }
 
 export async function updateSettingsAction(_prev: FormState, formData: FormData): Promise<FormState> {

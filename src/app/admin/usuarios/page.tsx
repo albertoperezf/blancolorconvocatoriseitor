@@ -4,22 +4,26 @@ import { getTranslations } from 'next-intl/server';
 import { ShirtIcon } from '@/components/icons';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
-import { listUsers } from '@/lib/services/admin';
+import { listResetRequests, listUsers } from '@/lib/services/admin';
 import { EnrolForm } from './enrol-form';
+import { ResetRequests } from './reset-requests';
 
 export const metadata: Metadata = { title: 'Jugadores' };
 
 export default async function UsersPage() {
   await requireAdmin();
-  const [t, tTeams, users] = await Promise.all([
+  const db = await getDb();
+  const [t, tTeams, users, requests] = await Promise.all([
     getTranslations('admin'),
     getTranslations('teams'),
-    listUsers(await getDb()),
+    listUsers(db),
+    listResetRequests(db),
   ]);
 
   return (
     <>
       <h1 className="text-2xl font-extrabold tracking-tight">{t('users')}</h1>
+      <ResetRequests requests={requests} />
       <section aria-labelledby="enrol-heading" className="card mt-4">
         <h2 id="enrol-heading" className="mb-3 text-xl font-extrabold">
           {t('enrolHeading')}
