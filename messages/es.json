@@ -156,6 +156,20 @@
     "choose": "Elige equipo",
     "none": "Sin equipo"
   },
+  "attendance": {
+    "profileHeading": "Mis partidos",
+    "went": "He ido",
+    "maybe": "Dudoso",
+    "missed": "No he ido",
+    "player": "Jugador",
+    "team": "Equipo",
+    "since": "{count, plural, one {# partido} other {# partidos}} desde el {date}",
+    "basis": "Según lo que respondió cada uno en la convocatoria.",
+    "adminIntro": "Datos desde el {date}, según lo que respondió cada jugador en la convocatoria.",
+    "empty": "Todavía no tienes partidos contados. Se cuentan desde el {date}.",
+    "emptyAdmin": "Todavía no se ha jugado ningún partido desde el {date}.",
+    "tableLabel": "Asistencia por jugador"
+  },
   "reset": {
     "title": "Nueva contraseña",
     "intro": "Hola, {name}. Crea tu nueva contraseña.",
@@ -168,6 +182,8 @@
     "settings": "Partido semanal",
     "usersIntro": "Da de alta jugadores, cambia equipos, marca bajas y genera enlaces de contraseña.",
     "settingsIntro": "Día, hora y lugar del partido de cada semana.",
+    "attendance": "Asistencia",
+    "attendanceIntro": "Cuántas veces ha ido, dudado o faltado cada jugador.",
     "enrolHeading": "Dar de alta un jugador",
     "username": "Usuario",
     "displayName": "Nombre visible",
@@ -178,7 +194,7 @@
     "duplicate": "Ese usuario ya existe.",
     "list": "Todos los jugadores ({count})",
     "edit": "Editar a {name}",
-    "absent": "De baja",
+    "absent": "Baja larga duración",
     "inactive": "Inactivo",
     "noPassword": "Sin contraseña",
     "editHeading": "Editar jugador",

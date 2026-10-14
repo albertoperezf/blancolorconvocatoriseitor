@@ -150,7 +150,7 @@ test('public pages are indexable, private ones are not, and robots/sitemap/OG im
 });
 
 test('private pages redirect anonymous visitors to login', async ({ page }) => {
-  for (const path of ['/partido', '/perfil', '/admin', '/admin/usuarios']) {
+  for (const path of ['/partido', '/perfil', '/admin', '/admin/usuarios', '/admin/asistencia']) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/login$/);
   }

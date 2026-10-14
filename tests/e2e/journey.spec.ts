@@ -121,6 +121,10 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
 
   // The player changes his password: a mismatch keeps the values, success clears and hides them.
   await player.goto('/perfil');
+  // Joined after the seeded past matches, so nothing is counted for him yet.
+  await expect(player.getByRole('region', { name: 'Mis partidos' })).toContainText(
+    'Todavía no tienes partidos contados',
+  );
   const current = player.getByLabel('Contraseña actual');
   const next = player.getByLabel('Nueva contraseña', { exact: true });
   const confirm = player.getByLabel('Repite la nueva contraseña');
@@ -231,6 +235,29 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(player.locator('main li').first()).toContainText('Resultado: Empate');
   await expect(player.getByRole('button', { name: 'Guardar' })).toHaveCount(0);
   await expectNoA11yViolations(player);
+
+  // Attendance: admins see every player's numbers, sortable by column; players can't open it.
+  await page.goto('/admin');
+  await page.getByRole('link', { name: /Asistencia/ }).click();
+  await expect(page).toHaveURL(/\/admin\/asistencia$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Asistencia' })).toBeVisible();
+  await expect(page.locator('main')).toContainText(/Datos desde el \d+ de \w+ de \d{4}, según lo que respondió/);
+  const table = page.getByRole('region', { name: 'Asistencia por jugador' });
+  await expect(table.getByRole('rowheader', { name: 'Admin E2E' })).toBeVisible();
+  const went = table.getByRole('columnheader', { name: /He ido/ });
+  const maybe = table.getByRole('columnheader', { name: /Dudoso/ });
+  await expect(went).toHaveAttribute('aria-sort', 'descending');
+  await went.getByRole('link').click();
+  await expect(page).toHaveURL(/orden=went&dir=asc/);
+  await expect(went).toHaveAttribute('aria-sort', 'ascending');
+  await maybe.getByRole('link').click();
+  await expect(maybe).toHaveAttribute('aria-sort', 'descending');
+  await expect(went).not.toHaveAttribute('aria-sort');
+  await maybe.getByRole('link').click();
+  await expect(maybe).toHaveAttribute('aria-sort', 'ascending');
+  await expectNoA11yViolations(page);
+  await player.goto('/admin/asistencia');
+  await expect(player).toHaveURL(/\/partido$/);
 
   // Leave the shared admin as it started for the next project.
   await page.goto('/perfil');
