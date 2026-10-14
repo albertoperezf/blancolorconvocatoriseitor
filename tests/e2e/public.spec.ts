@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { expectNoA11yViolations } from './helpers';
 
-test('public page shows the weekly match, the squad groups and the FAQ', async ({ page }) => {
+test('public page shows the weekly match, the squad groups and a contact link', async ({ page }) => {
   const response = await page.goto('/');
   expect(response?.headers()['content-security-policy']).toContain("script-src 'self' 'nonce-");
   expect(response?.headers()['x-powered-by']).toBeUndefined();
@@ -15,11 +15,34 @@ test('public page shows the weekly match, the squad groups and the FAQ', async (
     await expect(page.getByRole('heading', { name: new RegExp(label) })).toBeVisible();
   }
 
-  const faq = page.getByText('He olvidado mi contraseña');
-  await faq.click();
-  await expect(page.getByText(/Es porque eres un botarate/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Preguntas frecuentes' })).toHaveCount(0);
+  await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Contacto' })).toHaveAttribute(
+    'href',
+    '/contacto',
+  );
 
   await expectNoA11yViolations(page);
+});
+
+test('visitors can send a message from the contact form', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('contentinfo').getByRole('link', { name: 'Contacto' }).click();
+  await expect(page).toHaveURL(/\/contacto$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Contacto' })).toBeVisible();
+  await expect(page.locator('main')).not.toContainText('@gmail.com');
+
+  await page.getByRole('button', { name: 'Enviar' }).click();
+  await expect(page.getByText('Escribe tu nombre (entre 2 y 60 caracteres).')).toBeVisible();
+  await expect(page.getByText('Escribe un email válido.')).toBeVisible();
+  await expect(page.getByText('Escribe un mensaje de entre 10 y 1000 caracteres.')).toBeVisible();
+  await expectNoA11yViolations(page);
+
+  await page.getByLabel('Nombre').fill('Visitante');
+  await page.getByLabel('Email').fill('visitante@example.com');
+  await page.getByLabel('Mensaje').fill('Hola, ¿puedo jugar algún jueves?');
+  await page.getByRole('button', { name: 'Enviar' }).click();
+  await expect(page.getByRole('status')).toContainText('¡Gracias! Te responderé lo antes posible.');
+  await expect(page.getByLabel('Mensaje')).toHaveValue('');
 });
 
 test('the venue address opens in a maps app', async ({ page }) => {
@@ -150,7 +173,7 @@ test('public pages are indexable, private ones are not, and robots/sitemap/OG im
 });
 
 test('private pages redirect anonymous visitors to login', async ({ page }) => {
-  for (const path of ['/partido', '/perfil', '/admin', '/admin/usuarios', '/admin/asistencia']) {
+  for (const path of ['/partido', '/perfil', '/admin', '/admin/usuarios', '/admin/asistencia', '/admin/mensajes']) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/login$/);
   }

@@ -81,6 +81,12 @@ const goalsSchema = z
 
 export const resultSchema = z.object({ blancos: goalsSchema, color: goalsSchema });
 
+export const contactSchema = z.object({
+  name: z.string().trim().min(2, 'contact.name').max(60, 'contact.name'),
+  email: z.string().trim().max(120, 'contact.email').pipe(z.email('contact.email')),
+  message: z.string().trim().min(10, 'contact.message').max(1000, 'contact.message'),
+});
+
 /** Maps zod issues to { field: messageKey } for form UIs. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const out: Record<string, string> = {};

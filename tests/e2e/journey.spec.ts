@@ -269,6 +269,30 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await player.goto('/admin/asistencia');
   await expect(player).toHaveURL(/\/partido$/);
 
+  // Contact messages: a visitor writes, an admin reads and deletes it; players can't see them.
+  const visitor = await newPage(browser, baseURL);
+  const sender = `Visitante ${suffix}`;
+  await visitor.goto('/contacto');
+  await visitor.getByLabel('Nombre').fill(sender);
+  await visitor.getByLabel('Email').fill(`${suffix.toLowerCase()}@example.com`);
+  await visitor.getByLabel('Mensaje').fill('¿Se puede alquilar la pista otro día?');
+  await visitor.getByRole('button', { name: 'Enviar' }).click();
+  await expect(visitor.getByRole('status')).toContainText('¡Gracias!');
+  await page.goto('/admin');
+  await page.getByRole('link', { name: /Mensajes/ }).click();
+  await expect(page).toHaveURL(/\/admin\/mensajes$/);
+  const card = page.locator('main li').filter({ hasText: sender });
+  await expect(card).toContainText('¿Se puede alquilar la pista otro día?');
+  await expect(card.getByRole('link', { name: 'Responder' })).toHaveAttribute(
+    'href',
+    new RegExp(`^mailto:${suffix.toLowerCase()}@example\\.com`),
+  );
+  await expectNoA11yViolations(page);
+  await card.getByRole('button', { name: `Borrar el mensaje de ${sender}` }).click();
+  await expect(page.locator('main li').filter({ hasText: sender })).toHaveCount(0);
+  await player.goto('/admin/mensajes');
+  await expect(player).toHaveURL(/\/partido$/);
+
   // Leave the shared admin as it started for the next project.
   await page.goto('/perfil');
   await page.getByLabel('Juego con').selectOption('color');

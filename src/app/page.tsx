@@ -1,14 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { FaqList } from '@/components/faq-list';
 import { MatchHeader } from '@/components/match-header';
 import { SquadView } from '@/components/squad-view';
 import { getCurrentUser } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { ensureCurrentMatch, getSettings, getSquad } from '@/lib/match/queries';
 import { goingCount } from '@/lib/match/squad';
-import { listFaqs } from '@/lib/services/content';
 import { getMyDecision } from '@/lib/services/player';
 
 export const metadata: Metadata = { alternates: { canonical: '/' } };
@@ -17,13 +15,12 @@ const DECISION_COLOR = { going: 'text-going', maybe: 'text-maybe', not_going: 't
 
 export default async function HomePage() {
   const db = await getDb();
-  const [t, tStatus, user, settings, match, faqs] = await Promise.all([
+  const [t, tStatus, user, settings, match] = await Promise.all([
     getTranslations('match'),
     getTranslations('status'),
     getCurrentUser(),
     getSettings(db),
     ensureCurrentMatch(db),
-    listFaqs(db),
   ]);
   const [squad, decision] = await Promise.all([
     getSquad(db, match.id),
@@ -54,7 +51,6 @@ export default async function HomePage() {
         </div>
       </div>
       <SquadView squad={squad} meId={user?.id} ctaHref={user ? '/partido' : '/login'} />
-      <FaqList faqs={faqs} />
     </>
   );
 }

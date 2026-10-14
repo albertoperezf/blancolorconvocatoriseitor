@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from 'next';
+import Link from 'next/link';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
+import { MailIcon } from '@/components/icons';
 import { SiteHeader } from '@/components/site-header';
 import { siteUrl } from '@/lib/site-url';
 import { getTheme } from '@/lib/theme';
@@ -53,7 +55,16 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
             {children}
           </main>
           <footer className="border-t border-border px-4 py-6 text-center text-sm text-muted">
-            {t('footer.text')}
+            <p>
+              {t('footer.text')} ·{' '}
+              <Link
+                href="/contacto"
+                className="inline-flex min-h-6 items-center gap-1.5 align-middle font-semibold text-fg hover:text-brand"
+              >
+                <MailIcon className="size-4" />
+                {t('footer.contact')}
+              </Link>
+            </p>
           </footer>
         </NextIntlClientProvider>
         <Analytics />

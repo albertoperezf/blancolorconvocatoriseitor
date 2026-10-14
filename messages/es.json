@@ -184,6 +184,14 @@
     "settingsIntro": "Día, hora y lugar del partido de cada semana.",
     "attendance": "Asistencia",
     "attendanceIntro": "Cuántas veces ha ido, dudado o faltado cada jugador.",
+    "messages": "Mensajes",
+    "messagesIntro": "Lo que te escriben desde el formulario de contacto.",
+    "messagesCount": "{count, plural, one {mensaje} other {mensajes}}",
+    "messagesEmpty": "No hay mensajes.",
+    "reply": "Responder",
+    "replySubject": "Re: tu mensaje a Blancolores",
+    "delete": "Borrar",
+    "deleteFor": "Borrar el mensaje de {name}",
     "enrolHeading": "Dar de alta un jugador",
     "username": "Usuario",
     "displayName": "Nombre visible",
@@ -226,6 +234,11 @@
   },
   "errors": {
     "generic": "Algo ha fallado. Inténtalo otra vez.",
+    "contact": {
+      "name": "Escribe tu nombre (entre 2 y 60 caracteres).",
+      "email": "Escribe un email válido.",
+      "message": "Escribe un mensaje de entre 10 y 1000 caracteres."
+    },
     "username": {
       "min": "Mínimo 2 caracteres.",
       "max": "Máximo 30 caracteres.",
@@ -248,10 +261,17 @@
     "result": { "required": "Pon los goles de este equipo.", "goals": "Entre 0 y 99 goles." },
     "required": "Campo obligatorio."
   },
-  "faq": {
-    "heading": "Preguntas frecuentes"
-  },
   "footer": {
-    "text": "Blancolores · Hecho con cariño para los de los jueves."
+    "text": "Blancolores · Hecho con cariño para los de los jueves",
+    "contact": "Contacto"
+  },
+  "contact": {
+    "title": "Contacto",
+    "intro": "¿Necesitas hablar con el organizador? Escribe aquí y te responderé por email.",
+    "name": "Nombre",
+    "email": "Email",
+    "message": "Mensaje",
+    "submit": "Enviar",
+    "sent": "¡Gracias! Te responderé lo antes posible."
   }
 }

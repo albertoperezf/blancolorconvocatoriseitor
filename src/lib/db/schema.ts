@@ -133,3 +133,11 @@ export const auditLog = pgTable('audit_log', {
   details: text(),
   at: createdAt(),
 });
+
+export const contactMessages = pgTable('contact_messages', {
+  id: serial().primaryKey(),
+  name: varchar({ length: 60 }).notNull(),
+  email: varchar({ length: 120 }).notNull(),
+  message: varchar({ length: 1000 }).notNull(),
+  createdAt: createdAt(),
+});
