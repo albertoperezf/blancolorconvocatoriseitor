@@ -40,9 +40,6 @@ export default async function HomePage() {
           counts={{ going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length }}
         />
         <div className="flex flex-col gap-2 sm:items-end">
-          <p className="font-semibold tabular-nums">
-            {t('summary', { going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length })}
-          </p>
           {decision && (
             <p className="text-sm">
               {t.rich('yourAnswer', {

@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
             {t('nav.skip')}
           </a>
           <SiteHeader />
-          <main id="contenido" tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-4 pb-12 sm:px-6">
+          <main id="contenido" tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-8 pb-12 sm:px-6">
             {children}
           </main>
           <footer className="border-t border-border px-4 py-6 text-center text-sm text-muted">

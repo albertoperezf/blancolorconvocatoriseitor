@@ -32,6 +32,23 @@
   color-scheme: dark;
 }
 
+/* Smooth open/close of <details> where supported; other browsers still open instantly. */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 0.25s ease,
+      content-visibility 0.25s allow-discrete;
+  }
+  details[open]::details-content {
+    block-size: auto;
+  }
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 4rem;
@@ -69,6 +86,10 @@ body {
 }
 @utility btn-secondary {
   @apply btn border border-border bg-surface text-fg hover:bg-bg;
+}
+/* Inline action with the same footprint as a text row; the pseudo-element enlarges the tap area. */
+@utility btn-ghost {
+  @apply relative inline-flex min-h-6 items-center gap-2 font-semibold text-fg transition-colors before:absolute before:-inset-x-2 before:-inset-y-1 hover:text-brand;
 }
 @utility btn-link {
   @apply min-h-6 font-semibold text-brand underline underline-offset-4 hover:no-underline;

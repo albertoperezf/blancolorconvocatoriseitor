@@ -30,23 +30,35 @@ test('the venue address opens in a maps app', async ({ page }) => {
   await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 });
 
-test('the match can be added to a calendar', async ({ page }) => {
+test('the match can be added to a calendar from a small menu', async ({ page }) => {
   await page.goto('/');
-  const ics = page.getByRole('link', { name: 'Añadir al calendario' });
+  const trigger = page.getByRole('button', { name: 'Añadir a calendario' });
+  const ics = page.getByRole('link', { name: 'Apple / Outlook (.ics)' });
+  await expect(ics).toBeHidden();
+  await trigger.click();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
   await expect(ics).toHaveAttribute('href', '/api/calendario');
+  const google = page.getByRole('link', { name: /Google Calendar/ });
+  await expect(google).toHaveAttribute('href', /^https:\/\/calendar\.google\.com\/calendar\/render\?action=TEMPLATE/);
+  await expectNoA11yViolations(page);
+
+  await page.keyboard.press('Escape');
+  await expect(ics).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await page.getByRole('heading', { level: 1 }).click();
+  await expect(ics).toBeHidden();
+
   const response = await page.request.get('/api/calendario');
   expect(response.headers()['content-type']).toContain('text/calendar');
   const body = (await response.text()).replace(/\r\n /g, '');
   expect(body).toMatch(/DTSTART:\d{8}T\d{6}Z/);
   expect(body).toContain('LOCATION:Polideportivo La Concepción\\, C. de José del Hierro\\, 5');
-
-  const google = page.getByRole('link', { name: /Google Calendar/ });
-  await expect(google).toHaveAttribute('href', /^https:\/\/calendar\.google\.com\/calendar\/render\?action=TEMPLATE/);
 });
 
-test('the match can be shared on WhatsApp with a ready-made message', async ({ page }) => {
+test('the match can be shared with a ready-made message', async ({ page }) => {
   await page.goto('/');
-  const share = page.getByRole('link', { name: 'Compartir por WhatsApp' });
+  const share = page.getByRole('link', { name: 'Compartir' });
   const href = (await share.getAttribute('href'))!;
   expect(href).toMatch(/^https:\/\/wa\.me\/\?text=/);
   const text = new URL(href).searchParams.get('text')!;

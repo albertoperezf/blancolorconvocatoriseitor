@@ -69,7 +69,7 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   // Guests are allowed even when not going.
   const guest = `Íñigo ${suffix.slice(0, 3)}`;
   await page.getByLabel('Nombre del fichaje').fill(guest);
-  await page.getByRole('button', { name: 'Añadir' }).click();
+  await page.getByRole('button', { name: 'Añadir', exact: true }).click();
   await expect(page.getByRole('region', { name: 'INVITADOS' }).getByText(guest)).toBeVisible();
   await expectNoA11yViolations(page);
   await page.getByRole('button', { name: `Quitar a ${guest}` }).click();

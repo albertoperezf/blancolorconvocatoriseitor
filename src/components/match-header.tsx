@@ -2,7 +2,9 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import { appOrigin } from '@/lib/auth/current';
 import { googleCalendarUrl, matchCalendarEvent } from '@/lib/match/calendar';
 import type { Match } from '@/lib/match/queries';
-import { CalendarIcon, CalendarPlusIcon, MapPinIcon, ShareIcon } from './icons';
+import { CalendarMenu } from './calendar-menu';
+import { CalendarIcon, MapPinIcon } from './icons';
+import { ShareButton } from './share-button';
 
 export async function MatchHeader({
   match,
@@ -39,10 +41,8 @@ export async function MatchHeader({
     { title: t('eventTitle'), description: t('eventDescription', { url: origin }) },
     origin,
   );
-  const whatsappUrl = counts
-    ? `https://wa.me/?text=${encodeURIComponent(
-        t('shareText', { day: weekday, time, venue: match.venue, ...counts, url: origin }),
-      )}`
+  const shareText = counts
+    ? t('shareText', { day: weekday, time, venue: match.venue, ...counts, url: origin })
     : undefined;
 
   return (
@@ -54,14 +54,14 @@ export async function MatchHeader({
           {day} · {time}
         </time>
       </p>
-      <p className="mt-1 flex items-start gap-2 text-muted">
+      <p className="mt-2 flex items-start gap-2 text-muted">
         <MapPinIcon className="mt-0.5 size-5 shrink-0 text-brand" />
         <span>
           <span className="sr-only">{t('venue')}: </span>
           <span className="font-semibold text-fg">{match.venue}</span>
           {address && mapsUrl && (
             <>
-              <br />
+              {' · '}
               <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="btn-link font-medium">
                 {shortAddress}
                 <span className="sr-only"> ({t('openMap')})</span>
@@ -70,32 +70,17 @@ export async function MatchHeader({
           )}
         </span>
       </p>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <a href="/api/calendario" download className="btn-secondary min-h-11 px-4 text-sm">
-          <CalendarPlusIcon className="size-5 text-brand" />
-          {t('addToCalendar')}
-        </a>
-        <a
-          href={googleCalendarUrl(event)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-secondary min-h-11 px-4 text-sm"
-        >
-          {t('googleCalendar')}
-          <span className="sr-only"> ({t('opensNewTab')})</span>
-        </a>
-        {whatsappUrl && (
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary min-h-11 px-4 text-sm"
-          >
-            <ShareIcon className="size-5 text-going" />
-            {t('shareWhatsapp')}
-            <span className="sr-only"> ({t('opensNewTab')})</span>
-          </a>
-        )}
+      <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <CalendarMenu
+          googleUrl={googleCalendarUrl(event)}
+          labels={{
+            trigger: t('addToCalendar'),
+            ics: t('calendarIcs'),
+            google: t('googleCalendar'),
+            opensNewTab: t('opensNewTab'),
+          }}
+        />
+        {shareText && <ShareButton text={shareText} label={t('share')} />}
       </div>
     </div>
   );
