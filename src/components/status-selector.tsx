@@ -11,10 +11,11 @@ type Props = {
   onSave: (decision: Decision | null) => Promise<SaveResult>;
 };
 
+// Selected colours come from React state, not `peer-checked:`; iOS Safari could leave stale highlights.
 const OPTIONS: { value: Decision; Icon: typeof CheckIcon; checked: string }[] = [
-  { value: 'going', Icon: CheckIcon, checked: 'peer-checked:bg-going peer-checked:border-going' },
-  { value: 'maybe', Icon: QuestionIcon, checked: 'peer-checked:bg-maybe peer-checked:border-maybe' },
-  { value: 'not_going', Icon: XIcon, checked: 'peer-checked:bg-notgoing peer-checked:border-notgoing' },
+  { value: 'going', Icon: CheckIcon, checked: 'bg-going border-going text-on-status' },
+  { value: 'maybe', Icon: QuestionIcon, checked: 'bg-maybe border-maybe text-on-status' },
+  { value: 'not_going', Icon: XIcon, checked: 'bg-notgoing border-notgoing text-on-status' },
 ];
 
 export function StatusSelector({ initial, onSave }: Props) {
@@ -41,7 +42,7 @@ export function StatusSelector({ initial, onSave }: Props) {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgb(0_0_0/0.08)] backdrop-blur md:static md:mt-6 md:rounded-[var(--radius-card)] md:border md:p-6 md:shadow-none">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgb(0_0_0/0.08)] md:static md:mt-6 md:rounded-[var(--radius-card)] md:border md:p-6 md:shadow-none">
       <fieldset id="tu-respuesta" disabled={pending} aria-busy={pending}>
         <legend className="mb-2 font-extrabold">{t('legend')}</legend>
         <div className="grid grid-cols-3 gap-2">
@@ -56,7 +57,7 @@ export function StatusSelector({ initial, onSave }: Props) {
                 onChange={() => save(value, saved, true)}
               />
               <span
-                className={`flex min-h-14 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl border-2 border-border bg-surface px-2 text-sm font-extrabold tracking-wide peer-checked:text-on-status peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand sm:flex-row sm:gap-2 sm:text-base ${checked}`}
+                className={`flex min-h-14 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl border-2 px-2 text-sm font-extrabold tracking-wide peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand sm:flex-row sm:gap-2 sm:text-base ${optimistic === value ? checked : 'border-border bg-surface'}`}
               >
                 <Icon className="size-5" />
                 {t(value)}

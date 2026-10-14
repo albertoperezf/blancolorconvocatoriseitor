@@ -62,6 +62,16 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(page.getByRole('region', { name: 'COLOR' }).getByText('(tú)')).toBeVisible();
   await page.getByRole('button', { name: 'Deshacer' }).click();
   await expect(status).toHaveText('Guardado: DUDA.');
+  // Only the restored answer is highlighted (iOS Safari used to keep stale highlights).
+  const option = (name: string) =>
+    page
+      .locator('#tu-respuesta label')
+      .filter({ hasText: new RegExp(`^${name}$`) })
+      .locator('span')
+      .first();
+  await expect(option('DUDA')).toHaveClass(/bg-maybe/);
+  await expect(option('VOY')).not.toHaveClass(/bg-going/);
+  await expect(option('NO VOY')).not.toHaveClass(/bg-notgoing/);
   await expect(page.getByRole('region', { name: 'DUDOSITOS' }).getByText('Admin E2E')).toBeVisible();
   await page.getByText('NO VOY', { exact: true }).click();
   await expect(page.getByRole('region', { name: 'MARIQUITAS QUE NO VAN' }).getByText('Admin E2E')).toBeVisible();
