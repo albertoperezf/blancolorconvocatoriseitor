@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DbHandle } from '@/lib/db/create';
-import { attendances, pushSubscriptions } from '@/lib/db/schema';
+import { attendances, guests, pushSubscriptions } from '@/lib/db/schema';
 import { ensureCurrentMatch } from '@/lib/match/queries';
 import { reminderKindFor, runReminder, type ComposeReminder } from '@/lib/push/reminders';
 import { deleteSubscription, saveSubscription, type PushPayload, type PushSender } from '@/lib/push/service';
@@ -56,6 +56,7 @@ describe('runReminder', () => {
     }
     const match = await ensureCurrentMatch(h.db, MONDAY);
     await h.db.insert(attendances).values({ matchId: match.id, userId: ids.answered, decision: 'going' });
+    await h.db.insert(guests).values({ matchId: match.id, hostId: ids.answered, name: 'Invitado' });
     await saveSubscription(h.db, ids.answered, sub('answered'));
     await saveSubscription(h.db, ids.pending, sub('pending-phone'));
     await saveSubscription(h.db, ids.pending, sub('pending-gone'));
@@ -69,7 +70,7 @@ describe('runReminder', () => {
     const result = await runReminder(h.db, { now: MONDAY, send, compose });
     expect(result).toEqual({ kind: 'monday', sent: 1, failed: 0, removed: 1 });
     expect(calls.map((c) => c.endpoint).sort()).toEqual([sub('pending-gone').endpoint, sub('pending-phone').endpoint]);
-    expect(calls[0].payload).toMatchObject({ title: 'Recordatorio', body: 'respondido 1, van 1', url: '/partido' });
+    expect(calls[0].payload).toMatchObject({ title: 'Recordatorio', body: 'respondido 1, van 2', url: '/partido' });
     const remaining = await h.db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, ids.pending));
     expect(remaining.map((s) => s.endpoint)).toEqual([sub('pending-phone').endpoint]);
   });

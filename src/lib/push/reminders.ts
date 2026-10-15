@@ -3,6 +3,7 @@ import { and, count, eq, isNull } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
 import { attendances, reminderSends, users } from '@/lib/db/schema';
 import { ensureCurrentMatch, getSettings, getSquad, type Match } from '@/lib/match/queries';
+import { goingCount } from '@/lib/match/squad';
 import { sendToSubscriptions, subscriptionsFor, type PushPayload, type PushSender } from './service';
 
 export type ReminderKind = 'monday' | 'wednesday';
@@ -33,7 +34,7 @@ export async function reminderCounts(db: Db, matchId: string): Promise<ReminderC
     db.select({ n: count() }).from(attendances).where(eq(attendances.matchId, matchId)),
     getSquad(db, matchId),
   ]);
-  return { answered: row.n, going: squad.blancos.length + squad.color.length + squad.noTeam.length };
+  return { answered: row.n, going: goingCount(squad) };
 }
 
 export async function reminderPayload(db: Db, match: Match, compose: ComposeReminder): Promise<PushPayload> {
