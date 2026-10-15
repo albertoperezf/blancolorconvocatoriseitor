@@ -204,6 +204,7 @@
     "absent": "Baja larga duración",
     "inactive": "Inactivo",
     "noPassword": "Sin contraseña",
+    "statusLegend": "Leyenda de estados",
     "editHeading": "Editar jugador",
     "longTermAbsence": "Baja de larga duración",
     "absenceNote": "Nota de la baja (solo admins)",

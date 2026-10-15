@@ -98,6 +98,34 @@ export const ShirtIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) =>
   </svg>
 );
 
+export const CrownIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M11.56 3.27a.5.5 0 0 1 .88 0l2.95 5.6a1 1 0 0 0 1.52.3l4.27-3.67a.5.5 0 0 1 .8.52l-2.84 10.25a1 1 0 0 1-.95.73H5.81a1 1 0 0 1-.96-.73L2.02 6.02a.5.5 0 0 1 .8-.52l4.27 3.67a1 1 0 0 0 1.52-.3z" />
+    <path d="M5 21h14" />
+  </svg>
+);
+
+export const BandageIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="2" y="6" width="20" height="12" rx="2" />
+    <path d="M6 6v12M18 6v12M10 10h.01M10 14h.01M14 10h.01M14 14h.01" />
+  </svg>
+);
+
+export const LockOpenIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3" y="11" width="18" height="11" rx="2" />
+    <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+  </svg>
+);
+
+export const BanIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="m4.9 4.9 14.2 14.2" />
+  </svg>
+);
+
 // Portero = glove, Defensa = shield, Mediocampo = two-way arrows, Delantero = target.
 const POSITION_PATHS = {
   portero: (
