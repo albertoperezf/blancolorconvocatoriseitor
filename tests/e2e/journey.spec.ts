@@ -148,6 +148,18 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(player.getByRole('radio')).toHaveCount(3);
   await expect(player.getByRole('region', { name: 'DUDOSITOS' }).getByText(`Nuevo ${suffix}`)).toBeVisible();
 
+  // Guests are allowed by default; once the admin takes that away, "Mis fichajes" disappears.
+  await expect(player.getByRole('heading', { name: 'Mis fichajes' })).toBeVisible();
+  const canBringGuests = page.getByLabel('Puede traer fichajes');
+  await expect(canBringGuests).toBeChecked();
+  await canBringGuests.uncheck();
+  await page.getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByText('Cambios guardados.')).toBeVisible();
+  await expect(canBringGuests).not.toBeChecked();
+  await player.reload();
+  await expect(player.getByRole('heading', { name: 'Convocatoria' })).toBeVisible();
+  await expect(player.getByRole('heading', { name: 'Mis fichajes' })).toHaveCount(0);
+
   // The player changes his password: a mismatch keeps the values, success clears and hides them.
   await player.goto('/perfil');
   const notifications = player.getByRole('region', { name: 'Notificaciones' });

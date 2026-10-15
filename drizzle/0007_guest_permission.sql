@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "can_bring_guests" boolean DEFAULT true NOT NULL;

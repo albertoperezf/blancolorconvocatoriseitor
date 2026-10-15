@@ -61,6 +61,7 @@ export const adminUpdateUserSchema = z.object({
   role: z.enum(['player', 'admin']),
   longTermAbsence: z.boolean(),
   absenceNote: z.string().trim().max(200).nullable(),
+  canBringGuests: z.boolean(),
   active: z.boolean(),
 });
 

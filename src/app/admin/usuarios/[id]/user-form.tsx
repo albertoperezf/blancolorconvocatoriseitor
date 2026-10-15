@@ -13,10 +13,11 @@ type User = {
   role: string;
   longTermAbsence: boolean;
   absenceNote: string | null;
+  canBringGuests: boolean;
   active: boolean;
 };
 
-export function UserForm({ user, isSelf }: { user: User; isSelf: boolean }) {
+export function UserForm({ user, isSelf, upcomingGuests }: { user: User; isSelf: boolean; upcomingGuests: number }) {
   const t = useTranslations('admin');
   const tProfile = useTranslations('profile');
   const msg = useMessage();
@@ -25,6 +26,8 @@ export function UserForm({ user, isSelf }: { user: User; isSelf: boolean }) {
   const noticeVisible = useAutoHide(state);
   const [absent, setAbsent] = useState(user.longTermAbsence);
   const roleId = useId();
+  const guestsHintId = useId();
+  const guestsLocked = user.canBringGuests && upcomingGuests > 0;
   const err = (f: string) => (state.status === 'error' ? msg(state.errors?.[f]) : undefined);
   const check = 'flex min-h-11 cursor-pointer items-center gap-3 font-semibold';
 
@@ -63,6 +66,27 @@ export function UserForm({ user, isSelf }: { user: User; isSelf: boolean }) {
       {absent && (
         <Field name="absenceNote" label={t('absenceNote')} defaultValue={user.absenceNote ?? ''} maxLength={200} />
       )}
+      <div>
+        <label className={check}>
+          <input
+            type="checkbox"
+            name="canBringGuests"
+            className="size-6"
+            defaultChecked={user.canBringGuests}
+            disabled={guestsLocked}
+            aria-describedby={guestsLocked ? guestsHintId : undefined}
+          />
+          {t('canBringGuests')}
+        </label>
+        {guestsLocked && (
+          <>
+            <p id={guestsHintId} className="pl-9 text-sm text-muted">
+              {t('guestsLocked', { count: upcomingGuests })}
+            </p>
+            <input type="hidden" name="canBringGuests" value="on" />
+          </>
+        )}
+      </div>
       <label className={check}>
         <input type="checkbox" name="active" className="size-6" defaultChecked={user.active} disabled={isSelf} />
         {t('active')}

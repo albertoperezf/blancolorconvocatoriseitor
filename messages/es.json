@@ -80,7 +80,8 @@
     "remove": "Quitar a {name}",
     "empty": "No has traído a nadie.",
     "added": "{name} añadido.",
-    "removed": "Fichaje quitado."
+    "removed": "Fichaje quitado.",
+    "notAllowed": "No puedes traer fichajes. Habla con un admin."
   },
   "login": {
     "title": "Introduce tu clave de acceso",
@@ -208,6 +209,9 @@
     "editHeading": "Editar jugador",
     "longTermAbsence": "Baja de larga duración",
     "absenceNote": "Nota de la baja (solo admins)",
+    "canBringGuests": "Puede traer fichajes",
+    "guestsLocked": "Tiene {count, plural, one {# fichaje} other {# fichajes}} para el próximo partido. No se puede desmarcar hasta que él {count, plural, one {lo quite} other {los quite}} o empiece el partido.",
+    "hasGuests": "No se puede quitar el permiso de fichajes: ya tiene fichajes para el próximo partido.",
     "active": "Cuenta activa",
     "saved": "Cambios guardados.",
     "selfLockout": "No puedes quitarte el rol de admin ni desactivarte a ti mismo.",

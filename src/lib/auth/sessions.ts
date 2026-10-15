@@ -9,7 +9,15 @@ const RENEW_WHEN_LEFT_MS = 15 * DAY_MS;
 
 export type SessionUser = Pick<
   typeof users.$inferSelect,
-  'id' | 'username' | 'displayName' | 'role' | 'team' | 'position' | 'longTermAbsence' | 'mustChangePassword'
+  | 'id'
+  | 'username'
+  | 'displayName'
+  | 'role'
+  | 'team'
+  | 'position'
+  | 'longTermAbsence'
+  | 'canBringGuests'
+  | 'mustChangePassword'
 >;
 
 export async function createSession(db: Db, userId: string, now = new Date()) {
@@ -37,6 +45,7 @@ export async function validateSessionToken(
         team: users.team,
         position: users.position,
         longTermAbsence: users.longTermAbsence,
+        canBringGuests: users.canBringGuests,
         mustChangePassword: users.mustChangePassword,
         active: users.active,
       },
@@ -57,9 +66,29 @@ export async function validateSessionToken(
     await db.update(sessions).set({ expiresAt }).where(eq(sessions.id, id));
   }
 
-  const { id: userId, username, displayName, role, team, position, longTermAbsence, mustChangePassword } = row.user;
+  const {
+    id: userId,
+    username,
+    displayName,
+    role,
+    team,
+    position,
+    longTermAbsence,
+    canBringGuests,
+    mustChangePassword,
+  } = row.user;
   return {
-    user: { id: userId, username, displayName, role, team, position, longTermAbsence, mustChangePassword },
+    user: {
+      id: userId,
+      username,
+      displayName,
+      role,
+      team,
+      position,
+      longTermAbsence,
+      canBringGuests,
+      mustChangePassword,
+    },
     expiresAt,
   };
 }

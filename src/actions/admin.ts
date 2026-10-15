@@ -48,6 +48,7 @@ export async function updateUserAction(userId: string, _prev: FormState, formDat
     role: formData.get('role'),
     longTermAbsence: formData.get('longTermAbsence') === 'on',
     absenceNote: optional(formData.get('absenceNote')) ?? null,
+    canBringGuests: formData.get('canBringGuests') === 'on',
     active: formData.get('active') === 'on',
   });
   if (!parsed.success) return { status: 'error', errors: fieldErrors(parsed.error) };
@@ -56,6 +57,7 @@ export async function updateUserAction(userId: string, _prev: FormState, formDat
     await updateUser(await getDb(), admin.id, userId, parsed.data);
   } catch (e) {
     if (e instanceof DomainError && e.code === 'self_lockout') return { status: 'error', message: 'admin.selfLockout' };
+    if (e instanceof DomainError && e.code === 'has_guests') return { status: 'error', message: 'admin.hasGuests' };
     throw e;
   }
   refresh();

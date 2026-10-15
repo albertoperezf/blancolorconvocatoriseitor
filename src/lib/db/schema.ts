@@ -38,6 +38,7 @@ export const users = pgTable('users', {
   position: positionEnum(),
   longTermAbsence: boolean().notNull().default(false),
   absenceNote: varchar({ length: 200 }),
+  canBringGuests: boolean().notNull().default(true),
   active: boolean().notNull().default(true),
   createdAt: createdAt(),
 });

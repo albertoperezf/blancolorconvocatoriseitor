@@ -3,7 +3,7 @@ import type { Db } from '@/lib/db/create';
 import { attendances, guests, users, type Decision, type Position, type Team } from '@/lib/db/schema';
 
 export class DomainError extends Error {
-  constructor(public readonly code: 'not_found' | 'forbidden' | 'duplicate' | 'self_lockout') {
+  constructor(public readonly code: 'not_found' | 'forbidden' | 'duplicate' | 'self_lockout' | 'has_guests') {
     super(code);
   }
 }
@@ -32,6 +32,9 @@ export async function getMyDecision(db: Db, userId: string, matchId: string): Pr
 }
 
 export async function addGuest(db: Db, hostId: string, matchId: string, name: string) {
+  const [host] = await db.select({ canBringGuests: users.canBringGuests }).from(users).where(eq(users.id, hostId));
+  if (!host) throw new DomainError('not_found');
+  if (!host.canBringGuests) throw new DomainError('forbidden');
   const [row] = await db.insert(guests).values({ hostId, matchId, name }).returning();
   return row;
 }

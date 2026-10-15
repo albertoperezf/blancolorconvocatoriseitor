@@ -36,7 +36,14 @@ export async function addGuestAction(_prev: FormState, formData: FormData): Prom
 
   const db = await getDb();
   const match = await ensureCurrentMatch(db);
-  await addGuest(db, user.id, match.id, name.data);
+  try {
+    await addGuest(db, user.id, match.id, name.data);
+  } catch (e) {
+    if (e instanceof DomainError && e.code === 'forbidden') {
+      return { status: 'error', errors: { name: 'guests.notAllowed' } };
+    }
+    throw e;
+  }
   refresh();
   return { status: 'success', message: 'guests.added', data: { name: name.data } };
 }

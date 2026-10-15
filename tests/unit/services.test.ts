@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DbHandle } from '@/lib/db/create';
 import { auditLog, users } from '@/lib/db/schema';
 import { ensureCurrentMatch, getSquad } from '@/lib/match/queries';
-import { enrolUser, listUsers, updateUser } from '@/lib/services/admin';
+import { countUpcomingGuests, enrolUser, listUsers, updateUser } from '@/lib/services/admin';
 import { addGuest, DomainError, getMyDecision, removeGuest, setAttendance } from '@/lib/services/player';
 import { freshDb, insertUser } from './helpers/db';
 
@@ -97,6 +97,7 @@ describe('admin', () => {
       role: 'player',
       longTermAbsence: true,
       absenceNote: 'Rodilla',
+      canBringGuests: true,
       active: true,
     });
     const [after] = await h.db.select().from(users).where(eq(users.id, blanco.id));
@@ -105,8 +106,40 @@ describe('admin', () => {
     expect(log.at(-1)?.details).toContain('team');
   });
 
+  it('lets admins stop a player from bringing guests, but not while he has guests for an upcoming match', async () => {
+    const id = await enrolUser(h.db, admin.id, { username: 'SINFICHAJES', displayName: 'Sin', role: 'player' });
+    const match = await ensureCurrentMatch(h.db, new Date('2026-10-13T10:00:00Z'));
+    const guest = await addGuest(h.db, id, match.id, 'Antes');
+    const input = {
+      displayName: 'Sin',
+      team: null,
+      role: 'player' as const,
+      longTermAbsence: false,
+      absenceNote: null,
+      canBringGuests: false,
+      active: true,
+    };
+
+    const beforeKickoff = new Date('2026-10-14T10:00:00Z');
+    expect(await countUpcomingGuests(h.db, id, beforeKickoff)).toBe(1);
+    await expect(updateUser(h.db, admin.id, id, input, beforeKickoff)).rejects.toMatchObject({ code: 'has_guests' });
+
+    const afterKickoff = new Date('2026-10-15T19:00:00Z');
+    await updateUser(h.db, admin.id, id, input, afterKickoff);
+    await expect(addGuest(h.db, id, match.id, 'Después')).rejects.toMatchObject({ code: 'forbidden' });
+    const log = await h.db.select().from(auditLog).where(eq(auditLog.targetId, id));
+    expect(log.at(-1)?.details).toBe('canBringGuests');
+    await removeGuest(h.db, id, guest.id);
+  });
+
   it('prevents admins from demoting or deactivating themselves', async () => {
-    const base = { displayName: 'ADMIN', team: 'color' as const, longTermAbsence: false, absenceNote: null };
+    const base = {
+      displayName: 'ADMIN',
+      team: 'color' as const,
+      longTermAbsence: false,
+      absenceNote: null,
+      canBringGuests: true,
+    };
     await expect(updateUser(h.db, admin.id, admin.id, { ...base, role: 'player', active: true })).rejects.toMatchObject(
       {
         code: 'self_lockout',

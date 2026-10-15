@@ -1,7 +1,7 @@
-import { asc, count, eq } from 'drizzle-orm';
+import { and, asc, count, eq, gt } from 'drizzle-orm';
 import type { z } from 'zod';
 import type { Db } from '@/lib/db/create';
-import { auditLog, passwordResetRequests, settings, users } from '@/lib/db/schema';
+import { auditLog, guests, matches, passwordResetRequests, settings, users } from '@/lib/db/schema';
 import type { adminUpdateUserSchema, enrolSchema, settingsSchema } from '@/lib/validators';
 import { invalidateUserSessions } from '@/lib/auth/sessions';
 import { DomainError } from './player';
@@ -60,6 +60,7 @@ export async function getUser(db: Db, id: string) {
       team: users.team,
       longTermAbsence: users.longTermAbsence,
       absenceNote: users.absenceNote,
+      canBringGuests: users.canBringGuests,
       active: users.active,
     })
     .from(users)
@@ -78,15 +79,30 @@ export async function enrolUser(db: Db, actorId: string, input: z.output<typeof 
   return created.id;
 }
 
+/** Guests the player has signed up for matches that haven't kicked off yet. */
+export async function countUpcomingGuests(db: Db, hostId: string, now = new Date()) {
+  const [row] = await db
+    .select({ n: count() })
+    .from(guests)
+    .innerJoin(matches, eq(matches.id, guests.matchId))
+    .where(and(eq(guests.hostId, hostId), gt(matches.startsAt, now)));
+  return row?.n ?? 0;
+}
+
 export async function updateUser(
   db: Db,
   actorId: string,
   userId: string,
   input: z.output<typeof adminUpdateUserSchema>,
+  now = new Date(),
 ) {
   if (actorId === userId && (input.role !== 'admin' || !input.active)) throw new DomainError('self_lockout');
   const [before] = await db.select().from(users).where(eq(users.id, userId));
   if (!before) throw new DomainError('not_found');
+  // Only the player can remove his guests, so the permission stays until they're gone or the match starts.
+  if (before.canBringGuests && !input.canBringGuests && (await countUpcomingGuests(db, userId, now)) > 0) {
+    throw new DomainError('has_guests');
+  }
 
   await db
     .update(users)
@@ -94,7 +110,7 @@ export async function updateUser(
     .where(eq(users.id, userId));
   if (!input.active) await invalidateUserSessions(db, userId);
 
-  const changed = (['displayName', 'team', 'role', 'longTermAbsence', 'active'] as const).filter(
+  const changed = (['displayName', 'team', 'role', 'longTermAbsence', 'canBringGuests', 'active'] as const).filter(
     (k) => before[k] !== input[k],
   );
   if (changed.length) {

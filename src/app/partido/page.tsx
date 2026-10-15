@@ -22,7 +22,7 @@ export default async function MatchPage() {
   const [squad, decision, guests] = await Promise.all([
     getSquad(db, match.id),
     getMyDecision(db, user.id, match.id),
-    getMyGuests(db, user.id, match.id),
+    user.canBringGuests ? getMyGuests(db, user.id, match.id) : [],
   ]);
 
   return (
@@ -38,7 +38,7 @@ export default async function MatchPage() {
       </div>
       <PushBanner publicKey={vapidPublicKey()} />
       <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
-      <GuestManager guests={guests} />
+      {user.canBringGuests && <GuestManager guests={guests} />}
       <SquadView squad={squad} meId={user.id} ctaHref="#tu-respuesta" />
       {/* Room for the fixed status bar on mobile. */}
       <div aria-hidden className="h-40 md:hidden" />
