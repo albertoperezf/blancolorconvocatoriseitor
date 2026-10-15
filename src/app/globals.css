@@ -117,13 +117,17 @@ select.input {
   background-repeat: no-repeat;
 }
 
-/* iOS gives date/time inputs an intrinsic width and centred text, overflowing narrow screens. */
+/* iOS gives date/time inputs an intrinsic width and centred text, and once appearance is reset it
+   top-aligns the value; explicit vertical padding centres it like the other fields. */
 input.input[type='time'],
 input.input[type='date'] {
   appearance: none;
   min-width: 0;
+  padding-block: calc((3rem - 2px - 1.5rem) / 2);
+  line-height: 1.5rem;
   text-align: left;
 }
 input.input::-webkit-date-and-time-value {
+  margin: 0;
   text-align: left;
 }

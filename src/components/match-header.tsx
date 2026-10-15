@@ -43,17 +43,19 @@ export async function MatchHeader({
     ? t('shareText', { day: weekday, time, venue: match.venue, ...counts, url: origin })
     : undefined;
 
+  // Every row shares one type style and one gap, so date, venue and actions line up evenly under the title.
+  const row = 'flex min-h-6 items-center gap-2 font-semibold';
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       <Heading className="text-2xl font-extrabold tracking-tight sm:text-3xl">{t('title')}</Heading>
-      <p className="mt-2 flex items-center gap-2 text-lg font-semibold">
+      <p className={row}>
         <CalendarIcon className="size-5 shrink-0 text-brand" />
         <time dateTime={match.startsAt.toISOString()}>
           {day} · {time}
         </time>
       </p>
-      <p className="mt-2 flex items-start gap-2 text-muted">
-        <MapPinIcon className="mt-0.5 size-5 shrink-0 text-brand" />
+      <p className={row}>
+        <MapPinIcon className="size-5 shrink-0 text-brand" />
         <span>
           <span className="sr-only">{t('venue')}: </span>
           {mapsUrl ? (
@@ -62,11 +64,11 @@ export async function MatchHeader({
               <span className="sr-only"> ({t('openMap')})</span>
             </a>
           ) : (
-            <span className="font-semibold text-fg">{match.venue}</span>
+            match.venue
           )}
         </span>
       </p>
-      <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <CalendarMenu
           googleUrl={googleCalendarUrl(event)}
           labels={{
