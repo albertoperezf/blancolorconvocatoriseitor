@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { requireUser } from '@/lib/auth/current';
+import { PushSettings } from '@/components/push/push-settings';
 import { getDb } from '@/lib/db';
 import { attendanceFrom, attendanceStats } from '@/lib/match/attendance-stats';
 import { getSettings } from '@/lib/match/queries';
+import { vapidPublicKey } from '@/lib/push/service';
 import { ChangePasswordForm, CloseSessionsForm, PositionForm, TeamForm } from './profile-forms';
 
 export const metadata: Metadata = { title: 'Perfil' };
@@ -17,14 +19,16 @@ const STATS = [
 export default async function ProfilePage() {
   const user = await requireUser();
   const db = await getDb();
-  const [t, tA, format, settings, [stats]] = await Promise.all([
+  const [t, tA, tPush, format, settings, [stats]] = await Promise.all([
     getTranslations('profile'),
     getTranslations('attendance'),
+    getTranslations('push'),
     getFormatter(),
     getSettings(db),
     attendanceStats(db, { userId: user.id }),
   ]);
   const total = stats ? stats.went + stats.maybe + stats.missed : 0;
+  const pushKey = vapidPublicKey();
   const since = format.dateTime(attendanceFrom(), { day: 'numeric', month: 'long', timeZone: settings.timezone });
 
   return (
@@ -55,6 +59,14 @@ export default async function ProfilePage() {
           </>
         )}
       </section>
+      {pushKey && (
+        <section id="notificaciones" aria-labelledby="push-heading" className="card mt-4 scroll-mt-20">
+          <h2 id="push-heading" className="mb-1 text-xl font-extrabold">
+            {tPush('heading')}
+          </h2>
+          <PushSettings publicKey={pushKey} isAdmin={user.role === 'admin'} />
+        </section>
+      )}
       <section aria-labelledby="team-heading" className="card mt-4">
         <h2 id="team-heading" className="mb-3 text-xl font-extrabold">
           {t('teamHeading')}

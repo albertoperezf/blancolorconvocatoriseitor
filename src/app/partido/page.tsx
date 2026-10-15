@@ -3,12 +3,14 @@ import { getTranslations } from 'next-intl/server';
 import { setAttendanceAction } from '@/actions/player';
 import { GuestManager } from '@/components/guest-manager';
 import { MatchHeader } from '@/components/match-header';
+import { PushBanner } from '@/components/push/push-banner';
 import { SquadView } from '@/components/squad-view';
 import { StatusSelector } from '@/components/status-selector';
 import { requireUser } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { ensureCurrentMatch, getSettings, getSquad } from '@/lib/match/queries';
 import { goingCount } from '@/lib/match/squad';
+import { vapidPublicKey } from '@/lib/push/service';
 import { getMyDecision, getMyGuests } from '@/lib/services/player';
 
 export const metadata: Metadata = { title: 'Mi partido' };
@@ -34,6 +36,7 @@ export default async function MatchPage() {
           counts={{ going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length }}
         />
       </div>
+      <PushBanner publicKey={vapidPublicKey()} />
       <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
       <GuestManager guests={guests} />
       <SquadView squad={squad} meId={user.id} ctaHref="#tu-respuesta" />

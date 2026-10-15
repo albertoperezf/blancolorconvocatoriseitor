@@ -141,3 +141,27 @@ export const contactMessages = pgTable('contact_messages', {
   message: varchar({ length: 1000 }).notNull(),
   createdAt: createdAt(),
 });
+
+/** One row per browser/device with avisos enabled; a player can have several. */
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  endpoint: text().primaryKey(),
+  userId: uuid()
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  p256dh: text().notNull(),
+  auth: text().notNull(),
+  createdAt: createdAt(),
+});
+
+/** Makes each scheduled reminder idempotent: at most one send per match and kind. */
+export const reminderSends = pgTable(
+  'reminder_sends',
+  {
+    matchId: uuid()
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    kind: varchar({ length: 20 }).notNull(),
+    sentAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.matchId, t.kind] })],
+);

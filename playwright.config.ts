@@ -1,7 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import webpush from 'web-push';
 
 const PORT = 3100;
 export const E2E_ADMIN = { username: 'E2EADMIN', password: 'e2e-temporary-password' };
+export const E2E_CRON_SECRET = 'e2e-cron-secret';
+const vapid = webpush.generateVAPIDKeys();
 
 // Set PW_CHANNEL=chrome to reuse a locally installed Chrome when the Playwright browser download isn't possible.
 const channel = process.env.PW_CHANNEL || undefined;
@@ -37,6 +40,9 @@ export default defineConfig({
       ADMIN_USERNAME: E2E_ADMIN.username,
       ADMIN_DISPLAY_NAME: 'Admin E2E',
       ADMIN_TEMP_PASSWORD: E2E_ADMIN.password,
+      VAPID_PUBLIC_KEY: vapid.publicKey,
+      VAPID_PRIVATE_KEY: vapid.privateKey,
+      CRON_SECRET: E2E_CRON_SECRET,
       // The seeded past matches predate the real start dates (results 15 Oct, attendance 22 Oct 2026).
       RESULTS_FROM: '2000-01-01T00:00:00Z',
       ATTENDANCE_FROM: '2000-01-01T00:00:00Z',

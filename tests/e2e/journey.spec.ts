@@ -106,6 +106,18 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await player.getByLabel('Juego con').selectOption('blancos');
   await player.getByRole('button', { name: 'Guardar y continuar' }).click();
   await expect(player).toHaveURL(/\/partido$/);
+
+  // Push reminders: Mi partido offers them once; closing the banner is remembered.
+  const banner = player.getByRole('region', { name: 'Notificaciones' });
+  await expect(banner).toContainText('¿Quieres recibir una notificación para que no se te olvide responder?');
+  await expect(banner.getByRole('button', { name: 'Activar notificaciones' })).toBeVisible();
+  await expectNoA11yViolations(player);
+  await banner.getByRole('button', { name: 'Cerrar' }).click();
+  await expect(banner).toHaveCount(0);
+  await player.reload();
+  await expect(player.getByRole('heading', { name: 'Convocatoria' })).toBeVisible();
+  await expect(player.getByRole('region', { name: 'Notificaciones' })).toHaveCount(0);
+
   await player.getByText('DUDA', { exact: true }).click();
   await expect(player.getByRole('region', { name: 'DUDOSITOS' }).getByText(`Nuevo ${suffix}`)).toBeVisible();
 
@@ -138,6 +150,11 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
 
   // The player changes his password: a mismatch keeps the values, success clears and hides them.
   await player.goto('/perfil');
+  const notifications = player.getByRole('region', { name: 'Notificaciones' });
+  await expect(notifications).toContainText('te enviamos una notificación el lunes y el miércoles');
+  await expect(notifications.getByRole('button', { name: 'Activar notificaciones' })).toBeVisible();
+  // Only admins get the test button.
+  await expect(notifications.getByRole('button', { name: 'Enviar notificación de prueba' })).toHaveCount(0);
   // Joined after the seeded past matches, so nothing is counted for him yet.
   await expect(player.getByRole('region', { name: 'Mis partidos' })).toContainText(
     'Todavía no tienes partidos contados',

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { E2E_CRON_SECRET } from '../../playwright.config';
 import { expectNoA11yViolations } from './helpers';
 
 test('public page shows the weekly match, the squad groups and a contact link', async ({ page }) => {
@@ -176,6 +177,20 @@ test('public pages are indexable, private ones are not, and robots/sitemap/OG im
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /\/icon\.svg/);
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', /\/apple-icon/);
   expect((await page.request.get('/favicon.ico')).status()).toBe(404);
+});
+
+test('the reminder job only runs for Vercel Cron and the service worker is served', async ({ request }) => {
+  expect((await request.get('/api/cron/recordatorio')).status()).toBe(401);
+  expect((await request.get('/api/cron/recordatorio', { headers: { authorization: 'Bearer wrong' } })).status()).toBe(
+    401,
+  );
+  const ok = await request.get('/api/cron/recordatorio', { headers: { authorization: `Bearer ${E2E_CRON_SECRET}` } });
+  expect(ok.status()).toBe(200);
+  expect(await ok.json()).toEqual(expect.any(Object));
+
+  const sw = await request.get('/sw.js');
+  expect(sw.status()).toBe(200);
+  expect(await sw.text()).toContain("addEventListener('push'");
 });
 
 test('private pages redirect anonymous visitors to login', async ({ page }) => {

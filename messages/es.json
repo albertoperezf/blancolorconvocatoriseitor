@@ -272,5 +272,32 @@
     "message": "Mensaje",
     "submit": "Enviar",
     "sent": "¡Gracias! Te responderé lo antes posible."
+  },
+  "push": {
+    "heading": "Notificaciones",
+    "intro": "Si aún no has respondido, te enviamos una notificación el lunes y el miércoles antes del partido.",
+    "enable": "Activar notificaciones",
+    "disable": "Desactivar notificaciones",
+    "stateOn": "Notificaciones activadas en este dispositivo.",
+    "stateDenied": "Has bloqueado las notificaciones. Para activarlas, permítelas para esta web en los ajustes del navegador.",
+    "stateUnsupported": "Este navegador no permite notificaciones.",
+    "error": "No se han podido activar las notificaciones. Inténtalo otra vez.",
+    "iosTitle": "En iPhone, las notificaciones solo funcionan desde la pantalla de inicio:",
+    "iosStep1": "Pulsa Compartir y elige «Añadir a pantalla de inicio».",
+    "iosStep2": "Abre Blancolores desde el icono que se ha creado.",
+    "iosStep3": "Vuelve a Perfil y pulsa «Activar notificaciones».",
+    "test": "Enviar notificación de prueba",
+    "testResult": {
+      "sent": "Notificación enviada. Debería llegarte en unos segundos.",
+      "no-devices": "No tienes ningún dispositivo con las notificaciones activadas.",
+      "not-configured": "Las notificaciones no están configuradas en el servidor.",
+      "failed": "No se ha podido enviar la notificación."
+    },
+    "bannerLabel": "Notificaciones",
+    "bannerText": "¿Quieres recibir una notificación para que no se te olvide responder?",
+    "bannerIos": "Cómo activar las notificaciones en iPhone",
+    "bannerClose": "Cerrar",
+    "reminderTitle": "¡Apúntate, anda! ⚽",
+    "reminderBody": "{day} · {time} — {answered, plural, =0 {nadie ha respondido todavía.} one {ya ha respondido # ({going, plural, one {# va} other {# van}}).} other {ya han respondido # ({going, plural, one {# va} other {# van}}).}}"
   }
 }
