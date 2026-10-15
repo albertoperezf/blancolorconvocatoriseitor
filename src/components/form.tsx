@@ -12,6 +12,18 @@ export function useSubmitKeepingValues(dispatch: (formData: FormData) => void) {
   };
 }
 
+export const NOTICE_MS = 15_000;
+
+/** False once `ms` have passed since `trigger` last changed (e.g. a new action state), so notices fade out. */
+export function useAutoHide(trigger: unknown, ms = NOTICE_MS) {
+  const [expired, setExpired] = useState<unknown>(undefined);
+  useEffect(() => {
+    const id = window.setTimeout(() => setExpired(() => trigger), ms);
+    return () => window.clearTimeout(id);
+  }, [trigger, ms]);
+  return expired !== trigger;
+}
+
 /** Resolves a message key from a FormState: tries `errors.<key>` first, then the key itself. */
 export function useMessage() {
   const t = useTranslations();

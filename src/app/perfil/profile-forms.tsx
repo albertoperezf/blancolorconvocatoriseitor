@@ -9,15 +9,16 @@ import {
   updatePositionAction,
   updateTeamAction,
 } from '@/actions/player';
-import { Notice, PasswordField, TeamSelect, useMessage, useSubmitKeepingValues } from '@/components/form';
+import { Notice, PasswordField, TeamSelect, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
 import { PositionIcon } from '@/components/icons';
 import { POSITIONS } from '@/lib/positions';
 
 function Result({ state }: { state: FormState }) {
   const msg = useMessage();
+  const visible = useAutoHide(state);
   return (
     <div role="status" aria-live="polite">
-      {state.status === 'success' && state.message && <Notice tone="success">{msg(state.message)}</Notice>}
+      {state.status === 'success' && state.message && visible && <Notice tone="success">{msg(state.message)}</Notice>}
     </div>
   );
 }
@@ -26,8 +27,9 @@ export function TeamForm({ team }: { team: string | null }) {
   const t = useTranslations('profile');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(updateTeamAction, idle);
+  const onSubmit = useSubmitKeepingValues(formAction);
   return (
-    <form action={formAction} className="flex flex-col gap-3">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3">
       <TeamSelect label={t('team')} defaultValue={team} error={msg(state.errors?.team)} />
       <button type="submit" className="btn-primary self-start" disabled={pending}>
         {t('save')}

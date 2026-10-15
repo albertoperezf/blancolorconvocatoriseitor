@@ -45,12 +45,13 @@ test('visitors can send a message from the contact form', async ({ page }) => {
   await expect(page.getByLabel('Mensaje')).toHaveValue('');
 });
 
-test('the venue address opens in a maps app', async ({ page }) => {
+test('the venue name opens in a maps app', async ({ page }) => {
   await page.goto('/');
-  const link = page.getByRole('link', { name: /José del Hierro, 5/ });
+  const link = page.getByRole('link', { name: /^Polideportivo La Concepción/ });
   await expect(link).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=.*Hierro/);
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(page.locator('main')).not.toContainText('José del Hierro');
 });
 
 test('the match can be added to a calendar from a small menu', async ({ page }) => {
@@ -89,11 +90,16 @@ test('the match can be shared with a ready-made message', async ({ page }) => {
   expect(text).toMatch(/Van \d+/);
 });
 
-test('the squad shows when it was updated and can be refreshed by hand', async ({ page }) => {
+test('the squad shows how old the data is after 10 s and can be refreshed by hand', async ({ page }) => {
+  await page.clock.install();
   await page.goto('/');
-  await expect(page.getByText(/^Actualizado /)).toBeVisible();
-  await page.getByRole('button', { name: 'Actualizar' }).click();
-  await expect(page.getByText(/^Actualizado /)).toBeVisible();
+  const refresh = page.getByRole('button', { name: 'Actualizar' });
+  await expect(refresh).toBeVisible();
+  await expect(page.getByText(/^Actualizado/)).toHaveCount(0);
+  await page.clock.fastForward(20_000);
+  await expect(page.getByText(/^Actualizado hace \d+s$/)).toBeVisible();
+  await refresh.click();
+  await expect(page.getByText(/^Actualizado/)).toHaveCount(0);
 });
 
 test('opening one collapsed group does not open or stretch its neighbour', async ({ page }) => {

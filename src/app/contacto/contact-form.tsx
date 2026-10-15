@@ -4,13 +4,14 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useEffect, useId, useRef } from 'react';
 import { sendContactAction } from '@/actions/contact';
 import { idle } from '@/actions/form-state';
-import { Field, Notice, useMessage, useSubmitKeepingValues } from '@/components/form';
+import { Field, Notice, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
 
 export function ContactForm() {
   const t = useTranslations('contact');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(sendContactAction, idle);
   const onSubmit = useSubmitKeepingValues(formAction);
+  const noticeVisible = useAutoHide(state);
   const formRef = useRef<HTMLFormElement>(null);
   const messageId = useId();
   const errors = state.status === 'error' ? state.errors : undefined;
@@ -63,7 +64,7 @@ export function ContactForm() {
       </button>
       {/* Always rendered so screen readers announce the notice; -mt-4 cancels the gap while it's empty. */}
       <div role="status" aria-live="polite" className="-mt-4">
-        {state.status === 'success' && (
+        {state.status === 'success' && noticeVisible && (
           <div className="mt-4">
             <Notice tone="success">{t('sent')}</Notice>
           </div>

@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useId, useState } from 'react';
 import { updateUserAction } from '@/actions/admin';
 import { idle } from '@/actions/form-state';
-import { Field, Notice, TeamSelect, useMessage } from '@/components/form';
+import { Field, Notice, TeamSelect, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
 
 type User = {
   id: string;
@@ -21,13 +21,15 @@ export function UserForm({ user, isSelf }: { user: User; isSelf: boolean }) {
   const tProfile = useTranslations('profile');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(updateUserAction.bind(null, user.id), idle);
+  const onSubmit = useSubmitKeepingValues(formAction);
+  const noticeVisible = useAutoHide(state);
   const [absent, setAbsent] = useState(user.longTermAbsence);
   const roleId = useId();
   const err = (f: string) => (state.status === 'error' ? msg(state.errors?.[f]) : undefined);
   const check = 'flex min-h-11 cursor-pointer items-center gap-3 font-semibold';
 
   return (
-    <form action={formAction} className="flex flex-col gap-4" noValidate>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <Field
         name="displayName"
         label={t('displayName')}
@@ -70,7 +72,7 @@ export function UserForm({ user, isSelf }: { user: User; isSelf: boolean }) {
         {tProfile('save')}
       </button>
       <div role="status" aria-live="polite">
-        {state.status === 'success' && <Notice tone="success">{msg(state.message)}</Notice>}
+        {state.status === 'success' && noticeVisible && <Notice tone="success">{msg(state.message)}</Notice>}
         {state.status === 'error' && state.message && <Notice tone="error">{msg(state.message)}</Notice>}
       </div>
     </form>

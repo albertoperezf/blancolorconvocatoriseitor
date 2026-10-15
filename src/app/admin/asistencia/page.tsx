@@ -72,7 +72,7 @@ export default async function AttendancePage({ searchParams }: PageProps<'/admin
           </p>
           {/* Focusable so keyboard users can scroll it sideways on narrow screens. */}
           <div role="region" aria-label={t('tableLabel')} tabIndex={0} className="card mt-4 overflow-x-auto p-0 sm:p-0">
-            <table className="w-full min-w-[32rem] text-left text-sm">
+            <table className="w-full text-left text-sm">
               <thead className="border-b border-border">
                 <tr>
                   {columns.map((c, i) => {
@@ -83,7 +83,7 @@ export default async function AttendancePage({ searchParams }: PageProps<'/admin
                         key={c.key}
                         scope="col"
                         aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined}
-                        className={`px-4 py-2 font-semibold ${i > 0 ? 'text-right' : 'sticky left-0 bg-surface'}`}
+                        className={`px-2 py-2 sm:px-4 font-semibold ${i > 0 ? 'text-right' : 'sticky left-0 bg-surface'}`}
                       >
                         <Link
                           href={`/admin/asistencia?orden=${c.key}&dir=${nextDir}`}
@@ -98,7 +98,7 @@ export default async function AttendancePage({ searchParams }: PageProps<'/admin
                       </th>
                     );
                   })}
-                  <th scope="col" className="px-4 py-2 font-semibold">
+                  <th scope="col" className="hidden px-2 py-2 font-semibold sm:table-cell sm:px-4">
                     {t('team')}
                   </th>
                 </tr>
@@ -106,7 +106,7 @@ export default async function AttendancePage({ searchParams }: PageProps<'/admin
               <tbody className="divide-y divide-border">
                 {sortStats(stats, sort).map((s) => (
                   <tr key={s.userId}>
-                    <th scope="row" className="sticky left-0 bg-surface px-4 py-2 font-semibold">
+                    <th scope="row" className="sticky left-0 bg-surface px-2 py-2 sm:px-4 font-semibold">
                       {s.displayName}
                       {s.longTermAbsence && (
                         <span className="ml-2 rounded-full bg-bg px-2 py-0.5 text-xs font-semibold text-muted">
@@ -114,10 +114,12 @@ export default async function AttendancePage({ searchParams }: PageProps<'/admin
                         </span>
                       )}
                     </th>
-                    <td className="px-4 py-2 text-right tabular-nums">{s.went}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{s.maybe}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{s.missed}</td>
-                    <td className="px-4 py-2 text-muted">{s.team ? tTeams(s.team) : tTeams('none')}</td>
+                    <td className="px-2 py-2 sm:px-4 text-right tabular-nums">{s.went}</td>
+                    <td className="px-2 py-2 sm:px-4 text-right tabular-nums">{s.maybe}</td>
+                    <td className="px-2 py-2 sm:px-4 text-right tabular-nums">{s.missed}</td>
+                    <td className="hidden px-2 py-2 text-muted sm:table-cell sm:px-4">
+                      {s.team ? tTeams(s.team) : tTeams('none')}
+                    </td>
                   </tr>
                 ))}
               </tbody>

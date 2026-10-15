@@ -10,6 +10,8 @@
   --color-border: light-dark(#cfd5de, #3a424e);
   --color-brand: light-dark(#0b5cad, #7ab8ff);
   --color-brand-fg: light-dark(#ffffff, #0b1a2c);
+  /* Team white; light mode uses silver because pure white disappears on white cards. */
+  --color-blancos: light-dark(#b8c0cc, #ffffff);
   --color-going: light-dark(#17703a, #6fdc98);
   --color-maybe: light-dark(#8a4b00, #ffc266);
   --color-notgoing: light-dark(#b42318, #ff8f85);
@@ -99,4 +101,29 @@ body {
 }
 @utility label {
   @apply mb-1 block font-semibold;
+}
+
+/* Own chevron (drawn with currentColor so it follows the theme), with the same inset as the text. */
+select.input {
+  appearance: none;
+  padding-right: 2.75rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 1.3rem center,
+    right 1rem center;
+  background-size: 0.3rem 0.3rem;
+  background-repeat: no-repeat;
+}
+
+/* iOS gives date/time inputs an intrinsic width and centred text, overflowing narrow screens. */
+input.input[type='time'],
+input.input[type='date'] {
+  appearance: none;
+  min-width: 0;
+  text-align: left;
+}
+input.input::-webkit-date-and-time-value {
+  text-align: left;
 }

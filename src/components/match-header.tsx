@@ -33,8 +33,6 @@ export async function MatchHeader({
   const mapsUrl = address
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${match.venue}, ${address}`)}`
     : undefined;
-  // Street and number only; the full address still feeds the map search.
-  const shortAddress = address?.split(',').slice(0, 2).join(',').trim();
   const event = matchCalendarEvent(
     match,
     address,
@@ -58,15 +56,13 @@ export async function MatchHeader({
         <MapPinIcon className="mt-0.5 size-5 shrink-0 text-brand" />
         <span>
           <span className="sr-only">{t('venue')}: </span>
-          <span className="font-semibold text-fg">{match.venue}</span>
-          {address && mapsUrl && (
-            <>
-              {' · '}
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="btn-link font-medium">
-                {shortAddress}
-                <span className="sr-only"> ({t('openMap')})</span>
-              </a>
-            </>
+          {mapsUrl ? (
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="btn-link">
+              {match.venue}
+              <span className="sr-only"> ({t('openMap')})</span>
+            </a>
+          ) : (
+            <span className="font-semibold text-fg">{match.venue}</span>
           )}
         </span>
       </p>

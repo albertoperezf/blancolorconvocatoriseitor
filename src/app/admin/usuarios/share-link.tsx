@@ -2,11 +2,13 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useAutoHide } from '@/components/form';
 
 /** Shows a one-time link with copy and WhatsApp share; the link is never stored client-side. */
 export function ShareLink({ name, url }: { name: string; url: string }) {
   const t = useTranslations('admin');
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<number | null>(null);
+  const copiedVisible = useAutoHide(copied);
   const whatsapp = `https://wa.me/?text=${encodeURIComponent(t('whatsappText', { name, url }))}`;
 
   return (
@@ -27,7 +29,7 @@ export function ShareLink({ name, url }: { name: string; url: string }) {
           className="btn-secondary"
           onClick={async () => {
             await navigator.clipboard.writeText(url);
-            setCopied(true);
+            setCopied(Date.now());
           }}
         >
           {t('copy')}
@@ -37,7 +39,7 @@ export function ShareLink({ name, url }: { name: string; url: string }) {
         </a>
       </div>
       <p role="status" aria-live="polite" className="mt-2 min-h-5 text-sm">
-        {copied && t('copied')}
+        {copied !== null && copiedVisible && t('copied')}
       </p>
     </div>
   );

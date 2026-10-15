@@ -25,7 +25,6 @@ export default async function EditUserPage({ params }: PageProps<'/admin/usuario
         ← {t('back')}
       </Link>
       <h1 className="mt-3 text-2xl font-extrabold tracking-tight">{user.displayName}</h1>
-      <p className="text-muted">{user.username}</p>
       <section aria-labelledby="edit-heading" className="card mt-4">
         <h2 id="edit-heading" className="mb-3 text-xl font-extrabold">
           {t('editHeading')}

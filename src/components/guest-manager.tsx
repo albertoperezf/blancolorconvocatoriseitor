@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useEffect, useRef } from 'react';
 import { addGuestAction, removeGuestAction } from '@/actions/player';
 import { idle } from '@/actions/form-state';
-import { Field, useMessage } from './form';
+import { Field, useAutoHide, useMessage } from './form';
 import { XIcon } from './icons';
 
 export function GuestManager({ guests }: { guests: { id: string; name: string }[] }) {
@@ -12,6 +12,7 @@ export function GuestManager({ guests }: { guests: { id: string; name: string }[
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(addGuestAction, idle);
   const formRef = useRef<HTMLFormElement>(null);
+  const noticeVisible = useAutoHide(state);
 
   useEffect(() => {
     if (state.status === 'success') formRef.current?.reset();
@@ -61,7 +62,7 @@ export function GuestManager({ guests }: { guests: { id: string; name: string }[
         </button>
       </form>
       <div role="status" aria-live="polite" className="mt-2 min-h-6 text-sm">
-        {state.status === 'success' && msg(state.message, state.data)}
+        {state.status === 'success' && noticeVisible && msg(state.message, state.data)}
       </div>
     </section>
   );

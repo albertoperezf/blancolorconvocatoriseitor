@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useOptimistic, useState, useTransition } from 'react';
 import type { Decision } from '@/lib/db/schema';
 import { CheckIcon, QuestionIcon, XIcon } from './icons';
+import { useAutoHide } from './form';
 
 type SaveResult = { ok: boolean; error?: string };
 type Props = {
@@ -24,6 +25,8 @@ export function StatusSelector({ initial, onSave }: Props) {
   const [optimistic, setOptimistic] = useOptimistic(saved);
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState<{ text: string; undo?: Decision | null; error?: boolean } | null>(null);
+  const noticeVisible = useAutoHide(notice);
+  const shown = notice && (notice.error || noticeVisible) ? notice : null;
 
   function save(next: Decision | null, previous: Decision | null, offerUndo: boolean) {
     startTransition(async () => {
@@ -67,14 +70,14 @@ export function StatusSelector({ initial, onSave }: Props) {
         </div>
       </fieldset>
       <div role="status" aria-live="polite" aria-atomic="true" className="mt-2 flex min-h-8 items-center gap-3 text-sm">
-        {notice ? (
+        {shown ? (
           <>
-            <span className={notice.error ? 'font-semibold text-danger' : ''}>{notice.text}</span>
-            {notice.undo !== undefined && (
+            <span className={shown.error ? 'font-semibold text-danger' : ''}>{shown.text}</span>
+            {shown.undo !== undefined && (
               <button
                 type="button"
                 className="btn-link"
-                onClick={() => save(notice.undo ?? null, saved, false)}
+                onClick={() => save(shown.undo ?? null, saved, false)}
                 disabled={pending}
               >
                 {t('undo')}

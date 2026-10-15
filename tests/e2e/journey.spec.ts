@@ -117,11 +117,18 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   // Admin marks the player as long-term absent and moves him to Color.
   await page.goto('/admin/usuarios');
   await page.getByRole('link', { name: new RegExp(`Nuevo ${suffix}`) }).click();
+  // The list page also has a "Juego con" select (enrol form); wait for the player's page first.
+  await expect(page.getByRole('heading', { level: 1, name: `Nuevo ${suffix}` })).toBeVisible();
   await page.getByLabel('Juego con').selectOption('color');
   await page.getByLabel('Baja de larga duración').check();
   await page.getByLabel('Nota de la baja (solo admins)').fill('Rodilla');
   await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByText('Cambios guardados.')).toBeVisible();
+  // Saved values stay selected (forms used to reset to the previous team).
+  await expect(page.getByLabel('Juego con')).toHaveValue('color');
+  await expect(page.getByText(`NUEVO${suffix}`, { exact: true })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByLabel('Juego con')).toHaveValue('color');
   await expectNoA11yViolations(page);
 
   // Long-term absent players can still answer; their answer wins over the absence group.
@@ -192,6 +199,7 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await page.getByLabel('Juego con').selectOption('blancos');
   await page.getByRole('button', { name: 'Guardar' }).first().click();
   await expect(page.getByText('Equipo guardado.')).toBeVisible();
+  await expect(page.getByLabel('Juego con')).toHaveValue('blancos');
   await page.goto('/partido');
   await page.getByText('VOY', { exact: true }).click();
   await expect(page.getByRole('region', { name: 'BLANCOS' }).getByText('Admin E2E')).toBeVisible();

@@ -5,18 +5,19 @@ import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 import { requestResetAction } from '@/actions/auth';
 import { idle } from '@/actions/form-state';
-import { Field, Notice, useMessage, useSubmitKeepingValues } from '@/components/form';
+import { Field, Notice, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
 
 export function RecoverForm() {
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(requestResetAction, idle);
   const onSubmit = useSubmitKeepingValues(formAction);
+  const noticeVisible = useAutoHide(state);
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <div role="status" aria-live="polite">
-        {state.status === 'success' && <Notice tone="success">{t('recover.sent')}</Notice>}
+        {state.status === 'success' && noticeVisible && <Notice tone="success">{t('recover.sent')}</Notice>}
       </div>
       <Field
         name="username"

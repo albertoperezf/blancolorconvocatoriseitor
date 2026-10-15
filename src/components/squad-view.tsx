@@ -141,7 +141,7 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
           names={players(squad.blancos)}
           empty={beFirst}
           icon={<ShirtIcon className="size-5" />}
-          accent="border-l-fg/30"
+          accent="border-l-blancos"
         />
         <Group
           {...shared}

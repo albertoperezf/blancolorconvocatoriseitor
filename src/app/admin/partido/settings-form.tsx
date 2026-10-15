@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useId } from 'react';
 import { updateSettingsAction } from '@/actions/admin';
 import { idle } from '@/actions/form-state';
-import { Field, Notice, useMessage } from '@/components/form';
+import { Field, Notice, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
 
 type Settings = { weekday: number; kickoffTime: string; venue: string; address: string; rolloverHours: number };
 
@@ -13,12 +13,14 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   const tProfile = useTranslations('profile');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(updateSettingsAction, idle);
+  const onSubmit = useSubmitKeepingValues(formAction);
+  const noticeVisible = useAutoHide(state);
   const weekdayId = useId();
   const weekdays = t.raw('weekdays') as string[];
   const err = (f: string) => (state.status === 'error' ? msg(state.errors?.[f]) : undefined);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4" noValidate>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <div>
         <label htmlFor={weekdayId} className="label">
           {t('weekday')}
@@ -71,7 +73,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         {tProfile('save')}
       </button>
       <div role="status" aria-live="polite">
-        {state.status === 'success' && <Notice tone="success">{msg(state.message)}</Notice>}
+        {state.status === 'success' && noticeVisible && <Notice tone="success">{msg(state.message)}</Notice>}
       </div>
     </form>
   );

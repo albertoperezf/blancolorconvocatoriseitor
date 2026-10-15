@@ -28,11 +28,17 @@ export function LiveStatus({ renderedAt, intervalMs = 30_000 }: { renderedAt: st
   }, [router, intervalMs]);
 
   const updated = new Date(renderedAt);
-  const ago = now.getTime() - updated.getTime() < 10_000 ? t('justNow') : format.relativeTime(updated, now);
+  // Nothing for the first 10 s (the "Actualizar" link says enough); then a compact "hace 25s" / "hace 2min".
+  const text =
+    now.getTime() - updated.getTime() < 10_000
+      ? null
+      : t('updated', {
+          ago: format.relativeTime(updated, { now, style: 'narrow' }).replace(/(\d)[\s\u00a0\u202f]+/, '$1'),
+        });
 
   return (
     <div className="flex items-center gap-2 text-sm text-muted">
-      <span suppressHydrationWarning>{pending ? t('updating') : t('updated', { ago })}</span>
+      <span suppressHydrationWarning>{pending ? t('updating') : text}</span>
       <button
         type="button"
         onClick={() => startTransition(() => router.refresh())}

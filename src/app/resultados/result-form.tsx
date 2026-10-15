@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 import { saveResultAction } from '@/actions/admin';
 import { idle } from '@/actions/form-state';
-import { Field, useMessage, useSubmitKeepingValues } from '@/components/form';
+import { Field, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
 
 type Props = { matchId: string; legend: string; blancos: number | null; color: number | null };
 
@@ -13,6 +13,7 @@ export function ResultForm({ matchId, legend, blancos, color }: Props) {
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(saveResultAction.bind(null, matchId), idle);
   const onSubmit = useSubmitKeepingValues(formAction);
+  const noticeVisible = useAutoHide(state);
   const err = (f: string) => (state.status === 'error' ? msg(state.errors?.[f]) : undefined);
 
   return (
@@ -49,7 +50,7 @@ export function ResultForm({ matchId, legend, blancos, color }: Props) {
           {t('save')}
         </button>
         <p role="status" aria-live="polite" className="text-sm font-semibold">
-          {state.status === 'success' && <span className="text-going">{msg(state.message)}</span>}
+          {state.status === 'success' && noticeVisible && <span className="text-going">{msg(state.message)}</span>}
           {state.status === 'error' && state.message && <span className="text-danger">{msg(state.message)}</span>}
         </p>
       </div>

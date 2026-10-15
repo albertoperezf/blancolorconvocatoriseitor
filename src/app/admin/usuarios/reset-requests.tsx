@@ -18,9 +18,7 @@ export async function ResetRequests({ requests }: { requests: Request[] }) {
       <ul className="mt-3 divide-y divide-border">
         {requests.map((r) => (
           <li key={r.userId} className="py-3">
-            <p className="font-bold">
-              {r.displayName} <span className="font-normal text-muted">· {r.username}</span>
-            </p>
+            <p className="font-bold">{r.displayName}</p>
             <p className="text-sm text-muted">
               <time dateTime={r.requestedAt.toISOString()}>{format.relativeTime(r.requestedAt, now)}</time>
             </p>
