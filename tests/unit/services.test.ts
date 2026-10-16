@@ -4,7 +4,14 @@ import type { DbHandle } from '@/lib/db/create';
 import { auditLog, users } from '@/lib/db/schema';
 import { ensureCurrentMatch, getSquad } from '@/lib/match/queries';
 import { countUpcomingGuests, enrolUser, listUsers, updateUser } from '@/lib/services/admin';
-import { addGuest, DomainError, getMyDecision, removeGuest, setAttendance } from '@/lib/services/player';
+import {
+  addGuest,
+  DomainError,
+  getMyDecision,
+  removeGuest,
+  setAttendance,
+  setTeamAndPosition,
+} from '@/lib/services/player';
 import { freshDb, insertUser } from './helpers/db';
 
 let h: DbHandle;
@@ -72,6 +79,18 @@ describe('attendance and guests', () => {
     await expect(removeGuest(h.db, colorP.id, guests[0].id)).rejects.toBeInstanceOf(DomainError);
     await removeGuest(h.db, blanco.id, guests[0].id);
     expect((await getSquad(h.db, match.id)).guests).toHaveLength(2);
+  });
+});
+
+describe('profile', () => {
+  it('saves team and position together, and team alone without clearing the position', async () => {
+    const p = await insertUser(h, { username: 'PERFIL', team: 'blancos' });
+    await setTeamAndPosition(h.db, p.id, 'color', 'portero');
+    let [row] = await h.db.select().from(users).where(eq(users.id, p.id));
+    expect(row).toMatchObject({ team: 'color', position: 'portero' });
+    await setTeamAndPosition(h.db, p.id, 'blancos');
+    [row] = await h.db.select().from(users).where(eq(users.id, p.id));
+    expect(row).toMatchObject({ team: 'blancos', position: 'portero' });
   });
 });
 

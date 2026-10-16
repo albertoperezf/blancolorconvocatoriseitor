@@ -6,7 +6,7 @@ import { getSessionToken, requireUser } from '@/lib/auth/current';
 import { changePassword } from '@/lib/auth/service';
 import { invalidateUserSessions } from '@/lib/auth/sessions';
 import { ensureCurrentMatch } from '@/lib/match/queries';
-import { addGuest, DomainError, removeGuest, setAttendance, setPosition, setTeam } from '@/lib/services/player';
+import { addGuest, DomainError, removeGuest, setAttendance, setTeamAndPosition } from '@/lib/services/player';
 import {
   changePasswordSchema,
   decisionSchema,
@@ -59,22 +59,18 @@ export async function removeGuestAction(formData: FormData): Promise<void> {
   refresh();
 }
 
-export async function updateTeamAction(_prev: FormState, formData: FormData): Promise<FormState> {
+export async function updatePlayingAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
   const team = teamSchema.safeParse(formData.get('team'));
-  if (!team.success) return { status: 'error', errors: { team: 'team.required' } };
-  await setTeam(await getDb(), user.id, team.data);
+  const rawPosition = formData.get('position');
+  const position = rawPosition === null ? null : positionSchema.safeParse(rawPosition);
+  const errors: Record<string, string> = {};
+  if (!team.success) errors.team = 'team.required';
+  if (position && !position.success) errors.position = 'position.required';
+  if (!team.success || (position && !position.success)) return { status: 'error', errors };
+  await setTeamAndPosition(await getDb(), user.id, team.data, position?.data);
   refresh();
-  return { status: 'success', message: 'profile.teamSaved' };
-}
-
-export async function updatePositionAction(_prev: FormState, formData: FormData): Promise<FormState> {
-  const user = await requireUser();
-  const position = positionSchema.safeParse(formData.get('position'));
-  if (!position.success) return { status: 'error', errors: { position: 'position.required' } };
-  await setPosition(await getDb(), user.id, position.data);
-  refresh();
-  return { status: 'success', message: 'profile.positionSaved' };
+  return { status: 'success', message: 'profile.playingSaved' };
 }
 
 export async function changePasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {

@@ -189,7 +189,12 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   );
   // No goals yet, so no goals line.
   await expect(player.getByText(/Has marcado/)).toHaveCount(0);
+  // Password and sessions live folded inside "Seguridad".
   const current = player.getByLabel('Contraseña actual');
+  await expect(current).toBeHidden();
+  await player.getByText('Seguridad', { exact: true }).click();
+  await expect(current).toBeVisible();
+  await expect(player.getByRole('button', { name: 'Cerrar otras sesiones' })).toBeVisible();
   const next = player.getByLabel('Nueva contraseña', { exact: true });
   const confirm = player.getByLabel('Repite la nueva contraseña');
   const showNext = player.getByLabel('Mostrar contraseña').nth(1);
@@ -207,16 +212,27 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await confirm.fill('otra contraseña larga');
   await player.getByRole('region', { name: 'Cambiar contraseña' }).getByRole('button', { name: 'Guardar' }).click();
   await expect(player.getByText(/Contraseña cambiada/)).toBeVisible();
+  // Success folds "Seguridad" again and leaves the fields cleared.
+  await expect(current).toBeHidden();
   await expect(next).toHaveValue('');
   await expect(showNext).not.toBeChecked();
   await expect(next).toHaveAttribute('type', 'password');
 
-  // Position: chosen in the profile, shown with its icon next to the name in every squad group.
-  const positionSection = player.getByRole('region', { name: 'Mi posición' });
-  await positionSection.getByText('Portero', { exact: true }).click();
+  // Team and position: folded like "Seguridad"; one save, enabled only after a change.
+  const playing = player.getByRole('region', { name: 'Mi equipo y posición' });
+  const savePlaying = playing.getByRole('button', { name: 'Guardar' });
+  await expect(playing).toContainText('Color · Sin posición');
+  await expect(savePlaying).toBeHidden();
+  await playing.getByText('Mi equipo y posición', { exact: true }).click();
+  await expect(savePlaying).toBeDisabled();
+  await playing.getByText('Portero', { exact: true }).click();
   await expect(player.getByRole('radio', { name: 'Portero' })).toBeChecked();
-  await player.getByRole('region', { name: 'Mi posición' }).getByRole('button', { name: 'Guardar' }).click();
-  await expect(player.getByText('Posición guardada.')).toBeVisible();
+  await expect(playing.getByText('Cambios sin guardar')).toBeVisible();
+  await savePlaying.click();
+  await expect(playing.getByText('Cambios guardados.')).toBeVisible();
+  // Saving folds it again and the row shows the new choice.
+  await expect(savePlaying).toBeHidden();
+  await expect(playing).toContainText('Color · Portero');
   await expectNoA11yViolations(player);
   await player.goto('/');
   await expect(
@@ -243,9 +259,10 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   // Profile: change own team.
   await page.goto('/perfil');
   await expectNoA11yViolations(page);
+  await page.getByText('Mi equipo y posición', { exact: true }).click();
   await page.getByLabel('Juego con').selectOption('blancos');
-  await page.getByRole('button', { name: 'Guardar' }).first().click();
-  await expect(page.getByText('Equipo guardado.')).toBeVisible();
+  await page.getByRole('region', { name: 'Mi equipo y posición' }).getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByText('Cambios guardados.')).toBeVisible();
   await expect(page.getByLabel('Juego con')).toHaveValue('blancos');
   await page.goto('/partido');
   await page.getByText('VOY', { exact: true }).click();
@@ -395,7 +412,8 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
 
   // Leave the shared admin as it started for the next project.
   await page.goto('/perfil');
+  await page.getByText('Mi equipo y posición', { exact: true }).click();
   await page.getByLabel('Juego con').selectOption('color');
-  await page.getByRole('button', { name: 'Guardar' }).first().click();
-  await expect(page.getByText('Equipo guardado.')).toBeVisible();
+  await page.getByRole('region', { name: 'Mi equipo y posición' }).getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByText('Cambios guardados.')).toBeVisible();
 });

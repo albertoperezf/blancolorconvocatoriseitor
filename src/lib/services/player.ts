@@ -59,6 +59,10 @@ export async function setTeam(db: Db, userId: string, team: Team) {
   await db.update(users).set({ team }).where(eq(users.id, userId));
 }
 
-export async function setPosition(db: Db, userId: string, position: Position) {
-  await db.update(users).set({ position }).where(eq(users.id, userId));
+/** Team is always set; position only when given, so players who never picked one can still save their team. */
+export async function setTeamAndPosition(db: Db, userId: string, team: Team, position?: Position) {
+  await db
+    .update(users)
+    .set(position ? { team, position } : { team })
+    .where(eq(users.id, userId));
 }

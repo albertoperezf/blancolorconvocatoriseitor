@@ -8,7 +8,7 @@ import { attendanceFrom, attendanceStats } from '@/lib/match/attendance-stats';
 import { playerGoals } from '@/lib/match/goals';
 import { getSettings } from '@/lib/match/queries';
 import { vapidPublicKey } from '@/lib/push/service';
-import { ChangePasswordForm, CloseSessionsForm, PositionForm, TeamForm } from './profile-forms';
+import { PlayingSection, SecuritySection } from './profile-forms';
 
 export const metadata: Metadata = { title: 'Perfil' };
 
@@ -76,31 +76,8 @@ export default async function ProfilePage() {
           <PushSettings publicKey={pushKey} isAdmin={user.role === 'admin'} />
         </section>
       )}
-      <section aria-labelledby="team-heading" className="card mt-4">
-        <h2 id="team-heading" className="mb-3 text-xl font-extrabold">
-          {t('teamHeading')}
-        </h2>
-        <TeamForm team={user.team} />
-      </section>
-      <section aria-labelledby="position-heading" className="card mt-4">
-        <h2 id="position-heading" className="mb-3 text-xl font-extrabold">
-          {t('positionHeading')}
-        </h2>
-        <PositionForm position={user.position} />
-      </section>
-      <section aria-labelledby="password-heading" className="card mt-4">
-        <h2 id="password-heading" className="mb-3 text-xl font-extrabold">
-          {t('passwordHeading')}
-        </h2>
-        <ChangePasswordForm username={user.username} />
-      </section>
-      <section aria-labelledby="sessions-heading" className="card mt-4">
-        <h2 id="sessions-heading" className="text-xl font-extrabold">
-          {t('sessionsHeading')}
-        </h2>
-        <p className="mt-1 mb-3 text-muted">{t('sessionsHint')}</p>
-        <CloseSessionsForm />
-      </section>
+      <PlayingSection team={user.team} position={user.position} />
+      <SecuritySection username={user.username} />
     </div>
   );
 }
