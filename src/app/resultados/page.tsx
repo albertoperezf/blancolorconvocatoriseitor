@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
-import { ShirtIcon } from '@/components/icons';
+import { BallIcon, ShirtIcon } from '@/components/icons';
 import { getCurrentUser } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
+import type { Team } from '@/lib/db/schema';
+import { buildScorerColumns, listMatchScorers, scorerCandidates, topScorers } from '@/lib/match/goals';
 import { getSettings } from '@/lib/match/queries';
 import { listPlayedMatches, matchWinner, seasonSummary, type Winner } from '@/lib/match/results';
 import { ResultForm } from './result-form';
@@ -21,15 +23,22 @@ const BADGE: Record<Winner, string> = {
 
 export default async function ResultsPage() {
   const db = await getDb();
-  const [t, format, user, settings, played] = await Promise.all([
+  const [t, format, user, settings, played, pichichi] = await Promise.all([
     getTranslations('results'),
     getFormatter(),
     getCurrentUser(),
     getSettings(db),
     listPlayedMatches(db),
+    topScorers(db),
   ]);
   const isAdmin = user?.role === 'admin';
   const summary = seasonSummary(played);
+  const matchIds = played.map((m) => m.id);
+  const [scorers, candidates] = await Promise.all([
+    listMatchScorers(db, matchIds),
+    isAdmin ? scorerCandidates(db, matchIds) : null,
+  ]);
+  const scorersFor = (matchId: string, team: Team) => scorers.filter((s) => s.matchId === matchId && s.team === team);
 
   return (
     <>
@@ -63,6 +72,28 @@ export default async function ResultsPage() {
               </div>
             ))}
           </dl>
+        </section>
+      )}
+      {pichichi.length > 0 && (
+        <section aria-labelledby="pichichi-heading" className="card mt-4">
+          <h2 id="pichichi-heading" className="flex items-center gap-2 font-extrabold">
+            <BallIcon className="size-5 text-brand" />
+            {t('pichichiHeading')}
+          </h2>
+          <p className="mt-1 text-sm text-muted">{t('pichichiIntro')}</p>
+          <ol className="mt-3 flex flex-col gap-1">
+            {pichichi.map((p) => (
+              <li key={p.userId} className="flex min-h-10 items-center gap-3 rounded-lg bg-bg px-3">
+                <span className="w-5 text-center font-extrabold text-muted tabular-nums">{p.rank}</span>
+                <ShirtIcon
+                  filled={p.team === 'color'}
+                  className={`size-5 shrink-0 ${p.team === 'color' ? 'text-brand' : ''} ${p.team ? '' : 'opacity-0'}`}
+                />
+                <span className="min-w-0 flex-1 truncate font-bold">{p.name}</span>
+                <span className="font-extrabold tabular-nums">{t('goalsCount', { count: p.goals })}</span>
+              </li>
+            ))}
+          </ol>
         </section>
       )}
       {played.length === 0 ? (
@@ -111,12 +142,31 @@ export default async function ResultsPage() {
                     </span>
                   </p>
                 )}
-                {isAdmin && (
+                {hasResult && scorers.some((s) => s.matchId === m.id) && (
+                  <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+                    {(['blancos', 'color'] as const).map((team) => {
+                      const list = scorersFor(m.id, team);
+                      return (
+                        <p key={team} className={team === 'blancos' ? 'text-right' : 'text-left'}>
+                          {list.length > 0 && (
+                            <>
+                              <span className="sr-only">{t('scorersOf', { team: t(`winner.${team}`) })}: </span>
+                              <BallIcon className="mr-1 inline size-4 align-[-0.15em] text-muted" />
+                              {list.map((s) => (s.goals > 1 ? `${s.name} ×${s.goals}` : s.name)).join(', ')}
+                            </>
+                          )}
+                        </p>
+                      );
+                    })}
+                  </div>
+                )}
+                {isAdmin && candidates && (
                   <ResultForm
                     matchId={m.id}
                     legend={t('legend', { date })}
                     blancos={m.blancosGoals}
                     color={m.colorGoals}
+                    scorers={buildScorerColumns(m.id, candidates, scorers)}
                   />
                 )}
               </li>

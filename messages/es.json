@@ -109,7 +109,21 @@
     "summaryHeading": "Temporada: {count, plural, one {# partido} other {# partidos}}",
     "summaryBlancos": "Gana Blancos",
     "summaryColor": "Gana Color",
-    "summaryDraw": "Empates"
+    "summaryDraw": "Empates",
+    "scorersHeading": "Goleadores",
+    "scorersOf": "Goleadores de {team}",
+    "assigned": "{assigned} de {total}",
+    "assignedLong": "{assigned} de {total} goles asignados",
+    "guestTag": "inv.",
+    "addGoal": "Añadir un gol a {name}",
+    "removeGoal": "Quitar un gol a {name}",
+    "goalsOf": "Goles de {name}",
+    "addPlayer": "Añadir otro jugador…",
+    "addPlayerTo": "Añadir otro jugador a {team}",
+    "noCandidates": "Nadie dijo VOY con este equipo. Añade a quien haya jugado.",
+    "pichichiHeading": "Pichichi",
+    "pichichiIntro": "Máximos goleadores de la temporada (sin contar invitados).",
+    "goalsCount": "{count, plural, one {# gol} other {# goles}}"
   },
   "recover": {
     "title": "He olvidado mi contraseña",
@@ -158,6 +172,7 @@
   },
   "attendance": {
     "profileHeading": "Mis partidos",
+    "myGoals": "{count, plural, one {Has marcado # gol} other {Has marcado # goles}} esta temporada.",
     "went": "He ido",
     "maybe": "Dudoso",
     "missed": "No he ido",
@@ -262,7 +277,11 @@
     },
     "displayName": { "min": "Mínimo 2 caracteres.", "max": "Máximo 40 caracteres." },
     "settings": { "time": "Formato HH:MM." },
-    "result": { "required": "Pon los goles de este equipo.", "goals": "Entre 0 y 99 goles." },
+    "result": {
+      "required": "Pon los goles de este equipo.",
+      "goals": "Entre 0 y 99 goles.",
+      "tooManyScorers": "Hay más goles asignados a goleadores que goles en el marcador."
+    },
     "required": "Campo obligatorio."
   },
   "footer": {

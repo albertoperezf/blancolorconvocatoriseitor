@@ -6,8 +6,15 @@ import { appOrigin, requireAdmin } from '@/lib/auth/current';
 import { createResetToken } from '@/lib/auth/service';
 import { DomainError } from '@/lib/services/player';
 import { dismissResetRequest, enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
-import { adminUpdateUserSchema, enrolSchema, fieldErrors, resultSchema, settingsSchema } from '@/lib/validators';
-import { setMatchResult } from '@/lib/match/results';
+import {
+  adminUpdateUserSchema,
+  enrolSchema,
+  fieldErrors,
+  parseScorers,
+  resultSchema,
+  settingsSchema,
+} from '@/lib/validators';
+import { saveMatchResult, scorerExcess } from '@/lib/match/goals';
 import type { FormState } from './form-state';
 
 const optional = (v: FormDataEntryValue | null) => (v === null || v === '' ? undefined : v);
@@ -92,8 +99,13 @@ export async function saveResultAction(matchId: string, _prev: FormState, formDa
   const admin = await requireAdmin();
   const parsed = resultSchema.safeParse({ blancos: formData.get('blancos') ?? '', color: formData.get('color') ?? '' });
   if (!parsed.success) return { status: 'error', errors: fieldErrors(parsed.error) };
+  const scorers = parseScorers(formData.get('scorers'));
+  if (!scorers) return { status: 'error', message: 'errors.generic' };
+  if (scorerExcess(parsed.data, scorers).length > 0) {
+    return { status: 'error', errors: { scorers: 'result.tooManyScorers' } };
+  }
   try {
-    await setMatchResult(await getDb(), admin.id, matchId, parsed.data);
+    await saveMatchResult(await getDb(), admin.id, matchId, parsed.data, scorers);
   } catch (e) {
     if (e instanceof DomainError) return { status: 'error', message: 'errors.generic' };
     throw e;

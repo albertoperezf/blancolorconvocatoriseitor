@@ -82,6 +82,28 @@ const goalsSchema = z
 
 export const resultSchema = z.object({ blancos: goalsSchema, color: goalsSchema });
 
+export const scorersSchema = z
+  .array(
+    z.object({
+      team: teamSchema,
+      kind: z.enum(['user', 'guest']),
+      id: z.uuid(),
+      goals: z.number().int().min(1).max(99),
+    }),
+  )
+  .max(100);
+
+/** The scorers form field carries JSON; anything malformed is null. */
+export function parseScorers(value: FormDataEntryValue | null) {
+  if (typeof value !== 'string') return null;
+  try {
+    const parsed = scorersSchema.safeParse(JSON.parse(value));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+
 export const contactSchema = z.object({
   name: z.string().trim().min(2, 'contact.name').max(60, 'contact.name'),
   email: z.string().trim().max(120, 'contact.email').pipe(z.email('contact.email')),

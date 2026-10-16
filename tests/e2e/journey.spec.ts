@@ -171,6 +171,8 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(player.getByRole('region', { name: 'Mis partidos' })).toContainText(
     'Todavía no tienes partidos contados',
   );
+  // No goals yet, so no goals line.
+  await expect(player.getByText(/Has marcado/)).toHaveCount(0);
   const current = player.getByLabel('Contraseña actual');
   const next = player.getByLabel('Nueva contraseña', { exact: true });
   const confirm = player.getByLabel('Repite la nueva contraseña');
@@ -263,7 +265,11 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   // Results: admins record and correct scores; the winner is derived; players only read them.
   await page.getByRole('link', { name: 'Resultados' }).click();
   await expect(page).toHaveURL(/\/resultados$/);
-  const latest = page.locator('main li').first();
+  // The Pichichi list also has <li>s; the match cards are the ones with a form for admins.
+  const latest = page
+    .locator('main li')
+    .filter({ has: page.getByRole('button', { name: 'Guardar' }) })
+    .first();
   await latest.getByLabel('Goles de Blancos').fill('3');
   await latest.getByLabel('Goles de Color').fill('');
   await latest.getByRole('button', { name: 'Guardar' }).click();
@@ -284,10 +290,45 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(page.getByRole('region', { name: /^Temporada/ })).toContainText('Empates');
   await expectNoA11yViolations(page);
 
+  // Scorers: per-player counters. Nobody answered this seeded match, so scorers come from the dropdown.
+  const scorersBox = latest.locator('details', { hasText: 'Goleadores' });
+  if (!(await scorersBox.evaluate((d: HTMLDetailsElement) => d.open))) await scorersBox.locator('summary').click();
+  // The other project's run may have left scorers on this match; start from zero.
+  const minus = latest.locator('button:enabled', { hasText: '−' });
+  while ((await minus.count()) > 0) await minus.first().click();
+  const scorer = `Nuevo ${suffix}`;
+  await latest.getByLabel('Añadir otro jugador a Blancos').selectOption({ label: scorer });
+  await latest.getByRole('button', { name: `Añadir un gol a ${scorer}` }).click();
+  await latest.getByRole('button', { name: `Añadir un gol a ${scorer}` }).click();
+  const adminPlus = latest.getByRole('button', { name: 'Añadir un gol a Admin E2E' });
+  if ((await adminPlus.count()) > 0) await adminPlus.click();
+  else await latest.getByLabel('Añadir otro jugador a Color').selectOption({ label: 'Admin E2E' });
+  await expect(scorersBox.locator('summary')).toContainText('4 de 4 goles asignados');
+  await expect(scorersBox).toContainText('3 de 2');
+  await latest.getByRole('button', { name: 'Guardar' }).click();
+  await expect(latest.getByText('Hay más goles asignados a goleadores que goles en el marcador.')).toBeVisible();
+  await latest.getByRole('button', { name: `Quitar un gol a ${scorer}` }).click();
+  await expect(scorersBox.locator('summary')).toContainText('3 de 4 goles asignados');
+  await latest.getByRole('button', { name: 'Guardar' }).click();
+  await expect(latest.getByRole('status')).toHaveText('Resultado guardado.');
+  await expect(latest).toContainText(`${scorer} ×2`);
+  await expectNoA11yViolations(page);
+  await page.reload();
+  const pichichi = page.getByRole('region', { name: 'Pichichi' });
+  await expect(pichichi.getByRole('listitem').filter({ hasText: scorer })).toContainText('2 goles');
+  await expect(pichichi.getByRole('listitem').filter({ hasText: 'Admin E2E' })).toContainText('1 gol');
+
   await player.goto('/resultados');
-  await expect(player.locator('main li').first()).toContainText('Resultado: Empate');
+  await expect(player.locator('main li', { hasText: 'Resultado:' }).first()).toContainText('Resultado: Empate');
+  await expect(player.locator('main li', { hasText: 'Resultado:' }).first()).toContainText(`Nuevo ${suffix} ×2`);
   await expect(player.getByRole('button', { name: 'Guardar' })).toHaveCount(0);
+  await expect(player.getByRole('button', { name: /Añadir un gol/ })).toHaveCount(0);
   await expectNoA11yViolations(player);
+  // A player who has scored sees it in Perfil.
+  await player.goto('/perfil');
+  await expect(player.getByRole('region', { name: 'Mis partidos' })).toContainText(
+    'Has marcado 2 goles esta temporada.',
+  );
 
   // Attendance: admins see every player's numbers, sortable by column; players can't open it.
   await page.goto('/admin');

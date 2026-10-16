@@ -1,5 +1,7 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
+  check,
   integer,
   pgEnum,
   pgTable,
@@ -8,6 +10,7 @@ import {
   smallint,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -100,6 +103,27 @@ export const guests = pgTable('guests', {
   name: varchar({ length: 30 }).notNull(),
   createdAt: createdAt(),
 });
+
+export const matchGoals = pgTable(
+  'match_goals',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    matchId: uuid()
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    // The side the goals counted for, fixed at the time so later team changes don't rewrite history.
+    team: teamEnum().notNull(),
+    userId: uuid().references(() => users.id, { onDelete: 'cascade' }),
+    guestId: uuid().references(() => guests.id, { onDelete: 'cascade' }),
+    goals: smallint().notNull(),
+  },
+  (t) => [
+    unique().on(t.matchId, t.team, t.userId),
+    unique().on(t.matchId, t.team, t.guestId),
+    check('match_goals_one_scorer', sql`(${t.userId} is null) <> (${t.guestId} is null)`),
+    check('match_goals_positive', sql`${t.goals} > 0`),
+  ],
+);
 
 export const faqs = pgTable('faqs', {
   id: serial().primaryKey(),

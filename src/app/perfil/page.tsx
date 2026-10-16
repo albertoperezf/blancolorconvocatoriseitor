@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { requireUser } from '@/lib/auth/current';
+import { BallIcon } from '@/components/icons';
 import { PushSettings } from '@/components/push/push-settings';
 import { getDb } from '@/lib/db';
 import { attendanceFrom, attendanceStats } from '@/lib/match/attendance-stats';
+import { playerGoals } from '@/lib/match/goals';
 import { getSettings } from '@/lib/match/queries';
 import { vapidPublicKey } from '@/lib/push/service';
 import { ChangePasswordForm, CloseSessionsForm, PositionForm, TeamForm } from './profile-forms';
@@ -19,13 +21,14 @@ const STATS = [
 export default async function ProfilePage() {
   const user = await requireUser();
   const db = await getDb();
-  const [t, tA, tPush, format, settings, [stats]] = await Promise.all([
+  const [t, tA, tPush, format, settings, [stats], goals] = await Promise.all([
     getTranslations('profile'),
     getTranslations('attendance'),
     getTranslations('push'),
     getFormatter(),
     getSettings(db),
     attendanceStats(db, { userId: user.id }),
+    playerGoals(db, user.id),
   ]);
   const total = stats ? stats.went + stats.maybe + stats.missed : 0;
   const pushKey = vapidPublicKey();
@@ -57,6 +60,12 @@ export default async function ProfilePage() {
             </dl>
             <p className="mt-2 text-sm text-muted">{tA('basis')}</p>
           </>
+        )}
+        {goals > 0 && (
+          <p className="mt-3 flex items-center gap-2 rounded-xl bg-bg px-3 py-2 font-bold">
+            <BallIcon className="size-5 shrink-0 text-brand" />
+            {tA('myGoals', { count: goals })}
+          </p>
         )}
       </section>
       {pushKey && (

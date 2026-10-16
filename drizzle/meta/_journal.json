@@ -57,6 +57,13 @@
       "when": 1792070996493,
       "tag": "0007_guest_permission",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792134903365,
+      "tag": "0008_match_goals",
+      "breakpoints": true
     }
   ]
 }
