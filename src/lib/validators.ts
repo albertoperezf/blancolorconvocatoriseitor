@@ -82,6 +82,12 @@ const goalsSchema = z
 
 export const resultSchema = z.object({ blancos: goalsSchema, color: goalsSchema });
 
+/** Answer sent by the service worker from a reminder's "Voy" / "No voy" buttons. */
+export const pushAnswerSchema = z.object({
+  decision: z.enum(['going', 'not_going']),
+  matchId: z.uuid(),
+});
+
 export const scorersSchema = z
   .array(
     z.object({

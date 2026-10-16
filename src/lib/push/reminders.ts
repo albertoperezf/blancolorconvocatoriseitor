@@ -8,7 +8,10 @@ import { sendToSubscriptions, subscriptionsFor, type PushPayload, type PushSende
 
 export type ReminderKind = 'monday' | 'wednesday';
 export type ReminderCounts = { answered: number; going: number };
-export type ComposeReminder = (match: Match, counts: ReminderCounts) => Promise<Pick<PushPayload, 'title' | 'body'>>;
+export type ComposeReminder = (
+  match: Match,
+  counts: ReminderCounts,
+) => Promise<Pick<PushPayload, 'title' | 'body' | 'actions' | 'confirm'>>;
 
 const DAY_MS = 86_400_000;
 // Monday 10:00 → Thursday 20:30 is ~3.4 days; anything further away is not "this week's" match.
@@ -39,7 +42,7 @@ export async function reminderCounts(db: Db, matchId: string): Promise<ReminderC
 
 export async function reminderPayload(db: Db, match: Match, compose: ComposeReminder): Promise<PushPayload> {
   const text = await compose(match, await reminderCounts(db, match.id));
-  return { ...text, url: '/partido', tag: `reminder-${match.id}` };
+  return { ...text, url: '/partido', tag: `reminder-${match.id}`, matchId: match.id };
 }
 
 /** Called by the cron job: on Mondays and Wednesdays, nudges players who haven't answered yet (once per day kind). */

@@ -191,6 +191,12 @@ test('the reminder job only runs for Vercel Cron and the service worker is serve
   const sw = await request.get('/sw.js');
   expect(sw.status()).toBe(200);
   expect(await sw.text()).toContain("addEventListener('push'");
+
+  // Answering from a notification needs the app's own origin and a session.
+  const data = { decision: 'going', matchId: '00000000-0000-4000-8000-000000000000' };
+  expect((await request.post('/api/asistencia', { data })).status()).toBe(403);
+  const origin = new URL(test.info().project.use.baseURL!).origin;
+  expect((await request.post('/api/asistencia', { data, headers: { origin } })).status()).toBe(401);
 });
 
 test('private pages redirect anonymous visitors to login', async ({ page }) => {

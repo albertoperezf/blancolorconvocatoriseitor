@@ -17,6 +17,8 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   browser,
   baseURL,
 }, info) => {
+  // One long end-to-end walk through the whole app (~40 s); the 30 s default is too tight for it.
+  test.setTimeout(120_000);
   const suffix = info.project.name.toUpperCase();
 
   // First login forces password + team; the second project finds the admin already onboarded.
@@ -78,9 +80,21 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
 
   // Guests are allowed even when not going.
   const guest = `Íñigo ${suffix.slice(0, 3)}`;
+  // The add-guest form is folded behind "＋ Añadir fichaje" and opens with the name field focused.
+  await expect(page.getByLabel('Nombre del fichaje')).toBeHidden();
+  await page.getByRole('button', { name: 'Añadir fichaje' }).click();
+  await expect(page.getByLabel('Nombre del fichaje')).toBeFocused();
+  // Esc folds it again; it reopens focused.
+  await page.keyboard.press('Escape');
+  await expect(page.getByLabel('Nombre del fichaje')).toBeHidden();
+  await page.getByRole('button', { name: 'Añadir fichaje' }).click();
+  await expect(page.getByLabel('Nombre del fichaje')).toBeFocused();
   await page.getByLabel('Nombre del fichaje').fill(guest);
   await page.getByRole('button', { name: 'Añadir', exact: true }).click();
   await expect(page.getByRole('region', { name: 'INVITADOS' }).getByText(guest)).toBeVisible();
+  // Measure contrast at rest: pointer off the just-clicked button and the form fully faded in.
+  await page.mouse.move(0, 0);
+  await expect(page.locator('#guest-form').locator('xpath=../..')).toHaveCSS('opacity', '1');
   await expectNoA11yViolations(page);
   await page.getByRole('button', { name: `Quitar a ${guest}` }).click();
   await expect(page.getByRole('region', { name: 'INVITADOS' }).getByText(guest)).toHaveCount(0);
@@ -234,7 +248,10 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(savePlaying).toBeHidden();
   await expect(playing).toContainText('Color · Portero');
   await expectNoA11yViolations(player);
+  // Logged-in players skip the public home and land on Mi partido (no separate menu item for it).
   await player.goto('/');
+  await expect(player).toHaveURL(/\/partido$/);
+  await expect(player.getByRole('banner').getByRole('link', { name: 'Mi partido' })).toHaveCount(0);
   await expect(
     player
       .getByRole('region', { name: 'DUDOSITOS' })
@@ -242,19 +259,17 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
       .filter({ hasText: `Nuevo ${suffix}` }),
   ).toContainText(`Nuevo ${suffix} (tú), Portero`);
 
-  // Hovering the icon shows the position; the home CTA reflects the player's answer.
+  // Hovering (or tapping) the icon shows the position.
   const chip = player
     .getByRole('region', { name: 'DUDOSITOS' })
     .getByRole('listitem')
     .filter({ hasText: `Nuevo ${suffix}` });
   const icon = chip.locator('.cursor-help');
+  // Keep the chip clear of the fixed answer bar at the bottom on phones.
+  await icon.evaluate((el) => el.scrollIntoView({ block: 'center' }));
   if (info.project.name === 'mobile') await icon.tap();
   else await icon.hover();
   await expect(chip.getByText('Portero', { exact: true })).toBeVisible();
-  await expect(player.getByText('Tu respuesta: DUDA')).toBeVisible();
-  await expect(player.getByRole('link', { name: 'Cambiar mi respuesta' })).toBeVisible();
-  await player.getByRole('link', { name: 'Cambiar mi respuesta' }).click();
-  await expect(player.getByRole('link', { name: 'Mi partido' })).toHaveAttribute('aria-current', 'page');
 
   // Profile: change own team.
   await page.goto('/perfil');
@@ -298,11 +313,14 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   // Results: admins record and correct scores; the winner is derived; players only read them.
   await page.getByRole('link', { name: 'Resultados' }).click();
   await expect(page).toHaveURL(/\/resultados$/);
-  // The Pichichi list also has <li>s; the match cards are the ones with a form for admins.
+  // The Pichichi list also has <li>s; the match cards are the ones with an edit toggle for admins.
   const latest = page
     .locator('main li')
-    .filter({ has: page.getByRole('button', { name: 'Guardar' }) })
+    .filter({ has: page.getByRole('button', { name: /^(Editar|Poner) resultado/ }) })
     .first();
+  // Folded unless it's the newest match still without a result (the other project may have filled it).
+  const editToggle = latest.getByRole('button', { name: /^(Editar|Poner) resultado/ });
+  if ((await editToggle.getAttribute('aria-expanded')) !== 'true') await editToggle.click();
   await latest.getByLabel('Goles de Blancos').fill('3');
   await latest.getByLabel('Goles de Color').fill('');
   await latest.getByRole('button', { name: 'Guardar' }).click();
@@ -411,6 +429,17 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(player).toHaveURL(/\/partido$/);
 
   // Leave the shared admin as it started for the next project.
+  // (First: the reminder's "Voy" / "No voy" buttons answer through this endpoint, same-origin only.)
+  await player.goto('/partido');
+  const matchId = await player.locator('[data-match-id]').getAttribute('data-match-id');
+  const answer = (origin: string) =>
+    player.request.post('/api/asistencia', { data: { decision: 'not_going', matchId }, headers: { origin } });
+  expect((await answer('https://evil.example')).status()).toBe(403);
+  expect((await answer(new URL(baseURL!).origin)).status()).toBe(204);
+  await player.reload();
+  await expect(
+    player.getByRole('region', { name: 'MARIQUITAS QUE NO VAN' }).getByText(`Nuevo ${suffix}`),
+  ).toBeVisible();
   await page.goto('/perfil');
   await page.getByText('Mi equipo y posición', { exact: true }).click();
   await page.getByLabel('Juego con').selectOption('color');

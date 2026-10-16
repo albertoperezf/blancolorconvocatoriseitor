@@ -37,7 +37,9 @@ export default async function MatchPage() {
         />
       </div>
       <PushBanner publicKey={vapidPublicKey()} />
-      <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
+      <div data-match-id={match.id} className="contents">
+        <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
+      </div>
       {user.canBringGuests && <GuestManager guests={guests} />}
       <SquadView squad={squad} meId={user.id} ctaHref="#tu-respuesta" />
       {/* Room for the fixed status bar on mobile. */}

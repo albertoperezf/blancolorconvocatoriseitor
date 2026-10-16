@@ -40,22 +40,37 @@ type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   name: string;
   error?: string;
   hint?: string;
+  /** Short hints can sit on the label's line instead of between the label and the input. */
+  hintInline?: boolean;
 };
 
-export function Field({ label, name, error, hint, id, ...input }: FieldProps) {
+export function Field({ label, name, error, hint, hintInline = false, id, ...input }: FieldProps) {
   const autoId = useId();
   const inputId = id ?? `${name}-${autoId}`;
   const hintId = hint ? `${inputId}-hint` : undefined;
   const errorId = error ? `${inputId}-error` : undefined;
   return (
     <div>
-      <label htmlFor={inputId} className="label">
-        {label}
-      </label>
-      {hint && (
-        <p id={hintId} className="mb-1 text-sm text-muted">
-          {hint}
-        </p>
+      {hint && hintInline ? (
+        <div className="mb-2.5 flex flex-wrap items-baseline gap-x-2">
+          <label htmlFor={inputId} className="font-semibold">
+            {label}
+          </label>
+          <p id={hintId} className="text-sm text-muted">
+            {hint}
+          </p>
+        </div>
+      ) : (
+        <>
+          <label htmlFor={inputId} className="label">
+            {label}
+          </label>
+          {hint && (
+            <p id={hintId} className="mb-1 text-sm text-muted">
+              {hint}
+            </p>
+          )}
+        </>
       )}
       <input
         id={inputId}

@@ -20,6 +20,11 @@ export function composeReminder(timezone: string): ComposeReminder {
         answered: counts.answered,
         going: counts.going,
       }),
+      actions: [
+        { action: 'going', title: t('actionGoing') },
+        { action: 'not_going', title: t('actionNotGoing') },
+      ],
+      confirm: { going: t('confirmGoing'), not_going: t('confirmNotGoing') },
     };
   };
 }

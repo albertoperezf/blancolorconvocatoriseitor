@@ -33,9 +33,7 @@
     "opensNewTab": "se abre en una pestaña nueva",
     "eventTitle": "Partido Blancolores",
     "eventDescription": "Di si vas, dudas o no vas: {url}",
-    "answerCta": "Apúntate al partido",
-    "changeCta": "Cambiar mi respuesta",
-    "yourAnswer": "Tu respuesta: <strong>{status}</strong>"
+    "answerCta": "Apúntate al partido"
   },
   "squad": {
     "heading": "Quién va",
@@ -75,8 +73,10 @@
   "guests": {
     "heading": "Mis fichajes",
     "label": "Nombre del fichaje",
-    "hint": "Entre 2 y 30 letras.",
+    "hint": "De 2 a 30 letras",
     "add": "Añadir",
+    "addToggle": "Añadir fichaje",
+    "cancel": "Cancelar",
     "remove": "Quitar a {name}",
     "empty": "No has traído a nadie.",
     "added": "{name} añadido.",
@@ -106,6 +106,8 @@
     "colorGoals": "Goles de Color",
     "save": "Guardar",
     "saved": "Resultado guardado.",
+    "edit": "Editar resultado",
+    "enter": "Poner resultado",
     "summaryHeading": "Temporada: {count, plural, one {# partido} other {# partidos}}",
     "summaryBlancos": "Gana Blancos",
     "summaryColor": "Gana Color",
@@ -140,6 +142,7 @@
   },
   "profile": {
     "title": "Perfil",
+    "logout": "Cerrar sesión",
     "playingHeading": "Mi equipo y posición",
     "team": "Juego con",
     "position": "Juego de",
@@ -312,9 +315,11 @@
     "stateUnsupported": "Este navegador no permite notificaciones.",
     "error": "No se han podido activar las notificaciones. Inténtalo otra vez.",
     "iosTitle": "En iPhone, las notificaciones solo funcionan desde la pantalla de inicio:",
-    "iosStep1": "Pulsa Compartir y elige «Añadir a pantalla de inicio».",
+    "iosStep1": "Pulsa <share></share> Compartir y elige «Añadir a pantalla de inicio».",
+    "iosShareIcon": "(icono de compartir)",
     "iosStep2": "Abre Blancolores desde el icono que se ha creado.",
     "iosStep3": "Vuelve a Perfil y pulsa «Activar notificaciones».",
+    "iosStep3Banner": "En Mi partido verás este aviso con el botón «Activar notificaciones».",
     "test": "Enviar notificación de prueba",
     "testResult": {
       "sent": "Notificación enviada. Debería llegarte en unos segundos.",
@@ -324,9 +329,12 @@
     },
     "bannerLabel": "Notificaciones",
     "bannerText": "¿Quieres recibir una notificación para que no se te olvide responder?",
-    "bannerIos": "Cómo activar las notificaciones en iPhone",
     "bannerClose": "Cerrar",
     "reminderTitle": "¡Apúntate, anda! ⚽",
+    "actionGoing": "✅ Voy",
+    "actionNotGoing": "❌ No voy",
+    "confirmGoing": "Apuntado: VOY. ¡Nos vemos en el partido!",
+    "confirmNotGoing": "Apuntado: NO VOY. ¡Otra vez será!",
     "reminderBody": "{day} · {time} — {answered, plural, =0 {nadie ha respondido todavía.} one {ya ha respondido # ({going, plural, one {# va} other {# van}}).} other {ya han respondido # ({going, plural, one {# va} other {# van}}).}}"
   }
 }

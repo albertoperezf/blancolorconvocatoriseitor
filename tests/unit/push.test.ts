@@ -70,7 +70,12 @@ describe('runReminder', () => {
     const result = await runReminder(h.db, { now: MONDAY, send, compose });
     expect(result).toEqual({ kind: 'monday', sent: 1, failed: 0, removed: 1 });
     expect(calls.map((c) => c.endpoint).sort()).toEqual([sub('pending-gone').endpoint, sub('pending-phone').endpoint]);
-    expect(calls[0].payload).toMatchObject({ title: 'Recordatorio', body: 'respondido 1, van 2', url: '/partido' });
+    expect(calls[0].payload).toMatchObject({
+      title: 'Recordatorio',
+      body: 'respondido 1, van 2',
+      url: '/partido',
+      matchId: expect.any(String),
+    });
     const remaining = await h.db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, ids.pending));
     expect(remaining.map((s) => s.endpoint)).toEqual([sub('pending-phone').endpoint]);
   });

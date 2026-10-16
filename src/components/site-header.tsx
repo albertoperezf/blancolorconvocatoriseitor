@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { logoutAction } from '@/actions/auth';
 import { getCurrentUser } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { countResetRequests } from '@/lib/services/admin';
@@ -39,11 +38,6 @@ export async function SiteHeader() {
             {user ? (
               <>
                 <li>
-                  <NavLink className={link} href="/partido">
-                    {t('match')}
-                  </NavLink>
-                </li>
-                <li>
                   <NavLink className={link} href="/perfil">
                     {t('profile')}
                   </NavLink>
@@ -65,13 +59,6 @@ export async function SiteHeader() {
                     </NavLink>
                   </li>
                 )}
-                <li>
-                  <form action={logoutAction}>
-                    <button type="submit" className={link}>
-                      {t('logout')}
-                    </button>
-                  </form>
-                </li>
               </>
             ) : (
               <li>

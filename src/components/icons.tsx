@@ -112,6 +112,14 @@ export const BandageIcon = (p: IconProps) => (
   </svg>
 );
 
+/** iOS Safari's Share glyph (square with an arrow), as players see it in the toolbar. */
+export const IosShareIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 3v12M8 7l4-4 4 4" />
+    <path d="M8 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2" />
+  </svg>
+);
+
 export const LockIcon = (p: IconProps) => (
   <svg {...base(p)}>
     <rect x="3" y="11" width="18" height="11" rx="2" />

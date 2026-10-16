@@ -3,7 +3,17 @@ import webpush from 'web-push';
 import type { Db } from '@/lib/db/create';
 import { pushSubscriptions } from '@/lib/db/schema';
 
-export type PushPayload = { title: string; body: string; url: string; tag?: string };
+export type PushAnswer = 'going' | 'not_going';
+export type PushPayload = {
+  title: string;
+  body: string;
+  url: string;
+  tag?: string;
+  /** Reminder only: lets the service worker answer from the notification's buttons. */
+  matchId?: string;
+  actions?: { action: PushAnswer; title: string }[];
+  confirm?: Record<PushAnswer, string>;
+};
 export type StoredSubscription = { endpoint: string; p256dh: string; auth: string };
 /** Resolves to 'gone' when the push service says the subscription no longer exists. */
 export type PushSender = (sub: StoredSubscription, payload: PushPayload) => Promise<'ok' | 'gone'>;

@@ -34,6 +34,7 @@ export default async function ResultsPage() {
   const isAdmin = user?.role === 'admin';
   const summary = seasonSummary(played);
   const matchIds = played.map((m) => m.id);
+  const newestPending = played.find((m) => m.blancosGoals === null || m.colorGoals === null)?.id;
   const [scorers, candidates] = await Promise.all([
     listMatchScorers(db, matchIds),
     isAdmin ? scorerCandidates(db, matchIds) : null,
@@ -167,6 +168,7 @@ export default async function ResultsPage() {
                     blancos={m.blancosGoals}
                     color={m.colorGoals}
                     scorers={buildScorerColumns(m.id, candidates, scorers)}
+                    defaultOpen={m.id === newestPending}
                   />
                 )}
               </li>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { logoutAction } from '@/actions/auth';
 import { requireUser } from '@/lib/auth/current';
 import { BallIcon } from '@/components/icons';
 import { PushSettings } from '@/components/push/push-settings';
@@ -78,6 +79,11 @@ export default async function ProfilePage() {
       )}
       <PlayingSection team={user.team} position={user.position} />
       <SecuritySection username={user.username} />
+      <form action={logoutAction} className="mt-6">
+        <button type="submit" className="btn-secondary w-full sm:w-auto">
+          {t('logout')}
+        </button>
+      </form>
     </div>
   );
 }

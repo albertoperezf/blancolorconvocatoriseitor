@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { sendTestPushAction } from '@/actions/push';
 import { useAutoHide } from '@/components/form';
+import { IosShareIcon } from '@/components/icons';
 import { usePush } from './use-push';
 
 /** "Notificaciones" box in Perfil: turn notifications on/off, iPhone steps, and an admin test send. */
@@ -53,15 +54,27 @@ export function PushSettings({ publicKey, isAdmin }: { publicKey: string | null;
   );
 }
 
-export function IosSteps() {
+/** iPhone only allows push from the home-screen app; `here` tailors the last step to where it's shown. */
+export function IosSteps({ here = 'profile' }: { here?: 'profile' | 'banner' }) {
   const t = useTranslations('push');
   return (
     <div>
       <p className="font-semibold">{t('iosTitle')}</p>
       <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted">
-        <li>{t('iosStep1')}</li>
+        <li>
+          {t.rich('iosStep1', {
+            share: () => (
+              <IosShareIcon
+                role="img"
+                aria-hidden={false}
+                aria-label={t('iosShareIcon')}
+                className="mx-0.5 inline size-5 align-[-0.25em] text-brand"
+              />
+            ),
+          })}
+        </li>
         <li>{t('iosStep2')}</li>
-        <li>{t('iosStep3')}</li>
+        <li>{here === 'banner' ? t('iosStep3Banner') : t('iosStep3')}</li>
       </ol>
     </div>
   );

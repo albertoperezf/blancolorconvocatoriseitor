@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { XIcon } from '@/components/icons';
+import { IosSteps } from './push-settings';
 import { usePush } from './use-push';
 
 const DISMISSED_KEY = 'avisos-banner-cerrado';
@@ -39,9 +39,8 @@ function Banner({ publicKey }: { publicKey: string }) {
               {t('enable')}
             </button>
           ) : (
-            <Link href="/perfil#notificaciones" className="btn-link">
-              {t('bannerIos')}
-            </Link>
+            // iPhone: install steps right here, so nobody has to go looking for them in Perfil.
+            <IosSteps here="banner" />
           )}
         </div>
       </div>
