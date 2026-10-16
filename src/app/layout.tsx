@@ -69,8 +69,13 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
           </footer>
         </NextIntlClientProvider>
         <TouchActive />
-        <Analytics />
-        <SpeedInsights />
+        {/* Their scripts only exist on Vercel; elsewhere (local, CI Lighthouse) they 404 on every page. */}
+        {process.env.VERCEL && (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        )}
       </body>
     </html>
   );
