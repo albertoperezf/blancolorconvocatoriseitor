@@ -7,7 +7,7 @@ import { idle } from '@/actions/form-state';
 import { Field, Notice, TeamSelect, useMessage } from '@/components/form';
 import { ShareLink } from './share-link';
 
-export function EnrolForm() {
+export function EnrolForm({ onClose }: { onClose: () => void }) {
   const t = useTranslations('admin');
   const tProfile = useTranslations('profile');
   const msg = useMessage();
@@ -51,15 +51,23 @@ export function EnrolForm() {
             <option value="admin">{t('roles.admin')}</option>
           </select>
         </div>
-        <button type="submit" className="btn-primary sm:col-span-2 sm:justify-self-start" disabled={pending}>
-          {t('enrol')}
-        </button>
+        <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+          <button type="submit" className="btn-primary" disabled={pending}>
+            {t('enrol')}
+          </button>
+          <button type="button" className="btn-secondary" onClick={onClose}>
+            {t('enrolCancel')}
+          </button>
+        </div>
       </form>
       <div role="status" aria-live="polite" className="mt-3">
         {state.status === 'success' && state.data && (
           <>
             <Notice tone="success">{t('enrolled', { name: state.data.name })}</Notice>
             <ShareLink name={state.data.name} url={state.data.url} />
+            <button type="button" className="btn-primary mt-3" onClick={onClose}>
+              {t('enrolDone')}
+            </button>
           </>
         )}
       </div>

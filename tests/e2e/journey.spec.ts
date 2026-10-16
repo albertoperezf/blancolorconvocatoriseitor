@@ -85,15 +85,31 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await page.getByRole('button', { name: `Quitar a ${guest}` }).click();
   await expect(page.getByRole('region', { name: 'INVITADOS' }).getByText(guest)).toHaveCount(0);
 
-  // Enrol a new player and share the reset link.
+  // Enrol a new player and share the reset link. The form stays folded away until asked for.
   await page.goto('/admin/usuarios');
   await expectNoA11yViolations(page);
+  const enrolToggle = page.getByRole('button', { name: 'Dar de alta', expanded: false });
+  await expect(page.getByLabel('Usuario')).toBeHidden();
+  await expect(page.getByRole('heading', { level: 2, name: /^Todos los jugadores \(\d+\)$/ })).toBeAttached();
+  await enrolToggle.click();
+  const enrolPanel = page.getByRole('region', { name: 'Dar de alta un jugador' });
+  await expect(enrolPanel.getByLabel('Usuario')).toBeFocused();
+  // Cancelar folds it again and gives focus back to the toggle.
+  await enrolPanel.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.getByLabel('Usuario')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Dar de alta', expanded: false })).toBeFocused();
+  await enrolToggle.click();
+  // Let the slide/fade finish so colour-contrast is measured on the final colours.
+  await expect(page.locator('#enrol-panel').locator('xpath=../..')).toHaveCSS('opacity', '1');
+  await expectNoA11yViolations(page);
   const username = `NUEVO${suffix}`;
-  await page.getByLabel('Usuario').fill(username);
-  await page.getByLabel('Nombre visible').fill(`Nuevo ${suffix}`);
-  await page.getByRole('button', { name: 'Dar de alta' }).click();
-  const link = await page.getByLabel(`Enlace para Nuevo ${suffix}`).inputValue();
+  await enrolPanel.getByLabel('Usuario').fill(username);
+  await enrolPanel.getByLabel('Nombre visible').fill(`Nuevo ${suffix}`);
+  await enrolPanel.getByRole('button', { name: 'Dar de alta' }).click();
+  const link = await enrolPanel.getByLabel(`Enlace para Nuevo ${suffix}`).inputValue();
   expect(link).toMatch(/\/restablecer\/[\w-]{40,}$/);
+  await enrolPanel.getByRole('button', { name: 'Listo' }).click();
+  await expect(page.getByLabel('Usuario')).toBeHidden();
 
   // The new player sets a password through the link and picks a team.
   const player = await newPage(browser, baseURL);

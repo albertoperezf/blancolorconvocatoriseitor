@@ -6,7 +6,7 @@ import { LinkHint } from '@/components/link-hint';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { listResetRequests, listUsers } from '@/lib/services/admin';
-import { EnrolForm } from '../enrol-form';
+import { EnrolSection } from '../enrol-section';
 import { ResetRequests } from '../reset-requests';
 
 export const metadata: Metadata = { title: 'Jugadores' };
@@ -42,19 +42,15 @@ export default async function UsersPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-extrabold tracking-tight">{t('users')}</h1>
-      <ResetRequests requests={requests} />
-      <section aria-labelledby="enrol-heading" className="card mt-4">
-        <h2 id="enrol-heading" className="mb-3 text-xl font-extrabold">
-          {t('enrolHeading')}
-        </h2>
-        <EnrolForm />
-      </section>
-      <section aria-labelledby="list-heading" className="mt-6">
-        <h2 id="list-heading" className="text-xl font-extrabold">
+      <EnrolSection title={t('users')} count={users.length}>
+        <ResetRequests requests={requests} />
+      </EnrolSection>
+      <section aria-labelledby="list-heading" className="mt-4">
+        {/* The visible count sits next to the page title; this keeps the list's heading for screen readers. */}
+        <h2 id="list-heading" className="sr-only">
           {t('list', { count: users.length })}
         </h2>
-        <ul aria-label={t('statusLegend')} className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+        <ul aria-label={t('statusLegend')} className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
           {(Object.keys(STATUS_ICONS) as Status[]).map((s) => {
             const Icon = STATUS_ICONS[s];
             return (
