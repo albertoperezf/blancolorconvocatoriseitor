@@ -251,8 +251,14 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expectNoA11yViolations(page);
   await requests.getByRole('button', { name: 'Generar enlace' }).click();
   await expect(requests.getByLabel(`Enlace para Nuevo ${suffix}`)).toHaveValue(/\/restablecer\//);
+  // Generating the link doesn't clear the request; only "Descartar" does, and the header badge follows.
   await page.reload();
+  await expect(requests.getByText(`Nuevo ${suffix}`)).toBeVisible();
+  await expect(page.getByRole('link', { name: /Admin.*solicitud/ })).toBeVisible();
+  await requests.getByRole('button', { name: `Descartar la solicitud de Nuevo ${suffix}` }).click();
   await expect(page.getByRole('region', { name: /olvidado su contraseña/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /Admin.*solicitud/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Admin', exact: true })).toBeVisible();
 
   // Results: admins record and correct scores; the winner is derived; players only read them.
   await page.getByRole('link', { name: 'Resultados' }).click();

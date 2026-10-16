@@ -100,7 +100,7 @@ describe('password reset links', () => {
 });
 
 describe('forgot-password requests', () => {
-  it('records one request per active player, ignores unknown users, and clears when a link is generated', async () => {
+  it('records one request per active player, ignores unknown users, and keeps it after a link is generated', async () => {
     await requestPasswordReset(h.db, 'PLAYER');
     await requestPasswordReset(h.db, 'PLAYER');
     await requestPasswordReset(h.db, 'NOBODY');
@@ -110,7 +110,7 @@ describe('forgot-password requests', () => {
 
     const [user] = await h.db.select().from(users).where(eq(users.username, 'PLAYER'));
     await createResetToken(h.db, user.id, null);
-    expect(await countResetRequests(h.db)).toBe(0);
+    expect(await countResetRequests(h.db)).toBe(1);
   });
 
   it('lets admins dismiss a request', async () => {

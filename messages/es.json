@@ -219,7 +219,7 @@
     "resetIntro": "Genera un enlace de un solo uso (caduca en 24 h). Al usarlo se cierran todas sus sesiones.",
     "resetCreate": "Generar enlace",
     "requestsHeading": "{count, plural, one {# jugador ha olvidado su contraseña} other {# jugadores han olvidado su contraseña}}",
-    "requestsIntro": "Genera el enlace y envíaselo por WhatsApp. Al generarlo, la solicitud desaparece.",
+    "requestsIntro": "Genera el enlace y envíaselo por WhatsApp. Cuando lo hayas enviado, pulsa «Descartar» para quitar la solicitud.",
     "dismiss": "Descartar",
     "dismissFor": "Descartar la solicitud de {name}",
     "resetLink": "Enlace para {name}",

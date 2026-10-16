@@ -56,9 +56,8 @@ export async function requestPasswordReset(db: Db, username: string, now = new D
 
 export async function createResetToken(db: Db, userId: string, actorId: string | null, now = new Date()) {
   const token = generateToken();
-  // Only the latest link for a user stays valid.
+  // Only the latest link for a user stays valid; the request stays until an admin dismisses it.
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
-  await db.delete(passwordResetRequests).where(eq(passwordResetRequests.userId, userId));
   await db.insert(passwordResetTokens).values({
     tokenHash: hashToken(token),
     userId,
