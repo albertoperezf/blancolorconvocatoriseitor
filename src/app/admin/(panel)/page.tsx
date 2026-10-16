@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { LinkHint } from '@/components/link-hint';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { countContactMessages } from '@/lib/services/contact';
@@ -23,7 +24,7 @@ export default async function AdminPage() {
       <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
           <li key={c.href}>
-            <Link href={c.href} className="card block h-full hover:border-brand">
+            <Link href={c.href} className="card-link group block h-full">
               <h2 className="flex items-center gap-2 text-lg font-extrabold text-brand">
                 {c.title}
                 {c.badge && (
@@ -32,6 +33,7 @@ export default async function AdminPage() {
                     <span className="sr-only"> {t('messagesCount', { count: c.badge })}</span>
                   </span>
                 )}
+                <LinkHint className="ml-auto" />
               </h2>
               <p className="mt-1 text-muted">{c.text}</p>
             </Link>

@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { BandageIcon, BanIcon, CrownIcon, LockOpenIcon, ShirtIcon } from '@/components/icons';
+import { LinkHint } from '@/components/link-hint';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { listResetRequests, listUsers } from '@/lib/services/admin';
-import { EnrolForm } from './enrol-form';
-import { ResetRequests } from './reset-requests';
+import { EnrolForm } from '../enrol-form';
+import { ResetRequests } from '../reset-requests';
 
 export const metadata: Metadata = { title: 'Jugadores' };
 
@@ -70,10 +71,7 @@ export default async function UsersPage() {
             return (
               <li key={u.id}>
                 {/* Always two single-line rows (name, team) so every card has the same height. */}
-                <Link
-                  href={`/admin/usuarios/${u.id}`}
-                  className="card flex items-center gap-3 p-3 hover:border-brand sm:p-4"
-                >
+                <Link href={`/admin/usuarios/${u.id}`} className="card-link group flex items-center gap-3 p-3 sm:p-4">
                   <ShirtIcon
                     filled={u.team === 'color'}
                     className={`size-6 shrink-0 ${u.team === 'color' ? 'text-brand' : ''}`}
@@ -103,6 +101,7 @@ export default async function UsersPage() {
                       })}
                     </span>
                   )}
+                  <LinkHint className="-mr-1" />
                 </Link>
               </li>
             );

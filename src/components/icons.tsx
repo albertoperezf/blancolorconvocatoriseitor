@@ -126,6 +126,18 @@ export const BanIcon = (p: IconProps) => (
   </svg>
 );
 
+export const ChevronRightIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="m9 18 6-6-6-6" />
+  </svg>
+);
+
+export const SpinnerIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M21 12a9 9 0 1 1-6.22-8.56" />
+  </svg>
+);
+
 // Portero = glove, Defensa = shield, Mediocampo = two-way arrows, Delantero = target.
 const POSITION_PATHS = {
   portero: (

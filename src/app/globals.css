@@ -80,8 +80,14 @@ body {
 @utility card {
   @apply rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6;
 }
+/* Card that is a link: brand border on hover, a quick press-in on tap/click. */
+@utility card-link {
+  @apply card transition-[scale,border-color,background-color] duration-100 hover:border-brand active:scale-[0.98] active:border-brand active:bg-brand/5;
+  -webkit-tap-highlight-color: transparent;
+}
 @utility btn {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 font-semibold transition-[color,background-color,border-color,opacity,scale] duration-100 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60;
+  -webkit-tap-highlight-color: transparent;
 }
 @utility btn-primary {
   @apply btn bg-brand text-brand-fg hover:opacity-90;

@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { MailIcon } from '@/components/icons';
 import { SiteHeader } from '@/components/site-header';
+import { TouchActive } from '@/components/touch-active';
 import { siteUrl } from '@/lib/site-url';
 import { getTheme } from '@/lib/theme';
 import './globals.css';
@@ -67,6 +68,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
             </p>
           </footer>
         </NextIntlClientProvider>
+        <TouchActive />
         <Analytics />
         <SpeedInsights />
       </body>

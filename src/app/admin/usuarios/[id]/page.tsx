@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { LinkHint } from '@/components/link-hint';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { countUpcomingGuests, getUser } from '@/lib/services/admin';
@@ -26,8 +27,9 @@ export default async function EditUserPage({ params }: PageProps<'/admin/usuario
 
   return (
     <div className="mx-auto max-w-xl">
-      <Link href="/admin/usuarios" className="btn-link">
-        ← {t('back')}
+      <Link href="/admin/usuarios" className="btn-link inline-flex items-center gap-1">
+        <LinkHint idle="←" />
+        {t('back')}
       </Link>
       <h1 className="mt-3 text-2xl font-extrabold tracking-tight">{user.displayName}</h1>
       <section aria-labelledby="edit-heading" className="card mt-4">
