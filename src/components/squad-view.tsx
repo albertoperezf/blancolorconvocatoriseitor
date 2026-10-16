@@ -47,7 +47,8 @@ function Group({ id, title, count, names, empty, open = true, icon, accent = 'bo
           {names.map((n) => (
             <li
               key={n.key}
-              className={`inline-flex items-center gap-1.5 rounded-lg bg-bg px-2.5 py-1 text-sm font-medium ${n.isMe ? 'font-extrabold ring-2 ring-brand' : ''}`}
+              // Inset ring: collapsible groups clip their content, which cut an outer ring off.
+              className={`inline-flex items-center gap-1.5 rounded-lg bg-bg px-2.5 py-1 text-sm font-medium ${n.isMe ? 'font-extrabold ring-2 ring-brand ring-inset' : ''}`}
             >
               {n.position && (
                 // Hover on desktop, tap (focus) on touch screens; tabIndex -1 keeps it out of the Tab order.
