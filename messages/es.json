@@ -1,6 +1,7 @@
 {
   "common": {
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "newTab": "(se abre en otra pestaña)"
   },
   "meta": {
     "title": "Blancolores · Convocatoria",
@@ -108,6 +109,10 @@
     "saved": "Resultado guardado.",
     "edit": "Editar resultado",
     "enteredBy": "Resultado puesto por {name}",
+    "moreHeading": "Más Blancolor",
+    "moreIntro": "Crónicas, fotos y vídeos de las finales, las cenas y las excursiones.",
+    "blogCta": "Crónicas en el blog",
+    "videosCta": "Vídeos en YouTube",
     "enter": "Poner resultado",
     "summaryHeading": "Temporada: {count, plural, one {# partido} other {# partidos}}",
     "summaryBlancos": "Gana Blancos",
@@ -314,7 +319,9 @@
   },
   "footer": {
     "text": "Blancolores · Hecho con cariño para los de los jueves",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "blog": "Blancolor al día",
+    "videos": "Blancolor Televisión"
   },
   "contact": {
     "title": "Contacto",

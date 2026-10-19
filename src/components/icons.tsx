@@ -78,6 +78,27 @@ export const MailIcon = (p: IconProps) => (
   </svg>
 );
 
+export const NewspaperIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 4h13a1 1 0 0 1 1 1v14a1 1 0 0 0 2 0V9h-2" />
+    <path d="M4 4v14a2 2 0 0 0 2 2h14" />
+    <path d="M8 8h6M8 12h6M8 16h4" />
+  </svg>
+);
+
+export const PlayIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="2" y="5" width="20" height="14" rx="4" />
+    <path d="m10 9 5 3-5 3z" />
+  </svg>
+);
+
+export const ExternalIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M7 17 17 7M8 7h9v9" />
+  </svg>
+);
+
 export const SunIcon = (p: IconProps) => (
   <svg {...base(p)}>
     <circle cx="12" cy="12" r="4" />

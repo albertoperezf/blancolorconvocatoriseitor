@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
-import { BallIcon, ShirtIcon } from '@/components/icons';
+import { ExternalLink } from '@/components/external-link';
+import { BallIcon, NewspaperIcon, PlayIcon, ShirtIcon } from '@/components/icons';
 import { getCurrentUser } from '@/lib/auth/current';
 import { canEditResults } from '@/lib/auth/roles';
 import { getDb } from '@/lib/db';
 import type { Team } from '@/lib/db/schema';
+import { BLOG_URL, VIDEOS_URL } from '@/lib/links';
 import { buildScorerColumns, listMatchScorers, scorerCandidates, topScorers } from '@/lib/match/goals';
 import { getSettings } from '@/lib/match/queries';
 import { listPlayedMatches, matchWinner, seasonSummary, type Winner } from '@/lib/match/results';
@@ -24,8 +26,9 @@ const BADGE: Record<Winner, string> = {
 
 export default async function ResultsPage() {
   const db = await getDb();
-  const [t, format, user, settings, played, pichichi] = await Promise.all([
+  const [t, tFooter, format, user, settings, played, pichichi] = await Promise.all([
     getTranslations('results'),
+    getTranslations('footer'),
     getFormatter(),
     getCurrentUser(),
     getSettings(db),
@@ -180,6 +183,33 @@ export default async function ResultsPage() {
           })}
         </ul>
       )}
+      <section aria-labelledby="more-heading" className="card mt-6">
+        <h2 id="more-heading" className="font-extrabold">
+          {t('moreHeading')}
+        </h2>
+        <p className="mt-1 text-sm text-muted">{t('moreIntro')}</p>
+        <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+          {(
+            [
+              [BLOG_URL, NewspaperIcon, tFooter('blog'), t('blogCta')],
+              [VIDEOS_URL, PlayIcon, tFooter('videos'), t('videosCta')],
+            ] as const
+          ).map(([href, Icon, name, cta]) => (
+            <li key={href}>
+              <ExternalLink
+                href={href}
+                className="flex min-h-16 items-center gap-3 rounded-xl border border-border bg-bg px-4 py-3 transition-colors hover:border-brand"
+              >
+                <Icon className="size-6 shrink-0 text-brand" />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-extrabold">{name}</span>
+                  <span className="block text-sm text-muted">{cta}</span>
+                </span>
+              </ExternalLink>
+            </li>
+          ))}
+        </ul>
+      </section>
     </>
   );
 }

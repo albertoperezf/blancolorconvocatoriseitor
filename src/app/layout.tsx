@@ -4,12 +4,16 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
-import { MailIcon } from '@/components/icons';
+import { ExternalLink } from '@/components/external-link';
+import { MailIcon, NewspaperIcon, PlayIcon } from '@/components/icons';
 import { SiteHeader } from '@/components/site-header';
 import { TouchActive } from '@/components/touch-active';
+import { BLOG_URL, VIDEOS_URL } from '@/lib/links';
 import { siteUrl } from '@/lib/site-url';
 import { getTheme } from '@/lib/theme';
 import './globals.css';
+
+const footerLink = 'inline-flex min-h-6 items-center gap-1.5 font-semibold text-fg hover:text-brand';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('meta');
@@ -56,16 +60,27 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
             {children}
           </main>
           <footer className="border-t border-border px-4 py-6 text-center text-sm text-muted">
-            <p>
-              {t('footer.text')} ·{' '}
-              <Link
-                href="/contacto"
-                className="inline-flex min-h-6 items-center gap-1.5 align-middle font-semibold text-fg hover:text-brand"
-              >
-                <MailIcon className="size-4" />
-                {t('footer.contact')}
-              </Link>
-            </p>
+            <p>{t('footer.text')}</p>
+            <ul className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+              <li>
+                <Link href="/contacto" className={footerLink}>
+                  <MailIcon className="size-4" />
+                  {t('footer.contact')}
+                </Link>
+              </li>
+              <li>
+                <ExternalLink href={BLOG_URL} className={footerLink}>
+                  <NewspaperIcon className="size-4" />
+                  {t('footer.blog')}
+                </ExternalLink>
+              </li>
+              <li>
+                <ExternalLink href={VIDEOS_URL} className={footerLink}>
+                  <PlayIcon className="size-4" />
+                  {t('footer.videos')}
+                </ExternalLink>
+              </li>
+            </ul>
           </footer>
         </NextIntlClientProvider>
         <TouchActive />

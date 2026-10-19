@@ -25,6 +25,26 @@ test('public page shows the weekly match, the squad groups and a contact link', 
   await expectNoA11yViolations(page);
 });
 
+test('the blog and the YouTube channel are linked from the footer and Resultados, in a new tab', async ({ page }) => {
+  const links = [
+    ['Blancolor al día', 'https://blancoloraldia.blogspot.com/'],
+    ['Blancolor Televisión', 'https://www.youtube.com/playlist?list=PLU00xG48XqlduXFp5yPhydJFDp8OYll3b'],
+  ] as const;
+  await page.goto('/resultados');
+  const more = page.getByRole('region', { name: 'Más Blancolor' });
+  for (const scope of [page.getByRole('contentinfo'), more]) {
+    for (const [name, href] of links) {
+      const link = scope.getByRole('link', { name: new RegExp(`^${name}.*\\(se abre en otra pestaña\\)$`) });
+      await expect(link).toHaveAttribute('href', href);
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+  }
+  await expect(more).toContainText('Crónicas en el blog');
+  await expect(more).toContainText('Vídeos en YouTube');
+  await expectNoA11yViolations(page);
+});
+
 test('visitors can send a message from the contact form', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('contentinfo').getByRole('link', { name: 'Contacto' }).click();
