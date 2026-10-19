@@ -2,6 +2,8 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page } from '@playwright/test';
 
 export async function expectNoA11yViolations(page: Page) {
+  // From the top: otherwise target-size counts whatever the sticky header happens to cover at this scroll.
+  await page.evaluate(() => window.scrollTo(0, 0));
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     // Next.js dev/route announcer is outside our control.

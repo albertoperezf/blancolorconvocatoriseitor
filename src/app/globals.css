@@ -65,6 +65,10 @@ html {
   html:has(#tu-respuesta) {
     scroll-padding-bottom: 11rem;
   }
+  /* Room for the fixed answer bar below the footer, so the footer isn't hidden behind it. */
+  body:has(#tu-respuesta) {
+    padding-bottom: calc(9rem + max(0.75rem, env(safe-area-inset-bottom)));
+  }
 }
 
 /* High Contrast drops background colours, so selected states need the system highlight instead. */

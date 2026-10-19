@@ -42,8 +42,6 @@ export default async function MatchPage() {
         <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
       </div>
       {user.canBringGuests && <GuestManager guests={guests} />}
-      {/* Room for the fixed status bar on mobile. */}
-      <div aria-hidden className="h-40 md:hidden" />
     </>
   );
 }
