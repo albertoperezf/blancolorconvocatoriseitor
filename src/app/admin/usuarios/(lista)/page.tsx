@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { BandageIcon, BanIcon, CrownIcon, LockOpenIcon, ShirtIcon } from '@/components/icons';
+import { BandageIcon, BanIcon, CrownIcon, LockOpenIcon, PencilIcon, ShirtIcon } from '@/components/icons';
 import { LinkHint } from '@/components/link-hint';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
@@ -13,6 +13,7 @@ export const metadata: Metadata = { title: 'Jugadores' };
 
 const STATUS_ICONS = {
   admin: CrownIcon,
+  editor: PencilIcon,
   absent: BandageIcon,
   inactive: BanIcon,
   noPassword: LockOpenIcon,
@@ -23,6 +24,7 @@ type Status = keyof typeof STATUS_ICONS;
 function statusesOf(u: { role: string; longTermAbsence: boolean; active: boolean; hasPassword: boolean }) {
   const s: Status[] = [];
   if (u.role === 'admin') s.push('admin');
+  if (u.role === 'editor') s.push('editor');
   if (u.longTermAbsence) s.push('absent');
   if (!u.active) s.push('inactive');
   if (!u.hasPassword) s.push('noPassword');
@@ -38,7 +40,7 @@ export default async function UsersPage() {
     listUsers(db),
     listResetRequests(db),
   ]);
-  const statusLabel = (s: Status) => (s === 'admin' ? t('roles.admin') : t(s));
+  const statusLabel = (s: Status) => (s === 'admin' || s === 'editor' ? t(`roles.${s}`) : t(s));
 
   return (
     <>

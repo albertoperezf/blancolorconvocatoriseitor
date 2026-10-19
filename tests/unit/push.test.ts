@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DbHandle } from '@/lib/db/create';
 import { attendances, guests, pushSubscriptions } from '@/lib/db/schema';
 import { ensureCurrentMatch } from '@/lib/match/queries';
+import { notifyNewEditor } from '@/lib/push/editor-notice';
 import { reminderKindFor, runReminder, type ComposeReminder } from '@/lib/push/reminders';
 import { deleteSubscription, saveSubscription, type PushPayload, type PushSender } from '@/lib/push/service';
 import { freshDb, insertUser } from './helpers/db';
@@ -122,6 +123,22 @@ describe('push subscriptions', () => {
     await deleteSubscription(h.db, luis, sub('shared').endpoint);
     [row] = await h.db.select().from(pushSubscriptions);
     expect(row).toBeUndefined();
+  });
+
+  it('tells a new editor on their own devices only, pointing at Resultados', async () => {
+    const editor = (await insertUser(h, { username: 'EDITORA' })).id;
+    const other = (await insertUser(h, { username: 'OTRO' })).id;
+    await saveSubscription(h.db, editor, sub('editor-phone'));
+    await saveSubscription(h.db, other, sub('other-phone'));
+    const { calls, send } = fakeSender();
+    const text = { title: 'Editor', body: 'Ya puedes poner resultados' };
+
+    await notifyNewEditor(h.db, editor, send, text);
+    expect(calls).toEqual([
+      { endpoint: sub('editor-phone').endpoint, payload: { ...text, url: '/resultados', tag: 'role-editor' } },
+    ]);
+    const noDevices = (await insertUser(h, { username: 'SINMOVIL' })).id;
+    expect(await notifyNewEditor(h.db, noDevices, send, text)).toEqual({ sent: 0 });
   });
 });
 

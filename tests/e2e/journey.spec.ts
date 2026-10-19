@@ -429,7 +429,29 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(player).toHaveURL(/\/partido$/);
 
   // Leave the shared admin as it started for the next project.
-  // (First: the reminder's "Voy" / "No voy" buttons answer through this endpoint, same-origin only.)
+  // (First: an admin makes the player Editor — results only, no Admin area.)
+  await page.goto('/admin/usuarios');
+  await page.getByRole('link', { name: new RegExp(`Nuevo ${suffix}`) }).click();
+  await expect(page.getByRole('heading', { level: 1, name: `Nuevo ${suffix}` })).toBeVisible();
+  await page.getByLabel('Rol').selectOption('editor');
+  await page.getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByText('Cambios guardados.')).toBeVisible();
+  await player.goto('/resultados');
+  await expect(player.getByRole('banner').getByRole('link', { name: /^Admin/ })).toHaveCount(0);
+  const editorCard = player
+    .locator('main li')
+    .filter({ has: player.getByRole('button', { name: /^(Editar|Poner) resultado/ }) })
+    .first();
+  const editorToggle = editorCard.getByRole('button', { name: /^(Editar|Poner) resultado/ });
+  if ((await editorToggle.getAttribute('aria-expanded')) !== 'true') await editorToggle.click();
+  await editorCard.getByLabel('Goles de Blancos').fill('4');
+  await editorCard.getByLabel('Goles de Color').fill('4');
+  await editorCard.getByRole('button', { name: 'Guardar' }).click();
+  await expect(editorCard.getByRole('status')).toHaveText('Resultado guardado.');
+  await expect(editorCard).toContainText(`Resultado puesto por Nuevo ${suffix}`);
+  await player.goto('/admin');
+  await expect(player).toHaveURL(/\/partido$/);
+  // (And: the reminder's "Voy" / "No voy" buttons answer through this endpoint, same-origin only.)
   await player.goto('/partido');
   const matchId = await player.locator('[data-match-id]').getAttribute('data-match-id');
   const answer = (origin: string) =>

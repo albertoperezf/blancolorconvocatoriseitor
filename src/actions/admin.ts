@@ -1,9 +1,12 @@
 'use server';
 
 import { refresh } from 'next/cache';
+import { getTranslations } from 'next-intl/server';
 import { getDb } from '@/lib/db';
-import { appOrigin, requireAdmin } from '@/lib/auth/current';
+import { appOrigin, requireAdmin, requireResultsEditor } from '@/lib/auth/current';
 import { createResetToken } from '@/lib/auth/service';
+import { notifyNewEditor } from '@/lib/push/editor-notice';
+import { pushConfigured, webPushSender } from '@/lib/push/service';
 import { DomainError } from '@/lib/services/player';
 import { dismissResetRequest, enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
 import {
@@ -60,12 +63,21 @@ export async function updateUserAction(userId: string, _prev: FormState, formDat
   });
   if (!parsed.success) return { status: 'error', errors: fieldErrors(parsed.error) };
 
+  const db = await getDb();
+  let promotedToEditor = false;
   try {
-    await updateUser(await getDb(), admin.id, userId, parsed.data);
+    ({ promotedToEditor } = await updateUser(db, admin.id, userId, parsed.data));
   } catch (e) {
     if (e instanceof DomainError && e.code === 'self_lockout') return { status: 'error', message: 'admin.selfLockout' };
     if (e instanceof DomainError && e.code === 'has_guests') return { status: 'error', message: 'admin.hasGuests' };
     throw e;
+  }
+  if (promotedToEditor && pushConfigured()) {
+    const t = await getTranslations('push');
+    // Best effort: a failed notification must not undo or fail the saved role change.
+    await notifyNewEditor(db, userId, webPushSender(), { title: t('editorTitle'), body: t('editorBody') }).catch(
+      () => undefined,
+    );
   }
   refresh();
   return { status: 'success', message: 'admin.saved' };
@@ -96,7 +108,7 @@ export async function updateSettingsAction(_prev: FormState, formData: FormData)
 }
 
 export async function saveResultAction(matchId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const admin = await requireAdmin();
+  const editor = await requireResultsEditor();
   const parsed = resultSchema.safeParse({ blancos: formData.get('blancos') ?? '', color: formData.get('color') ?? '' });
   if (!parsed.success) return { status: 'error', errors: fieldErrors(parsed.error) };
   const scorers = parseScorers(formData.get('scorers'));
@@ -105,7 +117,7 @@ export async function saveResultAction(matchId: string, _prev: FormState, formDa
     return { status: 'error', errors: { scorers: 'result.tooManyScorers' } };
   }
   try {
-    await saveMatchResult(await getDb(), admin.id, matchId, parsed.data, scorers);
+    await saveMatchResult(await getDb(), editor.id, matchId, parsed.data, scorers);
   } catch (e) {
     if (e instanceof DomainError) return { status: 'error', message: 'errors.generic' };
     throw e;

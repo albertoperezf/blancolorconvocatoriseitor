@@ -64,6 +64,13 @@
       "when": 1792134903365,
       "tag": "0008_match_goals",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792390518950,
+      "tag": "0009_editor_role",
+      "breakpoints": true
     }
   ]
 }

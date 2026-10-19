@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
-import { auditLog, matches } from '@/lib/db/schema';
+import { auditLog, matches, users } from '@/lib/db/schema';
 import { DomainError } from '@/lib/services/player';
 
 /** First match with recorded results; RESULTS_FROM (ISO date) can move it for local testing. */
@@ -24,7 +24,7 @@ export function seasonSummary(played: { blancosGoals: number | null; colorGoals:
   return { ...summary, total: summary.blancos + summary.color + summary.draw };
 }
 
-/** Matches that have already kicked off since results started, newest first. */
+/** Matches that have already kicked off since results started, newest first, with who entered the score. */
 export function listPlayedMatches(db: Db, now: Date = new Date()) {
   return db
     .select({
@@ -32,8 +32,10 @@ export function listPlayedMatches(db: Db, now: Date = new Date()) {
       startsAt: matches.startsAt,
       blancosGoals: matches.blancosGoals,
       colorGoals: matches.colorGoals,
+      resultByName: users.displayName,
     })
     .from(matches)
+    .leftJoin(users, eq(users.id, matches.resultBy))
     .where(and(gte(matches.startsAt, resultsFrom()), lte(matches.startsAt, now)))
     .orderBy(desc(matches.startsAt));
 }
@@ -47,7 +49,7 @@ export async function setMatchResult(
 ) {
   const updated = await db
     .update(matches)
-    .set({ blancosGoals: goals.blancos, colorGoals: goals.color })
+    .set({ blancosGoals: goals.blancos, colorGoals: goals.color, resultBy: actorId })
     .where(and(eq(matches.id, matchId), gte(matches.startsAt, resultsFrom()), lte(matches.startsAt, now)))
     .returning({ id: matches.id });
   if (updated.length === 0) throw new DomainError('not_found');

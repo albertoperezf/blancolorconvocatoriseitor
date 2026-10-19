@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { BallIcon, ShirtIcon } from '@/components/icons';
 import { getCurrentUser } from '@/lib/auth/current';
+import { canEditResults } from '@/lib/auth/roles';
 import { getDb } from '@/lib/db';
 import type { Team } from '@/lib/db/schema';
 import { buildScorerColumns, listMatchScorers, scorerCandidates, topScorers } from '@/lib/match/goals';
@@ -31,13 +32,13 @@ export default async function ResultsPage() {
     listPlayedMatches(db),
     topScorers(db),
   ]);
-  const isAdmin = user?.role === 'admin';
+  const canEdit = !!user && canEditResults(user.role);
   const summary = seasonSummary(played);
   const matchIds = played.map((m) => m.id);
   const newestPending = played.find((m) => m.blancosGoals === null || m.colorGoals === null)?.id;
   const [scorers, candidates] = await Promise.all([
     listMatchScorers(db, matchIds),
-    isAdmin ? scorerCandidates(db, matchIds) : null,
+    canEdit ? scorerCandidates(db, matchIds) : null,
   ]);
   const scorersFor = (matchId: string, team: Team) => scorers.filter((s) => s.matchId === matchId && s.team === team);
 
@@ -161,7 +162,10 @@ export default async function ResultsPage() {
                     })}
                   </div>
                 )}
-                {isAdmin && candidates && (
+                {hasResult && m.resultByName && (
+                  <p className="mt-2 text-center text-xs text-muted">{t('enteredBy', { name: m.resultByName })}</p>
+                )}
+                {canEdit && candidates && (
                   <ResultForm
                     matchId={m.id}
                     legend={t('legend', { date })}

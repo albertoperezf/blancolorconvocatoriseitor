@@ -52,13 +52,13 @@ export const enrolSchema = z.object({
   username: usernameSchema,
   displayName: displayNameSchema,
   team: teamSchema.optional(),
-  role: z.enum(['player', 'admin']).default('player'),
+  role: z.enum(['player', 'editor', 'admin']).default('player'),
 });
 
 export const adminUpdateUserSchema = z.object({
   displayName: displayNameSchema,
   team: teamSchema.nullable(),
-  role: z.enum(['player', 'admin']),
+  role: z.enum(['player', 'editor', 'admin']),
   longTermAbsence: z.boolean(),
   absenceNote: z.string().trim().max(200).nullable(),
   canBringGuests: z.boolean(),

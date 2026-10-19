@@ -3,6 +3,7 @@ import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/db';
+import { canEditResults } from './roles';
 import { validateSessionToken, type SessionUser } from './sessions';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -45,6 +46,13 @@ export async function requireUser(): Promise<SessionUser> {
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireUser();
   if (user.role !== 'admin') redirect('/partido');
+  return user;
+}
+
+/** Admins and editors: may enter results and goalscorers on Resultados. */
+export async function requireResultsEditor(): Promise<SessionUser> {
+  const user = await requireUser();
+  if (!canEditResults(user.role)) redirect('/partido');
   return user;
 }
 

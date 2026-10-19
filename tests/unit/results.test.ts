@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DbHandle } from '@/lib/db/create';
+import { canEditResults } from '@/lib/auth/roles';
 import { matches } from '@/lib/db/schema';
 import { listPlayedMatches, matchWinner, seasonSummary, setMatchResult } from '@/lib/match/results';
 import { freshDb, insertUser } from './helpers/db';
@@ -19,6 +20,14 @@ beforeAll(async () => {
   ]);
 });
 afterAll(() => h.close());
+
+describe('canEditResults', () => {
+  it('lets admins and editors enter results, not players', () => {
+    expect(canEditResults('admin')).toBe(true);
+    expect(canEditResults('editor')).toBe(true);
+    expect(canEditResults('player')).toBe(false);
+  });
+});
 
 describe('matchWinner', () => {
   it('derives Blancos, Color or a draw from the goals', () => {
@@ -56,7 +65,14 @@ describe('results', () => {
     await setMatchResult(h.db, adminId, latest.id, { blancos: 5, color: 3 }, now);
     await setMatchResult(h.db, adminId, latest.id, { blancos: 5, color: 5 }, now);
     const [updated] = await listPlayedMatches(h.db, now);
-    expect(updated).toMatchObject({ blancosGoals: 5, colorGoals: 5 });
+    expect(updated).toMatchObject({ blancosGoals: 5, colorGoals: 5, resultByName: 'ADMIN' });
+  });
+
+  it('records who entered the result last (shown on the card)', async () => {
+    const editor = await insertUser(h, { username: 'EDITOR', displayName: 'Pepe', role: 'editor' });
+    const [latest] = await listPlayedMatches(h.db, now);
+    await setMatchResult(h.db, editor.id, latest.id, { blancos: 2, color: 1 }, now);
+    expect((await listPlayedMatches(h.db, now))[0].resultByName).toBe('Pepe');
   });
 
   it('refuses results for matches not yet played or before results started', async () => {

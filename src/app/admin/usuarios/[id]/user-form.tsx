@@ -48,6 +48,7 @@ export function UserForm({ user, isSelf, upcomingGuests }: { user: User; isSelf:
         </label>
         <select id={roleId} name="role" className="input" defaultValue={user.role} disabled={isSelf}>
           <option value="player">{t('roles.player')}</option>
+          <option value="editor">{t('roles.editor')}</option>
           <option value="admin">{t('roles.admin')}</option>
         </select>
         {/* Disabled controls aren't submitted; keep the value so admins can't demote themselves by accident. */}

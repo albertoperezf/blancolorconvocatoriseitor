@@ -48,6 +48,7 @@ export function EnrolForm({ onClose }: { onClose: () => void }) {
           </label>
           <select id={roleId} name="role" className="input" defaultValue="player">
             <option value="player">{t('roles.player')}</option>
+            <option value="editor">{t('roles.editor')}</option>
             <option value="admin">{t('roles.admin')}</option>
           </select>
         </div>

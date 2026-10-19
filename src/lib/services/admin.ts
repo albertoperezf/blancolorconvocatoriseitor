@@ -116,6 +116,7 @@ export async function updateUser(
   if (changed.length) {
     await db.insert(auditLog).values({ actorId, action: 'user_updated', targetId: userId, details: changed.join(',') });
   }
+  return { promotedToEditor: before.role !== 'editor' && input.role === 'editor' };
 }
 
 export async function updateSettings(db: Db, actorId: string, input: z.output<typeof settingsSchema>) {

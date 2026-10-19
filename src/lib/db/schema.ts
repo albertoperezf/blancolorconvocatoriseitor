@@ -16,7 +16,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { POSITIONS } from '../positions';
 
-export const roleEnum = pgEnum('role', ['player', 'admin']);
+export const roleEnum = pgEnum('role', ['player', 'admin', 'editor']);
 export const teamEnum = pgEnum('team', ['blancos', 'color']);
 export const decisionEnum = pgEnum('decision', ['going', 'maybe', 'not_going']);
 export const positionEnum = pgEnum('position', POSITIONS);
@@ -75,6 +75,8 @@ export const matches = pgTable('matches', {
   // Null until an admin records the result.
   blancosGoals: smallint(),
   colorGoals: smallint(),
+  // Who last saved the score (admin or editor), shown on the match card.
+  resultBy: uuid().references(() => users.id, { onDelete: 'set null' }),
 });
 
 export const attendances = pgTable(

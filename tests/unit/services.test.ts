@@ -151,6 +151,21 @@ describe('admin', () => {
     await removeGuest(h.db, id, guest.id);
   });
 
+  it('reports a promotion to editor only the first time', async () => {
+    const p = await insertUser(h, { username: 'ASCENDIDO' });
+    const input = {
+      displayName: 'Ascendido',
+      team: null,
+      longTermAbsence: false,
+      absenceNote: null,
+      canBringGuests: true,
+      active: true,
+    };
+    expect(await updateUser(h.db, admin.id, p.id, { ...input, role: 'editor' })).toEqual({ promotedToEditor: true });
+    expect(await updateUser(h.db, admin.id, p.id, { ...input, role: 'editor' })).toEqual({ promotedToEditor: false });
+    expect(await updateUser(h.db, admin.id, p.id, { ...input, role: 'player' })).toEqual({ promotedToEditor: false });
+  });
+
   it('prevents admins from demoting or deactivating themselves', async () => {
     const base = {
       displayName: 'ADMIN',
