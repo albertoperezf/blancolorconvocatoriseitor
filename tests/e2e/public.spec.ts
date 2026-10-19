@@ -209,7 +209,7 @@ test('the reminder job only runs for Vercel Cron and the service worker is serve
   );
   const ok = await request.get('/api/cron/recordatorio', { headers: { authorization: `Bearer ${E2E_CRON_SECRET}` } });
   expect(ok.status()).toBe(200);
-  expect(await ok.json()).toEqual(expect.any(Object));
+  expect(await ok.json()).toEqual(expect.objectContaining({ purgedSessions: expect.any(Number) }));
 
   const sw = await request.get('/sw.js');
   expect(sw.status()).toBe(200);

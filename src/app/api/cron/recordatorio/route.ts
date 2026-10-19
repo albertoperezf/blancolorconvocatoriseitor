@@ -1,4 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
+import { purgeExpiredSessions } from '@/lib/auth/sessions';
 import { getDb } from '@/lib/db';
 import { getSettings } from '@/lib/match/queries';
 import { composeReminder } from '@/lib/push/reminder-text';
@@ -16,9 +17,11 @@ function authorized(request: Request) {
 
 export async function GET(request: Request) {
   if (!authorized(request)) return new Response('Unauthorized', { status: 401 });
-  if (!pushConfigured()) return Response.json({ skipped: 'push-not-configured' });
   const db = await getDb();
+  // Housekeeping: sessions nobody came back to; used ones are already checked and dropped on use.
+  const purgedSessions = await purgeExpiredSessions(db);
+  if (!pushConfigured()) return Response.json({ purgedSessions, skipped: 'push-not-configured' });
   const { timezone } = await getSettings(db);
   const result = await runReminder(db, { now: new Date(), send: webPushSender(), compose: composeReminder(timezone) });
-  return Response.json(result);
+  return Response.json({ purgedSessions, ...result });
 }

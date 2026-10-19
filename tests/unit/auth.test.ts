@@ -11,7 +11,7 @@ import {
   requestPasswordReset,
 } from '@/lib/auth/service';
 import { countResetRequests, dismissResetRequest, listResetRequests } from '@/lib/services/admin';
-import { createSession, validateSessionToken } from '@/lib/auth/sessions';
+import { createSession, purgeExpiredSessions, validateSessionToken } from '@/lib/auth/sessions';
 import { freshDb, insertUser } from './helpers/db';
 
 let h: DbHandle;
@@ -67,6 +67,17 @@ describe('sessions', () => {
     const { token, expiresAt } = await createSession(h.db, user.id, created);
     const result = await validateSessionToken(h.db, token);
     expect(result!.expiresAt.getTime()).toBeGreaterThan(expiresAt.getTime());
+  });
+
+  it('purges only sessions that have expired', async () => {
+    const [user] = await h.db.select().from(users).where(eq(users.username, 'PLAYER'));
+    const now = new Date();
+    const stale = await createSession(h.db, user.id, new Date(now.getTime() - 31 * 86_400_000));
+    const fresh = await createSession(h.db, user.id, now);
+    expect(await purgeExpiredSessions(h.db, now)).toBeGreaterThanOrEqual(1);
+    expect(await purgeExpiredSessions(h.db, now)).toBe(0);
+    expect(await validateSessionToken(h.db, stale.token, now)).toBeNull();
+    expect(await validateSessionToken(h.db, fresh.token, now)).not.toBeNull();
   });
 });
 

@@ -102,6 +102,7 @@ export async function invalidateUserSessions(db: Db, userId: string, exceptToken
   await db.delete(sessions).where(exceptToken ? and(byUser, ne(sessions.id, hashToken(exceptToken))) : byUser);
 }
 
-export async function purgeExpiredSessions(db: Db, now = new Date()) {
-  await db.delete(sessions).where(lt(sessions.expiresAt, now));
+export async function purgeExpiredSessions(db: Db, now = new Date()): Promise<number> {
+  const deleted = await db.delete(sessions).where(lt(sessions.expiresAt, now)).returning({ id: sessions.id });
+  return deleted.length;
 }
