@@ -3,7 +3,9 @@ import type { Db } from '@/lib/db/create';
 import { attendances, guests, users, type Decision, type Position, type Team } from '@/lib/db/schema';
 
 export class DomainError extends Error {
-  constructor(public readonly code: 'not_found' | 'forbidden' | 'duplicate' | 'self_lockout' | 'has_guests') {
+  constructor(
+    public readonly code: 'not_found' | 'forbidden' | 'duplicate' | 'self_lockout' | 'has_guests' | 'stale' | 'started',
+  ) {
     super(code);
   }
 }

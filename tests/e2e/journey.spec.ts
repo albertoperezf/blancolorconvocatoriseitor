@@ -462,6 +462,52 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(
     player.getByRole('region', { name: 'MARIQUITAS QUE NO VAN' }).getByText(`Nuevo ${suffix}`),
   ).toBeVisible();
+
+  // Reset this week's answers and guests; it needs REINICIAR typed in a dialog.
+  await page.goto('/admin/partido');
+  // Day, time and venue are folded away; the row shows them and opens the form.
+  await expect(page.getByLabel('Hora', { exact: true })).toBeHidden();
+  await page.getByText('Día, hora y lugar', { exact: true }).click();
+  await expect(page.getByLabel('Hora', { exact: true })).toBeVisible();
+  await expectNoA11yViolations(page);
+  const resetCard = page.getByRole('region', { name: 'Partido de esta semana' });
+  const started = resetCard.getByText('El partido ya ha empezado');
+  const resetButton = resetCard.getByRole('button', { name: 'Reiniciar convocatoria' });
+  await expect(resetCard).toContainText(/\d+ respuestas? \(/);
+  // Between kickoff and the rollover the button is disabled on purpose.
+  if (!(await started.isVisible())) {
+    await resetButton.click();
+    const dialog = page.getByRole('dialog', { name: /^¿Reiniciar la convocatoria del / });
+    const word = dialog.getByLabel('Escribe REINICIAR para confirmar');
+    const confirm = dialog.getByRole('button', { name: 'Sí, reiniciar' });
+    await expect(word).toBeFocused();
+    await expect(confirm).toBeDisabled();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(resetButton).toBeFocused();
+    await resetButton.click();
+    await word.fill('reinicia');
+    await expect(confirm).toBeDisabled();
+    await word.fill('reiniciar');
+    await expect(confirm).toBeEnabled();
+    // Measured after the disabled→enabled fade, so contrast is checked on the final colours.
+    await expect(confirm).toHaveCSS('opacity', '1');
+    await expectNoA11yViolations(page);
+    await confirm.click();
+    await expect(dialog).toBeHidden();
+    await expect(resetCard.getByRole('status')).toContainText(
+      /Convocatoria reiniciada: se han? borrado \d+ respuestas?/,
+    );
+    await expect(resetCard).toContainText('No hay respuestas ni fichajes.');
+    await expect(resetButton).toBeDisabled();
+    await player.goto('/partido');
+    await expect(
+      player.getByRole('region', { name: 'MARIQUITAS QUE NO VAN' }).getByText(`Nuevo ${suffix}`),
+    ).toHaveCount(0);
+  }
+  await player.goto('/admin/partido');
+  await expect(player).toHaveURL(/\/partido$/);
+
   await page.goto('/perfil');
   await page.getByText('Mi equipo y posición', { exact: true }).click();
   await page.getByLabel('Juego con').selectOption('color');

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { RESET_WORD } from './match/reset-word';
 import { POSITIONS } from './positions';
 
 export const TEAMS = ['blancos', 'color'] as const;
@@ -81,6 +82,15 @@ const goalsSchema = z
   .transform(Number);
 
 export const resultSchema = z.object({ blancos: goalsSchema, color: goalsSchema });
+
+export const resetMatchSchema = z.object({
+  matchId: z.uuid(),
+  confirm: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .refine((v) => v === RESET_WORD, 'reset.confirm'),
+});
 
 /** Answer sent by the service worker from a reminder's "Voy" / "No voy" buttons. */
 export const pushAnswerSchema = z.object({

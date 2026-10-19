@@ -6,7 +6,11 @@ import { getDb } from '@/lib/db';
 import { appOrigin, requireAdmin, requireResultsEditor } from '@/lib/auth/current';
 import { createResetToken } from '@/lib/auth/service';
 import { notifyNewEditor } from '@/lib/push/editor-notice';
+import { composeResetNotice } from '@/lib/push/reminder-text';
+import { notifyMatchReset } from '@/lib/push/reset-notice';
 import { pushConfigured, webPushSender } from '@/lib/push/service';
+import { getSettings } from '@/lib/match/queries';
+import { resetMatch } from '@/lib/match/reset';
 import { DomainError } from '@/lib/services/player';
 import { dismissResetRequest, enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
 import {
@@ -14,6 +18,7 @@ import {
   enrolSchema,
   fieldErrors,
   parseScorers,
+  resetMatchSchema,
   resultSchema,
   settingsSchema,
 } from '@/lib/validators';
@@ -105,6 +110,38 @@ export async function updateSettingsAction(_prev: FormState, formData: FormData)
   await updateSettings(await getDb(), admin.id, parsed.data);
   refresh();
   return { status: 'success', message: 'admin.settingsSaved' };
+}
+
+export async function resetMatchAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const admin = await requireAdmin();
+  const parsed = resetMatchSchema.safeParse({
+    matchId: formData.get('matchId') ?? '',
+    confirm: formData.get('confirm') ?? '',
+  });
+  if (!parsed.success) return { status: 'error', errors: fieldErrors(parsed.error) };
+
+  const db = await getDb();
+  let reset: Awaited<ReturnType<typeof resetMatch>>;
+  try {
+    reset = await resetMatch(db, admin.id, parsed.data.matchId);
+  } catch (e) {
+    if (e instanceof DomainError && (e.code === 'stale' || e.code === 'started')) {
+      return { status: 'error', message: `admin.reset.${e.code}` };
+    }
+    throw e;
+  }
+  if (pushConfigured()) {
+    const { timezone } = await getSettings(db);
+    const text = await composeResetNotice(reset.match, timezone);
+    // Best effort: the reset is done even if a notification can't be delivered.
+    await notifyMatchReset(db, reset.match, admin.id, webPushSender(), text).catch(() => undefined);
+  }
+  refresh();
+  return {
+    status: 'success',
+    message: 'admin.reset.done',
+    data: { answers: String(reset.answers), guests: String(reset.guests) },
+  };
 }
 
 export async function saveResultAction(matchId: string, _prev: FormState, formData: FormData): Promise<FormState> {

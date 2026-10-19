@@ -201,7 +201,7 @@
     "users": "Jugadores",
     "settings": "Partido semanal",
     "usersIntro": "Da de alta jugadores, cambia equipos, marca bajas y genera enlaces de contraseña.",
-    "settingsIntro": "Día, hora y lugar del partido de cada semana.",
+    "settingsIntro": "Día, hora y lugar del partido de cada semana. También puedes reiniciar la convocatoria.",
     "attendance": "Asistencia",
     "attendanceIntro": "Cuántas veces ha ido, dudado o faltado cada jugador.",
     "messages": "Mensajes",
@@ -258,7 +258,25 @@
     "address": "Dirección",
     "venue": "Lugar",
     "rollover": "Horas tras el inicio para pasar a la semana siguiente",
-    "settingsSaved": "Partido guardado."
+    "settingsSaved": "Partido guardado.",
+    "detailsHeading": "Día, hora y lugar",
+    "reset": {
+      "heading": "Partido de esta semana",
+      "intro": "Borra todas las respuestas y fichajes del próximo partido y avisa a los jugadores para que vuelvan a responder.",
+      "summary": "{answers, plural, =0 {Ninguna respuesta} one {# respuesta ({going} Voy · {maybe} Duda · {notGoing} No voy)} other {# respuestas ({going} Voy · {maybe} Duda · {notGoing} No voy)}} · {guests, plural, =0 {ningún fichaje} one {# fichaje} other {# fichajes}}",
+      "empty": "No hay respuestas ni fichajes.",
+      "open": "Reiniciar convocatoria",
+      "confirmTitle": "¿Reiniciar la convocatoria del {day}?",
+      "confirmBody": "{total, plural, one {Se borrará} other {Se borrarán}} {what}. Los jugadores tendrán que volver a responder. Esto no se puede deshacer.",
+      "answersCount": "{count, plural, one {# respuesta} other {# respuestas}}",
+      "guestsCount": "{count, plural, one {# fichaje} other {# fichajes}}",
+      "confirmLabel": "Escribe {word} para confirmar",
+      "cancel": "Cancelar",
+      "confirm": "Sí, reiniciar",
+      "done": "Convocatoria reiniciada: {total, plural, one {se ha borrado} other {se han borrado}} {what}.",
+      "stale": "El partido ha cambiado desde que abriste la página. Recárgala y vuelve a intentarlo.",
+      "started": "El partido ya ha empezado: no se puede reiniciar."
+    }
   },
   "errors": {
     "generic": "Algo ha fallado. Inténtalo otra vez.",
@@ -286,6 +304,7 @@
     },
     "displayName": { "min": "Mínimo 2 caracteres.", "max": "Máximo 40 caracteres." },
     "settings": { "time": "Formato HH:MM." },
+    "reset": { "confirm": "Escribe REINICIAR para confirmar." },
     "result": {
       "required": "Pon los goles de este equipo.",
       "goals": "Entre 0 y 99 goles.",
@@ -335,6 +354,8 @@
     "actionGoing": "✅ Voy",
     "editorTitle": "¡Ahora eres editor! ✏️",
     "editorBody": "Ya puedes poner los resultados y los goleadores de los partidos en Resultados.",
+    "resetTitle": "Convocatoria reiniciada 🔄",
+    "resetBody": "{day} · {time} — Se han borrado todas las respuestas. ¡Vuelve a apuntarte!",
     "actionNotGoing": "❌ No voy",
     "confirmGoing": "Apuntado: VOY. ¡Nos vemos en el partido!",
     "confirmNotGoing": "Apuntado: NO VOY. ¡Otra vez será!",
