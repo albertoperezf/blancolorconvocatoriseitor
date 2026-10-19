@@ -149,6 +149,9 @@ test('login rejects bad credentials without revealing whether the user exists', 
   await page.getByLabel('Contraseña', { exact: true }).fill('whatever');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.locator('main').getByRole('alert')).toHaveText('Usuario o contraseña incorrectos.');
+  await expect(page.getByLabel('Usuario')).toHaveValue('NOEXISTE');
+  await expect(page.getByLabel('Contraseña', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('Contraseña', { exact: true })).toBeFocused();
   await expectNoA11yViolations(page);
 });
 
