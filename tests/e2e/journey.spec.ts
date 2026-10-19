@@ -449,6 +449,13 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await editorCard.getByRole('button', { name: 'Guardar' }).click();
   await expect(editorCard.getByRole('status')).toHaveText('Resultado guardado.');
   await expect(editorCard).toContainText(`Resultado puesto por Nuevo ${suffix}`);
+  // Folded editors must not stretch the page: it ends right at the footer.
+  const gapBelowFooter = await player.evaluate(
+    () =>
+      document.documentElement.scrollHeight -
+      (document.querySelector('footer')!.getBoundingClientRect().bottom + window.scrollY),
+  );
+  expect(gapBelowFooter).toBeLessThanOrEqual(1);
   await player.goto('/admin');
   await expect(player).toHaveURL(/\/partido$/);
   // (And: the reminder's "Voy" / "No voy" buttons answer through this endpoint, same-origin only.)

@@ -14,8 +14,9 @@ export function Reveal({ open, children, className = '' }: { open: boolean; chil
       } ${className}`}
       inert={!open}
     >
-      {/* -m-2 p-2: room for focus rings, which overflow-hidden would otherwise cut; net layout is unchanged. */}
-      <div className="-m-2 min-h-0 overflow-hidden p-2">{children}</div>
+      {/* -m-2 p-2: room for focus rings, which overflow-hidden would otherwise cut; net layout is unchanged.
+          relative: also clips absolute children (e.g. sr-only labels), which would otherwise stretch the page. */}
+      <div className="relative -m-2 min-h-0 overflow-hidden p-2">{children}</div>
     </div>
   );
 }
