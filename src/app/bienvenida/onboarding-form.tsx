@@ -10,7 +10,7 @@ export function OnboardingForm({ needsPassword, team }: { needsPassword: boolean
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(completeOnboardingAction, idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const err = (field: string) => msg(state.errors?.[field]);
 
   return (

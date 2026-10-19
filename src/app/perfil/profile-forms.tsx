@@ -13,7 +13,15 @@ import {
 } from 'react';
 import { idle, type FormState } from '@/actions/form-state';
 import { changePasswordAction, closeOtherSessionsAction, updatePlayingAction } from '@/actions/player';
-import { Notice, PasswordField, TeamSelect, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
+import {
+  Notice,
+  PasswordField,
+  TeamSelect,
+  useAutoHide,
+  useFocusAfterSubmit,
+  useMessage,
+  useSubmitKeepingValues,
+} from '@/components/form';
 import { LockIcon, PositionIcon, ShirtIcon } from '@/components/icons';
 import type { Position, Team } from '@/lib/db/schema';
 import { POSITIONS } from '@/lib/positions';
@@ -48,7 +56,7 @@ export function PlayingForm({
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(updatePlayingAction, idle);
-  const submit = useSubmitKeepingValues(formAction);
+  const submit = useSubmitKeepingValues(formAction, state);
   const [saved, setSaved] = useState<Playing>({ team: team ?? '', position: position ?? '' });
   const [current, setCurrent] = useState<Playing>(saved);
   const submitted = useRef<Playing>(saved);
@@ -110,7 +118,7 @@ export function ChangePasswordForm({ username, onSaved }: { username: string; on
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(changePasswordAction, idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const formRef = useRef<HTMLFormElement>(null);
   const err = (f: string) => msg(state.errors?.[f]);
 
@@ -158,8 +166,10 @@ export function ChangePasswordForm({ username, onSaved }: { username: string; on
 export function CloseSessionsForm() {
   const t = useTranslations('profile');
   const [state, formAction, pending] = useActionState(closeOtherSessionsAction, idle);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFocusAfterSubmit(formRef, state);
   return (
-    <form action={formAction} className="flex flex-col gap-3">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-3">
       <button type="submit" className="btn-secondary self-start" disabled={pending}>
         {t('closeOthers')}
       </button>
@@ -231,7 +241,10 @@ function useFoldAfterSave() {
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const visible = useAutoHide(savedAt);
   const onSaved = useCallback(() => {
-    if (detailsRef.current) detailsRef.current.open = false;
+    if (detailsRef.current) {
+      detailsRef.current.open = false;
+      detailsRef.current.querySelector('summary')?.focus();
+    }
     setSavedAt(Date.now());
   }, []);
   return { detailsRef, onSaved, showNotice: savedAt !== null && visible };

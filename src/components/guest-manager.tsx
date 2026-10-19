@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { addGuestAction, removeGuestAction } from '@/actions/player';
 import { idle } from '@/actions/form-state';
-import { Field, useAutoHide, useMessage } from './form';
+import { Field, useAutoHide, useFocusAfterSubmit, useMessage } from './form';
 import { CheckIcon, XIcon } from './icons';
 import { Reveal } from './reveal';
 
@@ -34,6 +34,7 @@ export function GuestManager({ guests }: { guests: { id: string; name: string }[
       focusName();
     }
   }, [state]);
+  useFocusAfterSubmit(formRef, state);
 
   const close = () => {
     // Closing discards what was typed and any validation error from the last attempt.

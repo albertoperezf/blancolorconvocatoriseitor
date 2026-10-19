@@ -11,7 +11,7 @@ export function RecoverForm() {
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(requestResetAction, idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const noticeVisible = useAutoHide(state);
 
   return (

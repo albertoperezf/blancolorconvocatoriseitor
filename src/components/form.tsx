@@ -1,12 +1,39 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { startTransition, useEffect, useId, useRef, useState, type FormEvent, type InputHTMLAttributes } from 'react';
+import {
+  startTransition,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type InputHTMLAttributes,
+  type RefObject,
+} from 'react';
+import type { FormState } from '@/actions/form-state';
+
+/**
+ * After a submit, focus the first invalid field (its error is read with it), or the submit button
+ * again: it was disabled while pending, which drops focus to <body>.
+ */
+export function useFocusAfterSubmit(formRef: RefObject<HTMLFormElement | null>, state: FormState | undefined) {
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form || !state || state.status === 'idle') return;
+    const invalid = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+    if (state.status === 'error' && invalid) invalid.focus();
+    else if (document.activeElement === document.body) form.querySelector<HTMLElement>('[type="submit"]')?.focus();
+  }, [formRef, state]);
+}
 
 /** `<form action>` auto-resets after every submit, even on validation errors; onSubmit keeps the values. */
-export function useSubmitKeepingValues(dispatch: (formData: FormData) => void) {
+export function useSubmitKeepingValues(dispatch: (formData: FormData) => void, state?: FormState) {
+  const formRef = useRef<HTMLFormElement | null>(null);
+  useFocusAfterSubmit(formRef, state);
   return (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    formRef.current = event.currentTarget;
     const formData = new FormData(event.currentTarget);
     startTransition(() => dispatch(formData));
   };
@@ -48,7 +75,10 @@ export function Field({ label, name, error, hint, hintInline = false, id, ...inp
   const autoId = useId();
   const inputId = id ?? `${name}-${autoId}`;
   const hintId = hint ? `${inputId}-hint` : undefined;
-  const errorId = error ? `${inputId}-error` : undefined;
+  // e.g. "Mínimo 12 caracteres.": highlight the hint instead of printing and announcing it twice.
+  const hintIsError = !!error && error === hint;
+  const errorId = error && !hintIsError ? `${inputId}-error` : undefined;
+  const hintClass = hintIsError ? 'font-semibold text-danger' : 'text-muted';
   return (
     <div>
       {hint && hintInline ? (
@@ -56,7 +86,7 @@ export function Field({ label, name, error, hint, hintInline = false, id, ...inp
           <label htmlFor={inputId} className="font-semibold">
             {label}
           </label>
-          <p id={hintId} className="text-sm text-muted">
+          <p id={hintId} className={`text-sm ${hintClass}`}>
             {hint}
           </p>
         </div>
@@ -66,7 +96,7 @@ export function Field({ label, name, error, hint, hintInline = false, id, ...inp
             {label}
           </label>
           {hint && (
-            <p id={hintId} className="mb-1 text-sm text-muted">
+            <p id={hintId} className={`mb-1 text-sm ${hintClass}`}>
               {hint}
             </p>
           )}
@@ -80,7 +110,7 @@ export function Field({ label, name, error, hint, hintInline = false, id, ...inp
         aria-describedby={[hintId, errorId].filter(Boolean).join(' ') || undefined}
         {...input}
       />
-      {error && (
+      {errorId && (
         <p id={errorId} className="mt-1 text-sm font-semibold text-danger">
           {error}
         </p>

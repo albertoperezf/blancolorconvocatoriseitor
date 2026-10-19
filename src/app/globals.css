@@ -51,9 +51,31 @@
   }
 }
 
+/* Keep keyboard focus clear of the sticky header (two rows below 520px) and the fixed answer bar. */
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-padding-top: 4rem;
+  scroll-padding-top: 7.5rem;
+}
+@media (min-width: 32.5rem) {
+  html {
+    scroll-padding-top: 4.5rem;
+  }
+}
+@media (max-width: 47.99rem) {
+  html:has(#tu-respuesta) {
+    scroll-padding-bottom: 11rem;
+  }
+}
+
+/* High Contrast drops background colours, so selected states need the system highlight instead. */
+@media (forced-colors: active) {
+  nav [aria-current='page'],
+  input[type='radio']:checked + span {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
 }
 
 body {
@@ -90,7 +112,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 @utility btn-primary {
-  @apply btn bg-brand text-brand-fg hover:opacity-90;
+  @apply btn bg-brand text-brand-fg hover:opacity-90 forced-colors:border;
 }
 @utility btn-secondary {
   @apply btn border border-border bg-surface text-fg hover:bg-bg;

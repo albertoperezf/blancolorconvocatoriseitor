@@ -1,19 +1,21 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useRef } from 'react';
 import { createResetLinkAction } from '@/actions/admin';
 import { idle } from '@/actions/form-state';
-import { Notice, useMessage } from '@/components/form';
+import { Notice, useFocusAfterSubmit, useMessage } from '@/components/form';
 import { ShareLink } from '../share-link';
 
 export function ResetLinkPanel({ userId }: { userId: string }) {
   const t = useTranslations('admin');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(createResetLinkAction.bind(null, userId), idle);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFocusAfterSubmit(formRef, state);
 
   return (
-    <form action={formAction}>
+    <form ref={formRef} action={formAction}>
       <button type="submit" className="btn-secondary" disabled={pending}>
         {t('resetCreate')}
       </button>

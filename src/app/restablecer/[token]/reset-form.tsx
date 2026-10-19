@@ -10,7 +10,7 @@ export function ResetForm({ token, username }: { token: string; username: string
   const t = useTranslations();
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(resetPasswordAction.bind(null, token), idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const err = (field: string) => msg(state.errors?.[field]);
 
   return (

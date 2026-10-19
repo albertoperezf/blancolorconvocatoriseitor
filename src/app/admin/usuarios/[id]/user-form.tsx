@@ -22,7 +22,7 @@ export function UserForm({ user, isSelf, upcomingGuests }: { user: User; isSelf:
   const tProfile = useTranslations('profile');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(updateUserAction.bind(null, user.id), idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const noticeVisible = useAutoHide(state);
   const [absent, setAbsent] = useState(user.longTermAbsence);
   const roleId = useId();

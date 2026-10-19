@@ -13,7 +13,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   const tProfile = useTranslations('profile');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(updateSettingsAction, idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const noticeVisible = useAutoHide(state);
   const weekdayId = useId();
   const weekdays = t.raw('weekdays') as string[];

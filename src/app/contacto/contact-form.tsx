@@ -10,7 +10,7 @@ export function ContactForm() {
   const t = useTranslations('contact');
   const msg = useMessage();
   const [state, formAction, pending] = useActionState(sendContactAction, idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const noticeVisible = useAutoHide(state);
   const formRef = useRef<HTMLFormElement>(null);
   const messageId = useId();

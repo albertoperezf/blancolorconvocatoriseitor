@@ -113,7 +113,7 @@ export default async function ResultsPage() {
             const hasResult = m.blancosGoals !== null && m.colorGoals !== null;
             const winner = hasResult ? matchWinner(m.blancosGoals!, m.colorGoals!) : null;
             return (
-              <li key={m.id} className="card">
+              <li key={m.id} className="card min-w-0">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h2 className="font-extrabold">
                     <time dateTime={m.startsAt.toISOString()}>{date}</time>
@@ -130,12 +130,12 @@ export default async function ResultsPage() {
                   )}
                 </div>
                 {hasResult && (
-                  <p className="mt-3 flex items-center justify-center gap-3 text-xl font-extrabold tabular-nums sm:text-2xl">
+                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 text-xl font-extrabold tabular-nums sm:text-2xl">
                     <span className="inline-flex items-center gap-1.5">
                       <ShirtIcon className="size-5" />
                       {t('blancos')}
                     </span>
-                    <span>
+                    <span className="whitespace-nowrap">
                       {m.blancosGoals} – {m.colorGoals}
                     </span>
                     <span className="inline-flex items-center gap-1.5">

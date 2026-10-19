@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useEffect, useId, useRef } from 'react';
 import { enrolUserAction } from '@/actions/admin';
 import { idle } from '@/actions/form-state';
-import { Field, Notice, TeamSelect, useMessage } from '@/components/form';
+import { Field, Notice, TeamSelect, useFocusAfterSubmit, useMessage } from '@/components/form';
 import { ShareLink } from './share-link';
 
 export function EnrolForm({ onClose }: { onClose: () => void }) {
@@ -19,6 +19,7 @@ export function EnrolForm({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (state.status === 'success') formRef.current?.reset();
   }, [state]);
+  useFocusAfterSubmit(formRef, state);
 
   return (
     <>

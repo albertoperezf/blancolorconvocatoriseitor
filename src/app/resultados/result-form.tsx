@@ -27,7 +27,7 @@ export function ResultForm({ matchId, legend, blancos, color, scorers, defaultOp
   const msg = useMessage();
   const [open, setOpen] = useState(defaultOpen);
   const [state, formAction, pending] = useActionState(saveResultAction.bind(null, matchId), idle);
-  const onSubmit = useSubmitKeepingValues(formAction);
+  const onSubmit = useSubmitKeepingValues(formAction, state);
   const noticeVisible = useAutoHide(state);
   const err = (f: string) => (state.status === 'error' ? msg(state.errors?.[f]) : undefined);
   const [score, setScore] = useState({ blancos: String(blancos ?? ''), color: String(color ?? '') });
