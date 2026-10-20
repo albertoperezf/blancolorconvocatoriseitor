@@ -443,6 +443,9 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
     .filter({ has: player.getByRole('button', { name: /^(Editar|Poner) resultado/ }) })
     .first();
   const editorToggle = editorCard.getByRole('button', { name: /^(Editar|Poner) resultado/ });
+  // Editors only get the latest match, until the next one kicks off.
+  await expect(player.getByRole('button', { name: /^(Editar|Poner) resultado/ })).toHaveCount(1);
+  await expect(editorCard).toContainText(/Se puede editar hasta el \S+, \d+ de \S+ a las \d\d:\d\d\./);
   if ((await editorToggle.getAttribute('aria-expanded')) !== 'true') await editorToggle.click();
   await editorCard.getByLabel('Goles de Blancos').fill('4');
   await editorCard.getByLabel('Goles de Color').fill('4');

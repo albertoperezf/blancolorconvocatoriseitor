@@ -24,6 +24,7 @@ import {
   settingsSchema,
 } from '@/lib/validators';
 import { saveMatchResult, scorerExcess } from '@/lib/match/goals';
+import { canEditMatch, latestPlayedMatchId } from '@/lib/match/results';
 import type { FormState } from './form-state';
 
 const optional = (v: FormDataEntryValue | null) => (v === null || v === '' ? undefined : v);
@@ -175,8 +176,12 @@ export async function saveResultAction(matchId: string, _prev: FormState, formDa
   if (scorerExcess(parsed.data, scorers).length > 0) {
     return { status: 'error', errors: { scorers: 'result.tooManyScorers' } };
   }
+  const db = await getDb();
+  if (!canEditMatch(editor.role, matchId, await latestPlayedMatchId(db))) {
+    return { status: 'error', message: 'results.locked' };
+  }
   try {
-    await saveMatchResult(await getDb(), editor.id, matchId, parsed.data, scorers);
+    await saveMatchResult(db, editor.id, matchId, parsed.data, scorers);
   } catch (e) {
     if (e instanceof DomainError) return { status: 'error', message: 'errors.generic' };
     throw e;

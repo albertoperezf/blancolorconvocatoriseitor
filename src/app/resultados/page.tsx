@@ -8,8 +8,9 @@ import { getDb } from '@/lib/db';
 import type { Team } from '@/lib/db/schema';
 import { BLOG_URL, VIDEOS_URL } from '@/lib/links';
 import { buildScorerColumns, listMatchScorers, scorerCandidates, topScorers } from '@/lib/match/goals';
-import { getSettings } from '@/lib/match/queries';
-import { listPlayedMatches, matchWinner, seasonSummary, type Winner } from '@/lib/match/results';
+import { ensureCurrentMatch, getSettings } from '@/lib/match/queries';
+import { canEditMatch, listPlayedMatches, matchWinner, seasonSummary, type Winner } from '@/lib/match/results';
+import { nextMatchStart } from '@/lib/match/schedule';
 import { ResultForm } from './result-form';
 
 export const metadata: Metadata = {
@@ -26,6 +27,8 @@ const BADGE: Record<Winner, string> = {
 
 export default async function ResultsPage() {
   const db = await getDb();
+  // Creates this week's match once it exists, so it becomes the latest played one on kick-off.
+  await ensureCurrentMatch(db);
   const [t, tFooter, format, user, settings, played, pichichi] = await Promise.all([
     getTranslations('results'),
     getTranslations('footer'),
@@ -38,7 +41,20 @@ export default async function ResultsPage() {
   const canEdit = !!user && canEditResults(user.role);
   const summary = seasonSummary(played);
   const matchIds = played.map((m) => m.id);
-  const newestPending = played.find((m) => m.blancosGoals === null || m.colorGoals === null)?.id;
+  const latest = played[0];
+  const editable = (matchId: string) => canEdit && canEditMatch(user.role, matchId, latest?.id);
+  // Editors lose the latest match when the next one kicks off; admins can always fix any.
+  const lockNote =
+    canEdit && user.role !== 'admin' && latest
+      ? (() => {
+          const next = nextMatchStart(latest.startsAt, settings);
+          const opts = { timeZone: settings.timezone } as const;
+          return t('editableUntil', {
+            day: format.dateTime(next, { ...opts, weekday: 'long', day: 'numeric', month: 'long' }),
+            time: format.dateTime(next, { ...opts, hour: '2-digit', minute: '2-digit' }),
+          });
+        })()
+      : undefined;
   const [scorers, candidates] = await Promise.all([
     listMatchScorers(db, matchIds),
     canEdit ? scorerCandidates(db, matchIds) : null,
@@ -128,7 +144,7 @@ export default async function ResultsPage() {
                     </span>
                   ) : (
                     <span className="rounded-full border border-dashed border-border px-3 py-0.5 text-sm text-muted">
-                      {t('pending')}
+                      {m.id === latest?.id ? t('pending') : t('noResult')}
                     </span>
                   )}
                 </div>
@@ -168,14 +184,15 @@ export default async function ResultsPage() {
                 {hasResult && m.resultByName && (
                   <p className="mt-2 text-center text-xs text-muted">{t('enteredBy', { name: m.resultByName })}</p>
                 )}
-                {canEdit && candidates && (
+                {candidates && editable(m.id) && (
                   <ResultForm
                     matchId={m.id}
                     legend={t('legend', { date })}
                     blancos={m.blancosGoals}
                     color={m.colorGoals}
                     scorers={buildScorerColumns(m.id, candidates, scorers)}
-                    defaultOpen={m.id === newestPending}
+                    defaultOpen={m.id === latest?.id && !hasResult}
+                    note={m.id === latest?.id ? lockNote : undefined}
                   />
                 )}
               </li>

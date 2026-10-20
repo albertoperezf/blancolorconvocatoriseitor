@@ -25,3 +25,8 @@ export function currentMatchStart(now: Date, schedule: Schedule): Date {
   }
   return new Date(at(daysAhead + 14).getTime());
 }
+
+/** Kick-off of the match after the one starting at `start`. */
+export function nextMatchStart(start: Date, schedule: Schedule): Date {
+  return currentMatchStart(new Date(start.getTime() + schedule.rolloverHours * HOUR_MS + 1), schedule);
+}

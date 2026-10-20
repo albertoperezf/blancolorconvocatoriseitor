@@ -17,12 +17,14 @@ type Props = {
   color: number | null;
   scorers: Record<Team, ScorerColumn>;
   defaultOpen?: boolean;
+  /** Shown under the toggle, e.g. until when it can still be edited. */
+  note?: string;
 };
 
 const asGoals = (v: string) => (/^\d{1,2}$/.test(v.trim()) ? Number(v) : null);
 
-/** Folded behind "Editar resultado" so the list stays short; the newest match without a result starts open. */
-export function ResultForm({ matchId, legend, blancos, color, scorers, defaultOpen = false }: Props) {
+/** Folded behind "Editar resultado" so the list stays short; the latest match starts open while it has no result. */
+export function ResultForm({ matchId, legend, blancos, color, scorers, defaultOpen = false, note }: Props) {
   const t = useTranslations('results');
   const msg = useMessage();
   const [open, setOpen] = useState(defaultOpen);
@@ -46,6 +48,7 @@ export function ResultForm({ matchId, legend, blancos, color, scorers, defaultOp
           ▾
         </span>
       </button>
+      {note && <p className="text-xs text-muted">{note}</p>}
       <Reveal open={open}>
         <form id={`result-${matchId}`} onSubmit={onSubmit} className="pt-2" noValidate>
           <fieldset>

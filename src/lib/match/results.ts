@@ -1,8 +1,9 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
-import { auditLog, matches, users } from '@/lib/db/schema';
+import { auditLog, matches, users, type Role } from '@/lib/db/schema';
 import { shownName } from '@/lib/db/shown-name';
 import { DomainError } from '@/lib/services/player';
+import { ensureCurrentMatch } from './queries';
 
 /** First match with recorded results; RESULTS_FROM (ISO date) can move it for local testing. */
 export function resultsFrom(): Date {
@@ -39,6 +40,23 @@ export function listPlayedMatches(db: Db, now: Date = new Date()) {
     .leftJoin(users, eq(users.id, matches.resultBy))
     .where(and(gte(matches.startsAt, resultsFrom()), lte(matches.startsAt, now)))
     .orderBy(desc(matches.startsAt));
+}
+
+/** Editors can only fix the newest match that has kicked off (it locks when the next one kicks off); admins, any. */
+export function canEditMatch(role: Role, matchId: string, latestPlayedId: string | undefined) {
+  return role === 'admin' || matchId === latestPlayedId;
+}
+
+export async function latestPlayedMatchId(db: Db, now: Date = new Date()): Promise<string | undefined> {
+  // Match rows are created lazily: make sure this week's exists, so it takes over once it kicks off.
+  await ensureCurrentMatch(db, now);
+  const [row] = await db
+    .select({ id: matches.id })
+    .from(matches)
+    .where(and(gte(matches.startsAt, resultsFrom()), lte(matches.startsAt, now)))
+    .orderBy(desc(matches.startsAt))
+    .limit(1);
+  return row?.id;
 }
 
 export async function setMatchResult(
