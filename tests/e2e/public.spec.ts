@@ -222,8 +222,12 @@ test('the reminder job only runs for Vercel Cron and the service worker is serve
   expect((await request.post('/api/asistencia', { data, headers: { origin } })).status()).toBe(401);
 });
 
-test('private pages redirect anonymous visitors to login', async ({ page }) => {
+test('private pages redirect anonymous visitors to login', async ({ page, request }) => {
   for (const path of ['/partido', '/perfil', '/admin', '/admin/usuarios', '/admin/asistencia', '/admin/mensajes']) {
+    // A real HTTP redirect, not a loading skeleton that redirects a second later.
+    const res = await request.get(path, { maxRedirects: 0 });
+    expect(res.status(), path).toBe(307);
+    expect(res.headers()['location'], path).toMatch(/\/login$/);
     await page.goto(path);
     await expect(page).toHaveURL(/\/login$/);
   }

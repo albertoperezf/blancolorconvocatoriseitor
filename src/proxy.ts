@@ -2,8 +2,16 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const SESSION_COOKIES = ['__Host-session', 'session'];
 const SESSION_TTL_S = 30 * 24 * 3600;
+const PRIVATE_PAGES = /^\/(partido|perfil|bienvenida|admin)(\/|$)/;
 
 export function proxy(request: NextRequest) {
+  // No session cookie at all: send them to login before the page's loading skeleton streams in.
+  // A cookie that's present but invalid is still caught by the page itself.
+  const hasSession = SESSION_COOKIES.some((name) => request.cookies.get(name)?.value);
+  if (!hasSession && request.method === 'GET' && PRIVATE_PAGES.test(request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const isDev = process.env.NODE_ENV === 'development';
   const csp = [
