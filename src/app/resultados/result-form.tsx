@@ -7,7 +7,8 @@ import { idle } from '@/actions/form-state';
 import { Field, useAutoHide, useMessage, useSubmitKeepingValues } from '@/components/form';
 import { Reveal } from '@/components/reveal';
 import type { Team } from '@/lib/db/schema';
-import type { ScorerColumn } from '@/lib/match/goals';
+import type { ScorerColumn, ScorerOption } from '@/lib/match/goals';
+import { AttendanceEditor, type Attendee, type MatchGuest } from './attendance-editor';
 import { ScorersEditor } from './scorers-editor';
 
 type Props = {
@@ -16,15 +17,21 @@ type Props = {
   blancos: number | null;
   color: number | null;
   scorers: Record<Team, ScorerColumn>;
+  attendance: { going: Attendee[]; guests: MatchGuest[]; others: Attendee[] };
   defaultOpen?: boolean;
   /** Shown under the toggle, e.g. until when it can still be edited. */
   note?: string;
 };
 
 const asGoals = (v: string) => (/^\d{1,2}$/.test(v.trim()) ? Number(v) : null);
+const toggle = (set: Set<string>, id: string) => {
+  const next = new Set(set);
+  if (!next.delete(id)) next.add(id);
+  return next;
+};
 
 /** Folded behind "Editar resultado" so the list stays short; the latest match starts open while it has no result. */
-export function ResultForm({ matchId, legend, blancos, color, scorers, defaultOpen = false, note }: Props) {
+export function ResultForm({ matchId, legend, blancos, color, scorers, attendance, defaultOpen = false, note }: Props) {
   const t = useTranslations('results');
   const msg = useMessage();
   const [open, setOpen] = useState(defaultOpen);
@@ -33,6 +40,29 @@ export function ResultForm({ matchId, legend, blancos, color, scorers, defaultOp
   const noticeVisible = useAutoHide(state);
   const err = (f: string) => (state.status === 'error' ? msg(state.errors?.[f]) : undefined);
   const [score, setScore] = useState({ blancos: String(blancos ?? ''), color: String(color ?? '') });
+  const [absent, setAbsent] = useState<Set<string>>(new Set());
+  const [present, setPresent] = useState<Attendee[]>([]);
+  const [removedGuests, setRemovedGuests] = useState<Set<string>>(new Set());
+  const [savedState, setSavedState] = useState(state);
+
+  // Once saved, the page data already reflects who came; start the next edit from there.
+  if (state !== savedState) {
+    setSavedState(state);
+    if (state.status === 'success') {
+      setAbsent(new Set());
+      setPresent([]);
+      setRemovedGuests(new Set());
+    }
+  }
+
+  const hidden = new Set([...[...absent].map((id) => `user:${id}`), ...[...removedGuests].map((id) => `guest:${id}`)]);
+  const promoted: Record<Team, ScorerOption[]> = { blancos: [], color: [] };
+  for (const a of present) {
+    for (const team of a.team ? [a.team] : (['blancos', 'color'] as const)) {
+      promoted[team].push({ kind: 'user', id: a.id, name: a.name });
+    }
+  }
+  const changes = { absent: [...absent], present: present.map((a) => a.id), removeGuests: [...removedGuests] };
 
   return (
     <div className="mt-4 border-t border-border pt-2">
@@ -80,10 +110,23 @@ export function ResultForm({ matchId, legend, blancos, color, scorers, defaultOp
               />
             </div>
           </fieldset>
+          <input type="hidden" name="attendance" value={JSON.stringify(changes)} />
+          <AttendanceEditor
+            {...attendance}
+            absent={absent}
+            present={present}
+            removedGuests={removedGuests}
+            onToggleAbsent={(id) => setAbsent((s) => toggle(s, id))}
+            onAddPresent={(player) => setPresent((p) => [...p, player])}
+            onRemovePresent={(id) => setPresent((p) => p.filter((a) => a.id !== id))}
+            onToggleGuest={(id) => setRemovedGuests((s) => toggle(s, id))}
+          />
           <ScorersEditor
             initial={scorers}
             score={{ blancos: asGoals(score.blancos), color: asGoals(score.color) }}
             error={err('scorers')}
+            hidden={hidden}
+            promoted={promoted}
           />
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button type="submit" className="btn-primary" disabled={pending}>

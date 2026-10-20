@@ -18,6 +18,7 @@ import {
   adminUpdateUserSchema,
   enrolSchema,
   fieldErrors,
+  parseAttendanceChanges,
   parseScorers,
   resetMatchSchema,
   resultSchema,
@@ -172,7 +173,8 @@ export async function saveResultAction(matchId: string, _prev: FormState, formDa
   const parsed = resultSchema.safeParse({ blancos: formData.get('blancos') ?? '', color: formData.get('color') ?? '' });
   if (!parsed.success) return { status: 'error', errors: fieldErrors(parsed.error) };
   const scorers = parseScorers(formData.get('scorers'));
-  if (!scorers) return { status: 'error', message: 'errors.generic' };
+  const changes = parseAttendanceChanges(formData.get('attendance'));
+  if (!scorers || !changes) return { status: 'error', message: 'errors.generic' };
   if (scorerExcess(parsed.data, scorers).length > 0) {
     return { status: 'error', errors: { scorers: 'result.tooManyScorers' } };
   }
@@ -181,7 +183,7 @@ export async function saveResultAction(matchId: string, _prev: FormState, formDa
     return { status: 'error', message: 'results.locked' };
   }
   try {
-    await saveMatchResult(db, editor.id, matchId, parsed.data, scorers);
+    await saveMatchResult(db, editor.id, matchId, parsed.data, scorers, new Date(), changes);
   } catch (e) {
     if (e instanceof DomainError) return { status: 'error', message: 'errors.generic' };
     throw e;

@@ -60,6 +60,15 @@ export default async function ResultsPage() {
     canEdit ? scorerCandidates(db, matchIds) : null,
   ]);
   const scorersFor = (matchId: string, team: Team) => scorers.filter((s) => s.matchId === matchId && s.team === team);
+  const attendanceFor = (matchId: string) => {
+    const going = (candidates?.going ?? []).filter((p) => p.matchId === matchId);
+    const goingIds = new Set(going.map((p) => p.id));
+    return {
+      going,
+      guests: (candidates?.matchGuests ?? []).filter((g) => g.matchId === matchId),
+      others: (candidates?.players ?? []).filter((p) => !goingIds.has(p.id)),
+    };
+  };
 
   return (
     <>
@@ -191,6 +200,7 @@ export default async function ResultsPage() {
                     blancos={m.blancosGoals}
                     color={m.colorGoals}
                     scorers={buildScorerColumns(m.id, candidates, scorers)}
+                    attendance={attendanceFor(m.id)}
                     defaultOpen={m.id === latest?.id && !hasResult}
                     note={m.id === latest?.id ? lockNote : undefined}
                   />

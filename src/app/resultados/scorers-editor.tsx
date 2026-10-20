@@ -10,40 +10,59 @@ const TEAMS: Team[] = ['blancos', 'color'];
 const MAX_GOALS = 99;
 
 type Columns = Record<Team, ScorerColumn>;
+type Row = ScorerOption & { goals: number };
+
+const keyOf = (o: ScorerOption) => `${o.kind}:${o.id}`;
 
 /** Per-player goal counters for both teams; the chosen scorers travel as JSON in the `scorers` field. */
 export function ScorersEditor({
   initial,
   score,
   error,
+  hidden,
+  promoted,
 }: {
   initial: Columns;
   score: Record<Team, number | null>;
   error?: string;
+  /** `kind:id` of people marked as not there ("Quién vino"): no row, no goals. */
+  hidden: Set<string>;
+  /** Players just marked as there, listed like the ones who said VOY. */
+  promoted: Record<Team, ScorerOption[]>;
 }) {
   const t = useTranslations('results');
-  const [columns, setColumns] = useState(initial);
+  const [goals, setGoalsMap] = useState<Record<string, number>>(() =>
+    Object.fromEntries(TEAMS.flatMap((team) => initial[team].listed.map((s) => [`${team}:${keyOf(s)}`, s.goals]))),
+  );
+  const [manual, setManual] = useState<Record<Team, ScorerOption[]>>({ blancos: [], color: [] });
   const [startOpen] = useState(() => TEAMS.some((team) => initial[team].listed.some((s) => s.goals > 0)));
 
+  const columns = Object.fromEntries(
+    TEAMS.map((team) => {
+      const seen = new Set<string>();
+      const listed: Row[] = [];
+      for (const o of [...initial[team].listed, ...promoted[team], ...manual[team]]) {
+        const key = keyOf(o);
+        if (seen.has(key) || hidden.has(key)) continue;
+        seen.add(key);
+        const saved = 'goals' in o ? (o.goals as number) : 0;
+        listed.push({ kind: o.kind, id: o.id, name: o.name, goals: goals[`${team}:${key}`] ?? saved });
+      }
+      const extra = initial[team].extra.filter((o) => !seen.has(keyOf(o)) && !hidden.has(keyOf(o)));
+      return [team, { listed, extra }];
+    }),
+  ) as Columns;
+
   const setGoals = (team: Team, key: string, delta: number) =>
-    setColumns((c) => ({
-      ...c,
-      [team]: {
-        ...c[team],
-        listed: c[team].listed.map((s) =>
-          `${s.kind}:${s.id}` === key ? { ...s, goals: Math.min(MAX_GOALS, Math.max(0, s.goals + delta)) } : s,
-        ),
-      },
+    setGoalsMap((g) => ({
+      ...g,
+      [`${team}:${key}`]: Math.min(MAX_GOALS, Math.max(0, (g[`${team}:${key}`] ?? 0) + delta)),
     }));
 
-  const addPlayer = (team: Team, option: ScorerOption) =>
-    setColumns((c) => ({
-      ...c,
-      [team]: {
-        listed: [...c[team].listed, { ...option, goals: 1 }],
-        extra: c[team].extra.filter((o) => o.id !== option.id),
-      },
-    }));
+  const addPlayer = (team: Team, option: ScorerOption) => {
+    setManual((m) => ({ ...m, [team]: [...m[team], option] }));
+    setGoalsMap((g) => ({ ...g, [`${team}:${keyOf(option)}`]: 1 }));
+  };
 
   const assigned = (team: Team) => columns[team].listed.reduce((n, s) => n + s.goals, 0);
   const total = TEAMS.reduce((n, team) => n + (score[team] ?? 0), 0);

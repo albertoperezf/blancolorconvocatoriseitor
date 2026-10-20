@@ -120,6 +120,24 @@ export function parseScorers(value: FormDataEntryValue | null) {
   }
 }
 
+export const attendanceChangesSchema = z.object({
+  absent: z.array(z.uuid()).max(100),
+  present: z.array(z.uuid()).max(100),
+  removeGuests: z.array(z.uuid()).max(100),
+});
+
+/** The "Quién vino" field carries JSON; missing means no changes, anything malformed is null. */
+export function parseAttendanceChanges(value: FormDataEntryValue | null) {
+  if (value === null) return { absent: [], present: [], removeGuests: [] };
+  if (typeof value !== 'string') return null;
+  try {
+    const parsed = attendanceChangesSchema.safeParse(JSON.parse(value));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+
 export const contactSchema = z.object({
   name: z.string().trim().min(2, 'contact.name').max(60, 'contact.name'),
   email: z.string().trim().max(120, 'contact.email').pipe(z.email('contact.email')),

@@ -10,6 +10,9 @@ export type ScorerInput = { team: Team; kind: ScorerKind; id: string; goals: num
 export type MatchScorer = ScorerInput & { matchId: string; name: string };
 export type ScorerOption = { kind: ScorerKind; id: string; name: string };
 export type ScorerColumn = { listed: (ScorerOption & { goals: number })[]; extra: ScorerOption[] };
+/** Who actually came, fixed after the match: VOY players who didn't, others who did, guests added by mistake. */
+export type AttendanceChanges = { absent: string[]; present: string[]; removeGuests: string[] };
+export const NO_CHANGES: AttendanceChanges = { absent: [], present: [], removeGuests: [] };
 
 const TEAMS: Team[] = ['blancos', 'color'];
 const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, 'es');
@@ -44,7 +47,7 @@ export function scorerExcess(score: { blancos: number; color: number }, scorers:
   return TEAMS.filter((team) => scorers.filter((s) => s.team === team).reduce((n, s) => n + s.goals, 0) > score[team]);
 }
 
-/** Saves the score and replaces the scorers of a played match in one go. */
+/** Saves the score, who came and the scorers of a played match in one go. */
 export async function saveMatchResult(
   db: Db,
   actorId: string,
@@ -52,14 +55,20 @@ export async function saveMatchResult(
   score: { blancos: number; color: number },
   scorers: ScorerInput[],
   now: Date = new Date(),
+  changes: AttendanceChanges = NO_CHANGES,
 ) {
   const keys = scorers.map((s) => `${s.team}:${s.kind}:${s.id}`);
   if (new Set(keys).size !== keys.length) throw new DomainError('duplicate');
   if (scorerExcess(score, scorers).length > 0) throw new DomainError('forbidden');
+  const absent = new Set(changes.absent);
+  const removed = new Set(changes.removeGuests);
+  if (scorers.some((s) => (s.kind === 'user' ? absent : removed).has(s.id))) throw new DomainError('forbidden');
+  if (changes.present.some((id) => absent.has(id))) throw new DomainError('forbidden');
 
   await db.transaction(async (tx) => {
     const t = tx as unknown as Db;
     await setMatchResult(t, actorId, matchId, score, now);
+    await applyAttendanceChanges(t, actorId, matchId, changes);
     const guestIds = scorers.filter((s) => s.kind === 'guest').map((s) => s.id);
     if (guestIds.length > 0) {
       const own = await t
@@ -98,16 +107,54 @@ export async function scorerCandidates(db: Db, matchIds: string[]) {
       .innerJoin(users, eq(users.id, attendances.userId))
       .where(and(inArray(attendances.matchId, matchIds), eq(attendances.decision, 'going'))),
     db
-      .select({ matchId: guests.matchId, id: guests.id, name: guests.name })
+      .select({ matchId: guests.matchId, id: guests.id, name: guests.name, hostName: shownName })
       .from(guests)
+      .innerJoin(users, eq(users.id, guests.hostId))
       .where(inArray(guests.matchId, matchIds)),
     db
-      .select({ id: users.id, name: users.displayName })
+      .select({ id: users.id, name: users.displayName, team: users.team })
       .from(users)
       .where(eq(users.active, true))
       .orderBy(asc(users.displayName)),
   ]);
   return { going, matchGuests, players };
+}
+
+async function applyAttendanceChanges(db: Db, actorId: string, matchId: string, changes: AttendanceChanges) {
+  const { absent, present, removeGuests } = changes;
+  if (absent.length + present.length + removeGuests.length === 0) return;
+  if (absent.length > 0) {
+    await db
+      .update(attendances)
+      .set({ decision: 'not_going', updatedAt: new Date() })
+      .where(
+        and(eq(attendances.matchId, matchId), inArray(attendances.userId, absent), eq(attendances.decision, 'going')),
+      );
+  }
+  if (present.length > 0) {
+    const ok = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(inArray(users.id, present), eq(users.active, true)));
+    if (ok.length !== new Set(present).size) throw new DomainError('not_found');
+    await db
+      .insert(attendances)
+      .values(present.map((userId) => ({ matchId, userId, decision: 'going' as const })))
+      .onConflictDoUpdate({
+        target: [attendances.matchId, attendances.userId],
+        set: { decision: 'going', updatedAt: new Date() },
+      });
+  }
+  if (removeGuests.length > 0) {
+    // Their goals go with them (cascade).
+    await db.delete(guests).where(and(eq(guests.matchId, matchId), inArray(guests.id, removeGuests)));
+  }
+  await db.insert(auditLog).values({
+    actorId,
+    action: 'attendance_corrected',
+    targetId: matchId,
+    details: `absent:${absent.join('|')};present:${present.join('|')};guests:${removeGuests.join('|')}`,
+  });
 }
 
 /**

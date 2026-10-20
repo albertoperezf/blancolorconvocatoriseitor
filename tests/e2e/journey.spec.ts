@@ -459,6 +459,36 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
       (document.querySelector('footer')!.getBoundingClientRect().bottom + window.scrollY),
   );
   expect(gapBelowFooter).toBeLessThanOrEqual(1);
+
+  // "Quién vino": editors fix who actually came; it's saved with the result.
+  const whoCame = editorCard.locator('details', { hasText: 'Quién vino' });
+  const noShowAdmin = whoCame.getByRole('button', { name: 'Marcar que Admin E2E no vino' });
+  const openWhoCame = async () => {
+    if ((await editorToggle.getAttribute('aria-expanded')) !== 'true') await editorToggle.click();
+    if (!(await whoCame.evaluate((d: HTMLDetailsElement) => d.open))) await whoCame.locator('summary').click();
+  };
+  await openWhoCame();
+  if ((await noShowAdmin.count()) === 0) {
+    await whoCame.getByLabel('Añadir a alguien que vino').selectOption({ label: 'Admin E2E' });
+    await expect(whoCame).toContainText('Admin E2E (añadido)');
+    await editorCard.getByRole('button', { name: 'Guardar' }).click();
+    await expect(editorCard.getByRole('status')).toHaveText('Resultado guardado.');
+    await player.reload();
+    await openWhoCame();
+  }
+  await expect(noShowAdmin).toBeVisible();
+  // Contrast is measured once the editor has finished fading in.
+  await player.mouse.move(0, 0);
+  await expect(editorCard.locator('form').locator('xpath=../..')).toHaveCSS('opacity', '1');
+  await expectNoA11yViolations(player);
+  await noShowAdmin.click();
+  await expect(whoCame.getByRole('button', { name: 'Deshacer: Admin E2E sí vino' })).toBeVisible();
+  // A no-show can't keep goals: their counter disappears from the scorers.
+  await expect(editorCard.getByRole('button', { name: 'Añadir un gol a Admin E2E' })).toHaveCount(0);
+  await editorCard.getByRole('button', { name: 'Guardar' }).click();
+  await expect(editorCard.getByRole('status')).toHaveText('Resultado guardado.');
+  await player.reload();
+  await expect(editorCard.getByRole('button', { name: 'Marcar que Admin E2E no vino' })).toHaveCount(0);
   await player.goto('/admin');
   await expect(player).toHaveURL(/\/partido$/);
   // (And: the reminder's "Voy" / "No voy" buttons answer through this endpoint, same-origin only.)
