@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
 import { auditLog, matches, users } from '@/lib/db/schema';
+import { shownName } from '@/lib/db/shown-name';
 import { DomainError } from '@/lib/services/player';
 
 /** First match with recorded results; RESULTS_FROM (ISO date) can move it for local testing. */
@@ -32,7 +33,7 @@ export function listPlayedMatches(db: Db, now: Date = new Date()) {
       startsAt: matches.startsAt,
       blancosGoals: matches.blancosGoals,
       colorGoals: matches.colorGoals,
-      resultByName: users.displayName,
+      resultByName: shownName,
     })
     .from(matches)
     .leftJoin(users, eq(users.id, matches.resultBy))

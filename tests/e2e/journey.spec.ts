@@ -515,6 +515,35 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await player.goto('/admin/partido');
   await expect(player).toHaveURL(/\/partido$/);
 
+  // Admins can't delete themselves.
+  await page.goto('/admin/usuarios');
+  await page.getByRole('link', { name: /Admin E2E/ }).click();
+  await expect(page.getByText('No puedes eliminarte a ti mismo.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Eliminar jugador' })).toBeDisabled();
+
+  // Delete the new player: confirmed by typing their username; past results keep the name, tagged.
+  await page.goto('/admin/usuarios');
+  await page.getByRole('link', { name: new RegExp(`Nuevo ${suffix}`) }).click();
+  await page.getByRole('button', { name: 'Eliminar jugador' }).click();
+  const deleteDialog = page.getByRole('dialog', { name: `¿Eliminar a Nuevo ${suffix}?` });
+  const deleteWord = deleteDialog.getByLabel(`Escribe ${username} para confirmar`);
+  const deleteConfirm = deleteDialog.getByRole('button', { name: 'Sí, eliminar' });
+  await expect(deleteWord).toBeFocused();
+  await deleteWord.fill('OTRO');
+  await expect(deleteConfirm).toBeDisabled();
+  await deleteWord.fill(username.toLowerCase());
+  await expect(deleteConfirm).toBeEnabled();
+  await expect(deleteConfirm).toHaveCSS('opacity', '1');
+  await expectNoA11yViolations(page);
+  await deleteConfirm.click();
+  await expect(page).toHaveURL(/\/admin\/usuarios\?eliminado=1$/);
+  await expect(page.getByRole('status').filter({ hasText: 'Jugador eliminado.' })).toBeVisible();
+  await expect(page.getByRole('link', { name: new RegExp(`Nuevo ${suffix}`) })).toHaveCount(0);
+  await player.goto('/partido');
+  await expect(player).toHaveURL(/\/login/);
+  await page.goto('/resultados');
+  await expect(page.locator('main')).toContainText(`Nuevo ${suffix} (Eliminado)`);
+
   await page.goto('/perfil');
   await page.getByText('Mi equipo y posición', { exact: true }).click();
   await page.getByLabel('Juego con').selectOption('color');

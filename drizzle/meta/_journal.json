@@ -71,6 +71,13 @@
       "when": 1792390518950,
       "tag": "0009_editor_role",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792494030980,
+      "tag": "0010_deleted_users",
+      "breakpoints": true
     }
   ]
 }

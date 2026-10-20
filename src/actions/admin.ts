@@ -1,6 +1,7 @@
 'use server';
 
 import { refresh } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getDb } from '@/lib/db';
 import { appOrigin, requireAdmin, requireResultsEditor } from '@/lib/auth/current';
@@ -12,7 +13,7 @@ import { pushConfigured, webPushSender } from '@/lib/push/service';
 import { getSettings } from '@/lib/match/queries';
 import { resetMatch } from '@/lib/match/reset';
 import { DomainError } from '@/lib/services/player';
-import { dismissResetRequest, enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
+import { deleteUser, dismissResetRequest, enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
 import {
   adminUpdateUserSchema,
   enrolSchema,
@@ -101,6 +102,27 @@ export async function dismissResetRequestAction(formData: FormData): Promise<voi
   const admin = await requireAdmin();
   await dismissResetRequest(await getDb(), admin.id, String(formData.get('userId') ?? ''));
   refresh();
+}
+
+/** Confirmed by typing the player's username (any case), so the wrong player can't be deleted by mistake. */
+export async function deleteUserAction(userId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const admin = await requireAdmin();
+  const db = await getDb();
+  const user = await getUser(db, userId);
+  if (!user) return { status: 'error', message: 'errors.generic' };
+  const typed = String(formData.get('confirm') ?? '')
+    .trim()
+    .toUpperCase();
+  if (typed !== user.username) return { status: 'error', errors: { confirm: 'confirmWord' } };
+  try {
+    await deleteUser(db, admin.id, userId);
+  } catch (e) {
+    if (e instanceof DomainError && e.code === 'self_lockout')
+      return { status: 'error', message: 'admin.deleteUser.self' };
+    if (e instanceof DomainError && e.code === 'not_found') return { status: 'error', message: 'errors.generic' };
+    throw e;
+  }
+  redirect('/admin/usuarios?eliminado=1');
 }
 
 export async function updateSettingsAction(_prev: FormState, formData: FormData): Promise<FormState> {

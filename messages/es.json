@@ -3,6 +3,10 @@
     "loading": "Cargando…",
     "newTab": "(se abre en otra pestaña)"
   },
+  "confirmDialog": {
+    "label": "Escribe {word} para confirmar",
+    "cancel": "Cancelar"
+  },
   "meta": {
     "title": "Blancolores · Convocatoria",
     "description": "Convocatorias y convocatorizator de jurgol para Blancolor y Blancolores."
@@ -275,12 +279,20 @@
       "confirmBody": "{total, plural, one {Se borrará} other {Se borrarán}} {what}. Los jugadores tendrán que volver a responder. Esto no se puede deshacer.",
       "answersCount": "{count, plural, one {# respuesta} other {# respuestas}}",
       "guestsCount": "{count, plural, one {# fichaje} other {# fichajes}}",
-      "confirmLabel": "Escribe {word} para confirmar",
-      "cancel": "Cancelar",
       "confirm": "Sí, reiniciar",
       "done": "Convocatoria reiniciada: {total, plural, one {se ha borrado} other {se han borrado}} {what}.",
       "stale": "El partido ha cambiado desde que abriste la página. Recárgala y vuelve a intentarlo.",
       "started": "El partido ya ha empezado: no se puede reiniciar."
+    },
+    "deleteUser": {
+      "heading": "Eliminar jugador",
+      "intro": "Borra su cuenta y sus respuestas y fichajes del próximo partido. Sus goles y partidos pasados se conservan como «{name} (Eliminado)».",
+      "self": "No puedes eliminarte a ti mismo.",
+      "open": "Eliminar jugador",
+      "confirmTitle": "¿Eliminar a {name}?",
+      "confirmBody": "No podrá volver a entrar y se cerrarán sus sesiones. Sus goles y resultados pasados se conservan como «{name} (Eliminado)». Esto no se puede deshacer.",
+      "confirm": "Sí, eliminar",
+      "done": "Jugador eliminado. Su historial se conserva con la etiqueta «(Eliminado)»."
     }
   },
   "errors": {
@@ -309,7 +321,7 @@
     },
     "displayName": { "min": "Mínimo 2 caracteres.", "max": "Máximo 40 caracteres." },
     "settings": { "time": "Formato HH:MM." },
-    "reset": { "confirm": "Escribe REINICIAR para confirmar." },
+    "confirmWord": "Escribe {word} para confirmar.",
     "result": {
       "required": "Pon los goles de este equipo.",
       "goals": "Entre 0 y 99 goles.",

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { Notice } from '@/components/form';
 import { BandageIcon, BanIcon, CrownIcon, LockOpenIcon, PencilIcon, ShirtIcon } from '@/components/icons';
 import { LinkHint } from '@/components/link-hint';
 import { requireAdmin } from '@/lib/auth/current';
@@ -31,19 +32,27 @@ function statusesOf(u: { role: string; longTermAbsence: boolean; active: boolean
   return s;
 }
 
-export default async function UsersPage() {
+export default async function UsersPage({ searchParams }: PageProps<'/admin/usuarios'>) {
   await requireAdmin();
   const db = await getDb();
-  const [t, tTeams, users, requests] = await Promise.all([
+  const [t, tTeams, users, requests, { eliminado }] = await Promise.all([
     getTranslations('admin'),
     getTranslations('teams'),
     listUsers(db),
     listResetRequests(db),
+    searchParams,
   ]);
   const statusLabel = (s: Status) => (s === 'admin' || s === 'editor' ? t(`roles.${s}`) : t(s));
 
   return (
     <>
+      <div role="status">
+        {eliminado && (
+          <div className="mb-4">
+            <Notice tone="success">{t('deleteUser.done')}</Notice>
+          </div>
+        )}
+      </div>
       <EnrolSection title={t('users')} count={users.length}>
         <ResetRequests requests={requests} />
       </EnrolSection>

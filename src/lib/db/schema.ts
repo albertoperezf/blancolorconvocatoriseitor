@@ -43,6 +43,8 @@ export const users = pgTable('users', {
   absenceNote: varchar({ length: 200 }),
   canBringGuests: boolean().notNull().default(true),
   active: boolean().notNull().default(true),
+  // Set when an admin deletes the player: the row stays so past goals and results keep a name.
+  deletedAt: timestamp({ withTimezone: true }),
   createdAt: createdAt(),
 });
 

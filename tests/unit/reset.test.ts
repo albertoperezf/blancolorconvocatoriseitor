@@ -124,7 +124,7 @@ describe('resetMatchSchema', () => {
     expect(resetMatchSchema.safeParse({ matchId, confirm: ' reiniciar ' }).success).toBe(true);
     const wrong = resetMatchSchema.safeParse({ matchId, confirm: 'REINICIA' });
     expect(wrong.success).toBe(false);
-    expect(wrong.error?.issues[0]).toMatchObject({ path: ['confirm'], message: 'reset.confirm' });
+    expect(wrong.error?.issues[0]).toMatchObject({ path: ['confirm'], message: 'confirmWord' });
     expect(resetMatchSchema.safeParse({ matchId: 'nope', confirm: 'REINICIAR' }).success).toBe(false);
   });
 });

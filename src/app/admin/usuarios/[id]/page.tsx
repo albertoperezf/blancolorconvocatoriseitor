@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { deleteUserAction } from '@/actions/admin';
 import { LinkHint } from '@/components/link-hint';
+import { TypedConfirmDialog } from '@/components/typed-confirm-dialog';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import { countUpcomingGuests, getUser } from '@/lib/services/admin';
@@ -24,6 +26,7 @@ export default async function EditUserPage({ params }: PageProps<'/admin/usuario
     countUpcomingGuests(db, id),
   ]);
   if (!user) notFound();
+  const isSelf = admin.id === user.id;
 
   return (
     <div className="mx-auto max-w-xl">
@@ -36,7 +39,7 @@ export default async function EditUserPage({ params }: PageProps<'/admin/usuario
         <h2 id="edit-heading" className="mb-3 text-xl font-extrabold">
           {t('editHeading')}
         </h2>
-        <UserForm user={user} isSelf={admin.id === user.id} upcomingGuests={upcomingGuests} />
+        <UserForm user={user} isSelf={isSelf} upcomingGuests={upcomingGuests} />
       </section>
       <section aria-labelledby="reset-heading" className="card mt-4">
         <h2 id="reset-heading" className="text-xl font-extrabold">
@@ -44,6 +47,23 @@ export default async function EditUserPage({ params }: PageProps<'/admin/usuario
         </h2>
         <p className="mt-1 mb-3 text-muted">{t('resetIntro')}</p>
         <ResetLinkPanel userId={user.id} />
+      </section>
+      <section aria-labelledby="delete-heading" className="card mt-4">
+        <h2 id="delete-heading" className="text-xl font-extrabold">
+          {t('deleteUser.heading')}
+        </h2>
+        <p className="mt-1 text-muted">
+          {isSelf ? t('deleteUser.self') : t('deleteUser.intro', { name: user.displayName })}
+        </p>
+        <TypedConfirmDialog
+          action={deleteUserAction.bind(null, user.id)}
+          word={user.username}
+          trigger={t('deleteUser.open')}
+          disabled={isSelf}
+          title={t('deleteUser.confirmTitle', { name: user.displayName })}
+          body={t('deleteUser.confirmBody', { name: user.displayName })}
+          confirm={t('deleteUser.confirm')}
+        />
       </section>
     </div>
   );

@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
 import { attendances, auditLog, guests, matchGoals, matches, users, type Team } from '@/lib/db/schema';
+import { shownName } from '@/lib/db/shown-name';
 import { DomainError } from '@/lib/services/player';
 import { resultsFrom, setMatchResult } from './results';
 
@@ -21,7 +22,7 @@ export async function listMatchScorers(db: Db, matchIds: string[]): Promise<Matc
       team: matchGoals.team,
       userId: matchGoals.userId,
       guestId: matchGoals.guestId,
-      userName: users.displayName,
+      userName: shownName,
       guestName: guests.name,
       goals: matchGoals.goals,
     })
@@ -92,7 +93,7 @@ export async function scorerCandidates(db: Db, matchIds: string[]) {
   if (matchIds.length === 0) return { going: [], matchGuests: [], players: [] };
   const [going, matchGuests, players] = await Promise.all([
     db
-      .select({ matchId: attendances.matchId, id: users.id, name: users.displayName, team: users.team })
+      .select({ matchId: attendances.matchId, id: users.id, name: shownName, team: users.team })
       .from(attendances)
       .innerJoin(users, eq(users.id, attendances.userId))
       .where(and(inArray(attendances.matchId, matchIds), eq(attendances.decision, 'going'))),
@@ -154,7 +155,7 @@ export function rankScorers<T extends { goals: number }>(rows: T[], limit: numbe
 export async function topScorers(db: Db, limit = 5): Promise<TopScorer[]> {
   const total = sql<number>`sum(${matchGoals.goals})::int`;
   const rows = await db
-    .select({ userId: users.id, name: users.displayName, team: users.team, goals: total })
+    .select({ userId: users.id, name: shownName, team: users.team, goals: total })
     .from(matchGoals)
     .innerJoin(matches, eq(matches.id, matchGoals.matchId))
     .innerJoin(users, eq(users.id, matchGoals.userId))

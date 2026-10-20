@@ -89,7 +89,7 @@ export const resetMatchSchema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .refine((v) => v === RESET_WORD, 'reset.confirm'),
+    .refine((v) => v === RESET_WORD, 'confirmWord'),
 });
 
 /** Answer sent by the service worker from a reminder's "Voy" / "No voy" buttons. */
