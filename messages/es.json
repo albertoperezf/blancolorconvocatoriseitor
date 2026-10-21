@@ -58,8 +58,6 @@
     "emptyAbsent": "Nadie de baja. ¡Todos en forma!",
     "me": "tú",
     "updated": "Actualizado {ago}",
-    "updating": "Actualizando…",
-    "refresh": "Actualizar",
     "guestOf": "invitado de {host}",
     "positionsLegend": "Posiciones"
   },

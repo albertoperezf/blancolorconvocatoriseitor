@@ -131,16 +131,21 @@ test('the match can be shared with a ready-made message', async ({ page }) => {
   expect(text).toMatch(/Van \d+/);
 });
 
-test('the squad shows how old the data is after 10 s and can be refreshed by hand', async ({ page }) => {
+test('the squad updates itself; its age only shows when updates stop, and going offline keeps the page', async ({
+  page,
+  context,
+}) => {
   await page.clock.install();
   await page.goto('/');
-  const refresh = page.getByRole('button', { name: 'Actualizar' });
-  await expect(refresh).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Convocatoria' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Actualizar' })).toHaveCount(0);
   await expect(page.getByText(/^Actualizado/)).toHaveCount(0);
-  await page.clock.fastForward(20_000);
-  await expect(page.getByText(/^Actualizado hace \d+s$/)).toBeVisible();
-  await refresh.click();
-  await expect(page.getByText(/^Actualizado/)).toHaveCount(0);
+  // Offline, the 30 s refreshes are skipped instead of swapping the page for the browser's error page.
+  await context.setOffline(true);
+  await page.clock.fastForward(70_000);
+  await expect(page.getByText(/^Actualizado hace 1min$/)).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Convocatoria' })).toBeVisible();
+  await context.setOffline(false);
 });
 
 test('opening one collapsed group does not open or stretch its neighbour', async ({ page }) => {

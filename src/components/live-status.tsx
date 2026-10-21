@@ -4,49 +4,46 @@ import { useRouter } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useEffect, useTransition } from 'react';
 
+const STALE_MS = 60_000;
+
 /**
- * Refreshes the server data on tab focus and every 30 s while visible, shows how fresh it is,
- * and offers a manual refresh. `renderedAt` comes from the server render, so it updates on each refresh.
+ * Refreshes the server data every 30 s while the tab is visible, when it comes back to the foreground and when
+ * the connection returns. The age only shows once updates stop arriving (offline, server unreachable).
  */
 export function LiveStatus({ renderedAt, intervalMs = 30_000 }: { renderedAt: string; intervalMs?: number }) {
   const t = useTranslations('squad');
   const format = useFormatter();
   const now = useNow({ updateInterval: 10_000 });
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
-    const tick = () => {
-      if (document.visibilityState === 'visible') startTransition(() => router.refresh());
+    const refresh = async () => {
+      if (document.visibilityState !== 'visible' || !navigator.onLine) return;
+      // A failed refresh makes Next reload the whole page (the browser's error page when offline): check first.
+      const reachable = await fetch('/manifest.webmanifest', { method: 'HEAD', cache: 'no-store' }).then(
+        (r) => r.ok,
+        () => false,
+      );
+      if (reachable) startTransition(() => router.refresh());
     };
-    const id = window.setInterval(tick, intervalMs);
-    document.addEventListener('visibilitychange', tick);
+    const id = window.setInterval(refresh, intervalMs);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('online', refresh);
     return () => {
       window.clearInterval(id);
-      document.removeEventListener('visibilitychange', tick);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('online', refresh);
     };
   }, [router, intervalMs]);
 
   const updated = new Date(renderedAt);
-  // Nothing for the first 10 s (the "Actualizar" link says enough); then a compact "hace 25s" / "hace 2min".
-  const text =
-    now.getTime() - updated.getTime() < 10_000
-      ? null
-      : t('updated', {
-          ago: format.relativeTime(updated, { now, style: 'narrow' }).replace(/(\d)[\s\u00a0\u202f]+/, '$1'),
-        });
-
+  if (now.getTime() - updated.getTime() < STALE_MS) return null;
   return (
-    <div className="flex items-center gap-2 text-sm text-muted">
-      <span suppressHydrationWarning>{pending ? t('updating') : text}</span>
-      <button
-        type="button"
-        onClick={() => startTransition(() => router.refresh())}
-        disabled={pending}
-        className="btn-link min-h-11 px-1"
-      >
-        {t('refresh')}
-      </button>
-    </div>
+    <p className="text-sm text-muted" suppressHydrationWarning>
+      {t('updated', {
+        ago: format.relativeTime(updated, { now, style: 'narrow' }).replace(/(\d)[\s\u00a0\u202f]+/, '$1'),
+      })}
+    </p>
   );
 }
