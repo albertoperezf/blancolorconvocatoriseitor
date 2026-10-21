@@ -23,12 +23,25 @@ type GroupProps = {
   names: Name[];
   empty: ReactNode;
   open?: boolean;
+  /** Phones have little room: drop the box entirely while nobody is in it. */
+  hideEmptyOnMobile?: boolean;
   icon?: ReactNode;
   accent?: string;
   meLabel?: string;
 };
 
-function Group({ id, title, count, names, empty, open = true, icon, accent = 'border-border', meLabel }: GroupProps) {
+function Group({
+  id,
+  title,
+  count,
+  names,
+  empty,
+  open = true,
+  hideEmptyOnMobile = false,
+  icon,
+  accent = 'border-border',
+  meLabel,
+}: GroupProps) {
   const header = (
     <>
       {icon}
@@ -39,7 +52,7 @@ function Group({ id, title, count, names, empty, open = true, icon, accent = 'bo
     </>
   );
   const body = (
-    <div className="px-4 pb-4 sm:px-5">
+    <div className="px-4 pb-3 sm:px-5 md:pb-4">
       {names.length === 0 ? (
         <p className="text-sm text-muted">{empty}</p>
       ) : (
@@ -72,7 +85,7 @@ function Group({ id, title, count, names, empty, open = true, icon, accent = 'bo
       )}
     </div>
   );
-  const box = `card border-l-4 p-0 sm:p-0 ${accent}`;
+  const box = `card border-l-4 p-0 sm:p-0 ${accent} ${hideEmptyOnMobile && names.length === 0 ? 'max-md:hidden' : ''}`;
 
   // Long, low-interest lists start collapsed; headings stay out of <summary> to keep their semantics.
   if (!open) {
@@ -90,7 +103,7 @@ function Group({ id, title, count, names, empty, open = true, icon, accent = 'bo
   }
   return (
     <section className={box} aria-labelledby={id}>
-      <h3 className="flex min-h-12 items-center gap-2 px-4 py-3 sm:px-5">{header}</h3>
+      <h3 className="flex min-h-10 items-center gap-2 px-4 py-2 sm:px-5 md:min-h-12 md:py-3">{header}</h3>
       {body}
     </section>
   );
@@ -126,14 +139,14 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
   const shared = { meLabel };
 
   return (
-    <section aria-labelledby="squad-heading" className="mt-8">
+    <section aria-labelledby="squad-heading" className="mt-5 md:mt-8">
       <div className="flex flex-wrap items-center justify-between gap-x-4">
         <h2 id="squad-heading" className="text-xl font-extrabold">
           {t('heading')} <span className="font-semibold text-muted tabular-nums">({goingCount(squad)})</span>
         </h2>
         <LiveStatus renderedAt={new Date().toISOString()} />
       </div>
-      <div className="mt-3 grid gap-3 md:grid-cols-3">
+      <div className="mt-2 grid gap-2 md:mt-3 md:grid-cols-3 md:gap-3">
         <Group
           {...shared}
           id="g-blancos"
@@ -161,10 +174,11 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
           names={squad.guests.map((g) => ({ key: g.id, label: g.name, hint: t('guestOf', { host: g.hostName }) }))}
           empty={t('emptyGuests')}
           accent="border-l-going"
+          hideEmptyOnMobile
         />
       </div>
       {squad.noTeam.length > 0 && (
-        <div className="mt-3">
+        <div className="mt-2 md:mt-3">
           <Group
             {...shared}
             id="g-noteam"
@@ -176,7 +190,7 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
         </div>
       )}
       {/* items-start: opening one collapsible group must not stretch its neighbour in the same row. */}
-      <div className="mt-3 grid items-start gap-3 md:grid-cols-2">
+      <div className="mt-2 grid items-start gap-2 md:mt-3 md:grid-cols-2 md:gap-3">
         <Group
           {...shared}
           id="g-maybe"
@@ -185,6 +199,7 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
           names={players(squad.maybe)}
           empty={t('emptyMaybe')}
           accent="border-l-maybe"
+          hideEmptyOnMobile
         />
         <Group
           {...shared}
@@ -194,6 +209,7 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
           names={players(squad.notGoing)}
           empty={t('emptyNotGoing')}
           accent="border-l-notgoing"
+          hideEmptyOnMobile
         />
         <Group
           {...shared}

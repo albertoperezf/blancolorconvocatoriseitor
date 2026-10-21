@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { E2E_CRON_SECRET } from '../../playwright.config';
 import { expectNoA11yViolations } from './helpers';
 
-test('public page shows the weekly match, the squad groups and a contact link', async ({ page }) => {
+test('public page shows the weekly match, the squad groups and a contact link', async ({ page }, info) => {
   const response = await page.goto('/');
   expect(response?.headers()['content-security-policy']).toContain("script-src 'self' 'nonce-");
   expect(response?.headers()['x-powered-by']).toBeUndefined();
@@ -12,8 +12,22 @@ test('public page shows the weekly match, the squad groups and a contact link', 
   await expect(page.getByText(/jueves/i).first()).toBeVisible();
   await expect(page.getByRole('link', { name: 'Apúntate al partido' })).toHaveAttribute('href', '/login');
   await expect(page.getByRole('link', { name: 'Resultados' })).not.toHaveAttribute('aria-current');
-  for (const label of ['BLANCOS', 'COLOR', 'INVITADOS', 'DUDOSITOS', 'MARIQUITAS QUE NO VAN']) {
+  for (const label of ['BLANCOS', 'COLOR']) {
     await expect(page.getByRole('heading', { name: new RegExp(label) })).toBeVisible();
+  }
+  if (info.project.name === 'mobile') {
+    // Phones drop Invitados, Dudositos and No van while they're empty.
+    const groups = await page.evaluate(() =>
+      ['g-guests', 'g-maybe', 'g-notgoing'].map((id) => {
+        const box = document.getElementById(id)!.closest<HTMLElement>('.card')!;
+        return { id, empty: !box.querySelector('li'), shown: box.offsetParent !== null };
+      }),
+    );
+    for (const g of groups) expect(g.shown, g.id).toBe(!g.empty);
+  } else {
+    for (const label of ['INVITADOS', 'DUDOSITOS', 'MARIQUITAS QUE NO VAN']) {
+      await expect(page.getByRole('heading', { name: new RegExp(label) })).toBeVisible();
+    }
   }
 
   await expect(page.getByRole('heading', { name: 'Preguntas frecuentes' })).toHaveCount(0);

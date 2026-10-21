@@ -62,8 +62,15 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(status).toHaveText('Guardado: VOY.Deshacer');
   await expect(page.getByRole('region', { name: 'COLOR' }).getByText('Admin E2E')).toBeVisible();
   await expect(page.getByRole('region', { name: 'COLOR' }).getByText('(tú)')).toBeVisible();
-  await page.getByRole('button', { name: 'Deshacer' }).click();
-  await expect(status).toHaveText('Guardado: DUDA.');
+  if (info.project.name === 'mobile') {
+    // Phones have no undo link: picking the previous answer again is just as quick.
+    await expect(page.getByRole('button', { name: 'Deshacer' })).toBeHidden();
+    await page.getByText('DUDA', { exact: true }).click();
+    await expect(status).toHaveText('Guardado: DUDA.Deshacer');
+  } else {
+    await page.getByRole('button', { name: 'Deshacer' }).click();
+    await expect(status).toHaveText('Guardado: DUDA.');
+  }
   // Only the restored answer is highlighted (iOS Safari used to keep stale highlights).
   const option = (name: string) =>
     page

@@ -22,7 +22,6 @@
     "main": "Principal",
     "darkTheme": "Tema oscuro",
     "results": "Resultados",
-    "beta": "Beta",
     "pendingRequests": "{count, plural, one {solicitud de contraseña pendiente} other {solicitudes de contraseña pendientes}}"
   },
   "match": {

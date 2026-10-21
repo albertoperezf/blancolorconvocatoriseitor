@@ -12,20 +12,17 @@ export async function SiteHeader() {
   const [t, user, theme] = await Promise.all([getTranslations('nav'), getCurrentUser(), getTheme()]);
   const pendingRequests = user?.role === 'admin' ? await countResetRequests(await getDb()) : 0;
   const link =
-    'inline-flex min-h-11 items-center rounded-lg px-2 font-semibold hover:bg-bg sm:px-3 aria-[current=page]:bg-brand aria-[current=page]:text-brand-fg';
+    'inline-flex min-h-11 items-center rounded-lg px-1.5 font-semibold hover:bg-bg sm:px-3 aria-[current=page]:bg-brand aria-[current=page]:text-brand-fg';
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-1.5 gap-y-1 px-4 py-2 sm:gap-x-2 sm:px-6">
         <Link
           href="/"
           className="mr-auto inline-flex min-h-11 items-center gap-2 text-lg font-extrabold tracking-tight"
         >
           <BallIcon className="size-6 text-brand" />
           Blancolores
-          <span className="rounded-full border border-brand px-2 py-0.5 text-xs font-bold tracking-wide text-brand uppercase">
-            {t('beta')}
-          </span>
         </Link>
         <ThemeToggle initial={theme} />
         <nav aria-label={t('main')}>

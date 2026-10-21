@@ -45,7 +45,7 @@ export function GuestManager({ guests }: { guests: { id: string; name: string }[
   };
 
   return (
-    <section aria-labelledby="guests-heading" className="card mt-6">
+    <section aria-labelledby="guests-heading" className="card mt-4 md:mt-6">
       <div className="flex items-center justify-between gap-3">
         <h2 id="guests-heading" className="text-xl font-extrabold">
           {t('heading')}

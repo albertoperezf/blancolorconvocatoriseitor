@@ -47,7 +47,8 @@ export function StatusSelector({ initial, onSave }: Props) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgb(0_0_0/0.08)] md:static md:mt-6 md:rounded-[var(--radius-card)] md:border md:p-6 md:shadow-none">
       <fieldset id="tu-respuesta" disabled={pending} aria-busy={pending}>
-        <legend className="mb-2 font-extrabold">{t('legend')}</legend>
+        {/* The three buttons explain themselves on phones; the title stays for screen readers. */}
+        <legend className="mb-2 font-extrabold max-md:sr-only">{t('legend')}</legend>
         <div className="grid grid-cols-3 gap-2">
           {OPTIONS.map(({ value, Icon, checked }) => (
             <label key={value} className="relative">
@@ -69,14 +70,20 @@ export function StatusSelector({ initial, onSave }: Props) {
           ))}
         </div>
       </fieldset>
-      <div role="status" aria-live="polite" aria-atomic="true" className="mt-2 flex min-h-8 items-center gap-3 text-sm">
+      {/* On phones the highlighted button already says it all; the text stays for screen readers, errors stay visible. */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className={`mt-2 flex min-h-8 items-center gap-3 text-sm ${shown?.error ? '' : 'max-md:sr-only'}`}
+      >
         {shown ? (
           <>
             <span className={shown.error ? 'font-semibold text-danger' : ''}>{shown.text}</span>
             {shown.undo !== undefined && (
               <button
                 type="button"
-                className="btn-link"
+                className="btn-link max-md:hidden"
                 onClick={() => save(shown.undo ?? null, saved, false)}
                 disabled={pending}
               >

@@ -63,11 +63,11 @@ html {
 }
 @media (max-width: 47.99rem) {
   html:has(#tu-respuesta) {
-    scroll-padding-bottom: 11rem;
+    scroll-padding-bottom: 6rem;
   }
   /* Room for the fixed answer bar below the footer, so the footer isn't hidden behind it. */
   body:has(#tu-respuesta) {
-    padding-bottom: calc(9rem + max(0.75rem, env(safe-area-inset-bottom)));
+    padding-bottom: calc(4.5rem + max(0.75rem, env(safe-area-inset-bottom)));
   }
 }
 
