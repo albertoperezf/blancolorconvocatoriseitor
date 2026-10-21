@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { capitalizeMonths } from '@/lib/dates';
 import { deleteContactMessageAction } from '@/actions/contact';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
@@ -32,7 +33,7 @@ export default async function MessagesPage() {
               <p className="text-sm text-muted">
                 <time
                   dateTime={m.createdAt.toISOString()}
-                  title={format.dateTime(m.createdAt, { dateStyle: 'long', timeStyle: 'short' })}
+                  title={capitalizeMonths(format.dateTime(m.createdAt, { dateStyle: 'long', timeStyle: 'short' }))}
                 >
                   {format.relativeTime(m.createdAt, now)}
                 </time>

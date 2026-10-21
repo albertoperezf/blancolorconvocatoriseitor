@@ -9,7 +9,13 @@ test('public page shows the weekly match, the squad groups and a contact link', 
 
   await expect(page.getByRole('heading', { level: 1, name: 'Convocatoria' })).toBeVisible();
   await expect(page.getByText('Polideportivo La Concepción').first()).toBeVisible();
-  await expect(page.getByText(/jueves/i).first()).toBeVisible();
+  // Phones and desktop render the date in different places (one is hidden), so look for the visible one.
+  await expect(
+    page
+      .getByText(/jueves/i)
+      .locator('visible=true')
+      .first(),
+  ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Apúntate al partido' })).toHaveAttribute('href', '/login');
   await expect(page.getByRole('link', { name: 'Resultados' })).not.toHaveAttribute('aria-current');
   for (const label of ['BLANCOS', 'COLOR']) {

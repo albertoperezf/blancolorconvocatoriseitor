@@ -4,6 +4,7 @@ import { ExternalLink } from '@/components/external-link';
 import { BallIcon, NewspaperIcon, PlayIcon, ShirtIcon } from '@/components/icons';
 import { getCurrentUser } from '@/lib/auth/current';
 import { canEditResults } from '@/lib/auth/roles';
+import { capitalizeMonths } from '@/lib/dates';
 import { getDb } from '@/lib/db';
 import type { Team } from '@/lib/db/schema';
 import { BLOG_URL, VIDEOS_URL } from '@/lib/links';
@@ -50,7 +51,7 @@ export default async function ResultsPage() {
           const next = nextMatchStart(latest.startsAt, settings);
           const opts = { timeZone: settings.timezone } as const;
           return t('editableUntil', {
-            day: format.dateTime(next, { ...opts, weekday: 'long', day: 'numeric', month: 'long' }),
+            day: capitalizeMonths(format.dateTime(next, { ...opts, weekday: 'long', day: 'numeric', month: 'long' })),
             time: format.dateTime(next, { ...opts, hour: '2-digit', minute: '2-digit' }),
           });
         })()
@@ -131,12 +132,14 @@ export default async function ResultsPage() {
       ) : (
         <ul className="mt-4 grid gap-3 md:grid-cols-2">
           {played.map((m) => {
-            const raw = format.dateTime(m.startsAt, {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-              timeZone: settings.timezone,
-            });
+            const raw = capitalizeMonths(
+              format.dateTime(m.startsAt, {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                timeZone: settings.timezone,
+              }),
+            );
             const date = raw.charAt(0).toUpperCase() + raw.slice(1);
             const hasResult = m.blancosGoals !== null && m.colorGoals !== null;
             const winner = hasResult ? matchWinner(m.blancosGoals!, m.colorGoals!) : null;

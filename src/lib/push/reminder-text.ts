@@ -1,11 +1,14 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { capitalizeMonths } from '@/lib/dates';
 import type { Match } from '@/lib/match/queries';
 import type { PushPayload } from './service';
 import type { ComposeReminder } from './reminders';
 
 async function when(match: Match, timezone: string) {
   const format = await getFormatter();
-  const day = format.dateTime(match.startsAt, { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone });
+  const day = capitalizeMonths(
+    format.dateTime(match.startsAt, { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone }),
+  );
   const time = format.dateTime(match.startsAt, { hour: '2-digit', minute: '2-digit', timeZone: timezone });
   return { day: day.charAt(0).toUpperCase() + day.slice(1), time };
 }

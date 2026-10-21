@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { capitalizeMonths } from '@/lib/dates';
 import { requireAdmin } from '@/lib/auth/current';
 import { getDb } from '@/lib/db';
 import {
@@ -45,7 +46,9 @@ export default async function AttendancePage({ searchParams }: PageProps<'/admin
     searchParams,
   ]);
   const sort = parseSort(params.orden, params.dir);
-  const since = format.dateTime(attendanceFrom(), { day: 'numeric', month: 'long', timeZone: settings.timezone });
+  const since = capitalizeMonths(
+    format.dateTime(attendanceFrom(), { day: 'numeric', month: 'long', timeZone: settings.timezone }),
+  );
   const columns: { key: SortKey; label: string }[] = [
     { key: 'name', label: t('player') },
     { key: 'went', label: t('went') },
@@ -62,12 +65,14 @@ export default async function AttendancePage({ searchParams }: PageProps<'/admin
         <>
           <p className="mt-1 max-w-prose text-muted">
             {t('adminIntro', {
-              date: format.dateTime(attendanceFrom(), {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-                timeZone: settings.timezone,
-              }),
+              date: capitalizeMonths(
+                format.dateTime(attendanceFrom(), {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  timeZone: settings.timezone,
+                }),
+              ),
             })}
           </p>
           {/* Focusable so keyboard users can scroll it sideways on narrow screens. */}

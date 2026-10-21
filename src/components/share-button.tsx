@@ -19,9 +19,16 @@ export function ShareButton({ text, label }: Props) {
   }
 
   return (
-    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={onClick} className="btn-ghost">
+    <a
+      href={whatsappUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={onClick}
+      // Phones: just the icon (44px tap area) beside the title; the label stays as its accessible name.
+      className="btn-ghost max-md:size-11 max-md:justify-center max-md:before:hidden"
+    >
       <ShareIcon className="size-5 text-going" />
-      {label}
+      <span className="max-md:sr-only">{label}</span>
     </a>
   );
 }

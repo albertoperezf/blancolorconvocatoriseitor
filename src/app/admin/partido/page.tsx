@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { requireAdmin } from '@/lib/auth/current';
 import { CalendarIcon } from '@/components/icons';
+import { capitalizeMonths } from '@/lib/dates';
 import { getDb } from '@/lib/db';
 import { ensureCurrentMatch, getSettings } from '@/lib/match/queries';
 import { resetSummary } from '@/lib/match/reset';
@@ -20,12 +21,9 @@ export default async function MatchSettingsPage() {
     ensureCurrentMatch(db),
   ]);
   const summary = await resetSummary(db, match);
-  const rawDay = format.dateTime(match.startsAt, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    timeZone: settings.timezone,
-  });
+  const rawDay = capitalizeMonths(
+    format.dateTime(match.startsAt, { weekday: 'long', day: 'numeric', month: 'long', timeZone: settings.timezone }),
+  );
   const time = format.dateTime(match.startsAt, { hour: '2-digit', minute: '2-digit', timeZone: settings.timezone });
 
   return (

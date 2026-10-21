@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { capitalizeMonths } from '@/lib/dates';
 import { logoutAction } from '@/actions/auth';
 import { requireUser } from '@/lib/auth/current';
 import { BallIcon } from '@/components/icons';
@@ -33,7 +34,9 @@ export default async function ProfilePage() {
   ]);
   const total = stats ? stats.went + stats.maybe + stats.missed : 0;
   const pushKey = vapidPublicKey();
-  const since = format.dateTime(attendanceFrom(), { day: 'numeric', month: 'long', timeZone: settings.timezone });
+  const since = capitalizeMonths(
+    format.dateTime(attendanceFrom(), { day: 'numeric', month: 'long', timeZone: settings.timezone }),
+  );
 
   return (
     <div className="mx-auto max-w-xl">

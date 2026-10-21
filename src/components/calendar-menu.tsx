@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { CalendarPlusIcon } from './icons';
 
 type Props = {
   googleUrl: string;
   labels: { trigger: string; ics: string; google: string; opensNewTab: string };
+  /** Text that opens the menu instead of the "Añadir a calendario" button (e.g. the match date). */
+  trigger?: ReactNode;
+  className?: string;
 };
 
 // Disclosure (not an ARIA menu): plain links inside, closes on outside click or Escape.
-export function CalendarMenu({ googleUrl, labels }: Props) {
+export function CalendarMenu({ googleUrl, labels, trigger, className = '' }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -35,17 +38,29 @@ export function CalendarMenu({ googleUrl, labels }: Props) {
 
   const item = 'flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold hover:bg-bg';
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className={`relative ${className}`}>
       <button
         ref={buttonRef}
         type="button"
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((o) => !o)}
-        className="btn-ghost"
+        className={
+          trigger
+            ? 'group/cal inline-flex min-h-6 items-center gap-1.5 text-left font-semibold text-brand'
+            : 'btn-ghost'
+        }
       >
-        <CalendarPlusIcon className="size-5 text-brand" />
-        {labels.trigger}
+        {trigger ? (
+          // Underline only the date, not the ▾ (a parent's underline would run under it too).
+          <span className="underline underline-offset-4 group-hover/cal:no-underline">{trigger}</span>
+        ) : (
+          <>
+            <CalendarPlusIcon className="size-5 text-brand" />
+            {labels.trigger}
+          </>
+        )}
+        {trigger && <span className="sr-only">, {labels.trigger}</span>}
         <span aria-hidden className={`text-muted transition-transform ${open ? 'rotate-180' : ''}`}>
           ▾
         </span>
