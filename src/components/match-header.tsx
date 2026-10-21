@@ -56,7 +56,9 @@ export async function MatchHeader({
     opensNewTab: t('opensNewTab'),
   };
   return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-2 md:grid-cols-1 md:gap-y-3">
+    // Phones: pb-1.5 matches the title's empty line space above the capitals, since the last row there is an
+    // underlined link that reaches its own bottom; the card then looks as tall above as below.
+    <div className="grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-2 max-md:pb-1.5 md:grid-cols-1 md:gap-y-3">
       <Heading className="col-start-1 row-start-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
         {t('title')}
       </Heading>

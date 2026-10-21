@@ -24,8 +24,8 @@ export function ShareButton({ text, label }: Props) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={onClick}
-      // Phones: just the icon (44px tap area) beside the title; the label stays as its accessible name.
-      className="btn-ghost max-md:size-11 max-md:justify-center max-md:before:hidden"
+      // Phones: just the icon beside the title; 44px tap area that doesn't make the title row taller.
+      className="btn-ghost max-md:-my-2.5 max-md:size-11 max-md:justify-center max-md:before:hidden"
     >
       <ShareIcon className="size-5 text-going" />
       <span className="max-md:sr-only">{label}</span>
