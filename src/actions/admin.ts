@@ -7,20 +7,24 @@ import { getDb } from '@/lib/db';
 import { appOrigin, requireAdmin, requireResultsEditor } from '@/lib/auth/current';
 import { createResetToken } from '@/lib/auth/service';
 import { notifyNewEditor } from '@/lib/push/editor-notice';
-import { composeResetNotice } from '@/lib/push/reminder-text';
+import { composeCancelNotice, composeResetNotice, composeRestoreNotice } from '@/lib/push/reminder-text';
+import { notifyMatchStatus } from '@/lib/push/cancel-notice';
 import { notifyMatchReset } from '@/lib/push/reset-notice';
 import { pushConfigured, webPushSender } from '@/lib/push/service';
+import { cancelMatch, restoreMatch } from '@/lib/match/cancel';
 import { getSettings } from '@/lib/match/queries';
 import { resetMatch } from '@/lib/match/reset';
 import { DomainError } from '@/lib/services/player';
 import { deleteUser, dismissResetRequest, enrolUser, getUser, updateSettings, updateUser } from '@/lib/services/admin';
 import {
   adminUpdateUserSchema,
+  cancelMatchSchema,
   enrolSchema,
   fieldErrors,
   parseAttendanceChanges,
   parseScorers,
   resetMatchSchema,
+  restoreMatchSchema,
   resultSchema,
   settingsSchema,
 } from '@/lib/validators';
@@ -166,6 +170,67 @@ export async function resetMatchAction(_prev: FormState, formData: FormData): Pr
     message: 'admin.reset.done',
     data: { answers: String(reset.answers), guests: String(reset.guests) },
   };
+}
+
+export async function cancelMatchAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const admin = await requireAdmin();
+  const parsed = cancelMatchSchema.safeParse({
+    matchId: formData.get('matchId') ?? '',
+    confirm: formData.get('confirm') ?? '',
+    reason: formData.get('reason') ?? '',
+    note: formData.get('note') ?? '',
+  });
+  if (!parsed.success) {
+    const errors = fieldErrors(parsed.error);
+    // Reason and note are picked outside the dialog: surface their error where the admin is looking.
+    return errors.confirm
+      ? { status: 'error', errors }
+      : { status: 'error', message: errors.note ?? errors.reason ?? 'admin.cancel.stale' };
+  }
+
+  const { matchId, reason, note } = parsed.data;
+  const t = await getTranslations('admin.cancel.reasons');
+  const text = reason === 'other' ? note : t(reason);
+  const db = await getDb();
+  let match: Awaited<ReturnType<typeof cancelMatch>>;
+  try {
+    match = await cancelMatch(db, admin.id, matchId, text);
+  } catch (e) {
+    if (e instanceof DomainError && e.code === 'stale') return { status: 'error', message: 'admin.cancel.stale' };
+    throw e;
+  }
+  if (pushConfigured()) {
+    const { timezone } = await getSettings(db);
+    const notice = await composeCancelNotice(match, timezone, text);
+    await notifyMatchStatus(db, match, admin.id, webPushSender(), notice).catch(() => undefined);
+  }
+  refresh();
+  return { status: 'success', message: 'admin.cancel.done' };
+}
+
+export async function restoreMatchAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const admin = await requireAdmin();
+  const parsed = restoreMatchSchema.safeParse({
+    matchId: formData.get('matchId') ?? '',
+    confirm: formData.get('confirm') ?? '',
+  });
+  if (!parsed.success) return { status: 'error', errors: fieldErrors(parsed.error) };
+
+  const db = await getDb();
+  let match: Awaited<ReturnType<typeof restoreMatch>>;
+  try {
+    match = await restoreMatch(db, admin.id, parsed.data.matchId);
+  } catch (e) {
+    if (e instanceof DomainError && e.code === 'stale') return { status: 'error', message: 'admin.cancel.stale' };
+    throw e;
+  }
+  if (pushConfigured()) {
+    const { timezone } = await getSettings(db);
+    const notice = await composeRestoreNotice(match, timezone);
+    await notifyMatchStatus(db, match, admin.id, webPushSender(), notice).catch(() => undefined);
+  }
+  refresh();
+  return { status: 'success', message: 'admin.cancel.restored' };
 }
 
 export async function saveResultAction(matchId: string, _prev: FormState, formData: FormData): Promise<FormState> {

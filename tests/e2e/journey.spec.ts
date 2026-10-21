@@ -561,6 +561,41 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
       player.getByRole('region', { name: 'MARIQUITAS QUE NO VAN' }).getByText(`Nuevo ${suffix}`),
     ).toHaveCount(0);
   }
+
+  // Cancel the match with a reason: players see why and the next convocatoria opens; reactivating undoes it.
+  const cancelCard = page.getByRole('region', { name: 'Cancelar partido' });
+  const cancelButton = cancelCard.getByRole('button', { name: 'Cancelar partido' });
+  await expect(cancelButton).toBeDisabled();
+  await cancelCard.getByLabel('Otro motivo').check();
+  await expect(cancelButton).toBeDisabled();
+  await cancelCard.getByLabel('Escribe el motivo').fill(`Lluvia ${suffix}`);
+  await cancelButton.click();
+  const cancelDialog = page.getByRole('dialog', { name: /^¿Cancelar el partido del / });
+  await expect(cancelDialog).toContainText(`Motivo: Lluvia ${suffix}.`);
+  await cancelDialog.getByLabel('Escribe CANCELAR para confirmar').fill('cancelar');
+  await cancelDialog.getByRole('button', { name: 'Sí, cancelar' }).click();
+  await expect(cancelDialog).toBeHidden();
+  const cancelledCard = page.getByRole('region', { name: 'Partido cancelado' });
+  await expect(cancelledCard.getByRole('status')).toContainText('Partido cancelado. Se ha avisado');
+  await expect(cancelledCard).toContainText(`Motivo: Lluvia ${suffix}`);
+  await expectNoA11yViolations(page);
+  await player.goto('/partido');
+  const cancelledBanner = player.getByRole('region', { name: 'Partido cancelado' });
+  await expect(cancelledBanner).toContainText(`Motivo: Lluvia ${suffix}`);
+  const cancelledAt = await cancelledBanner.locator('time').getAttribute('datetime');
+  const openAt = await player.locator('main time').nth(1).getAttribute('datetime');
+  // A week later (give or take the clock change).
+  expect(Date.parse(openAt!) - Date.parse(cancelledAt!)).toBeGreaterThan(6.9 * 86_400_000);
+  await expectNoA11yViolations(player);
+  await cancelledCard.getByRole('button', { name: 'Reactivar partido' }).click();
+  const restoreDialog = page.getByRole('dialog', { name: /^¿Reactivar el partido del / });
+  await restoreDialog.getByLabel('Escribe REACTIVAR para confirmar').fill('reactivar');
+  await restoreDialog.getByRole('button', { name: 'Sí, reactivar' }).click();
+  await expect(cancelCard.getByRole('status')).toContainText('Partido reactivado');
+  await player.reload();
+  await expect(player.getByRole('region', { name: 'Partido cancelado' })).toHaveCount(0);
+  expect(await player.locator('main time').first().getAttribute('datetime')).toBe(cancelledAt);
+
   await player.goto('/admin/partido');
   await expect(player).toHaveURL(/\/partido$/);
 

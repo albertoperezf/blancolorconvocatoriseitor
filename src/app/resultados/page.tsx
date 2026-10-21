@@ -42,8 +42,10 @@ export default async function ResultsPage() {
   const canEdit = !!user && canEditResults(user.role);
   const summary = seasonSummary(played);
   const matchIds = played.map((m) => m.id);
-  const latest = played[0];
-  const editable = (matchId: string) => canEdit && canEditMatch(user.role, matchId, latest?.id);
+  const latest = played.find((m) => !m.cancelledAt);
+  const cancelledIds = new Set(played.filter((m) => m.cancelledAt).map((m) => m.id));
+  const editable = (matchId: string) =>
+    canEdit && !cancelledIds.has(matchId) && canEditMatch(user.role, matchId, latest?.id);
   // Editors lose the latest match when the next one kicks off; admins can always fix any.
   const lockNote =
     canEdit && user.role !== 'admin' && latest
@@ -149,7 +151,11 @@ export default async function ResultsPage() {
                   <h2 className="font-extrabold">
                     <time dateTime={m.startsAt.toISOString()}>{date}</time>
                   </h2>
-                  {winner ? (
+                  {m.cancelledAt ? (
+                    <span className="rounded-full border border-danger bg-danger-bg px-3 py-0.5 text-sm font-bold text-danger">
+                      {t('cancelled')}
+                    </span>
+                  ) : winner ? (
                     <span className={`rounded-full border px-3 py-0.5 text-sm font-bold ${BADGE[winner]}`}>
                       <span className="sr-only">{t('resultLabel')}: </span>
                       {t(`winner.${winner}`)}
@@ -160,6 +166,9 @@ export default async function ResultsPage() {
                     </span>
                   )}
                 </div>
+                {m.cancelledAt && m.cancelReason && (
+                  <p className="mt-2 text-sm text-muted">{t('cancelledReason', { reason: m.cancelReason })}</p>
+                )}
                 {hasResult && (
                   // Sized by the card, not the screen: cards are half-width on foldables and desktop.
                   <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 text-base font-extrabold tabular-nums @2xs:gap-x-3 @2xs:text-lg @xs:text-xl @md:text-2xl">

@@ -78,6 +78,13 @@
       "when": 1792494030980,
       "tag": "0010_deleted_users",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792589885437,
+      "tag": "0011_match_cancellation",
+      "breakpoints": true
     }
   ]
 }

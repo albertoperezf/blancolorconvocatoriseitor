@@ -1,7 +1,7 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, isNotNull } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
 import { attendances, guests, matches, settings, users } from '@/lib/db/schema';
-import { currentMatchStart } from './schedule';
+import { currentMatchStart, nextMatchStart } from './schedule';
 import { groupSquad, type Squad } from './squad';
 
 export const DEFAULT_SETTINGS = {
@@ -24,13 +24,29 @@ export async function getSettings(db: Db): Promise<Settings> {
   return created ?? (await db.select().from(settings).where(eq(settings.id, 1)))[0];
 }
 
-/** Matches are created lazily the first time anyone asks for the current week. */
+/** Matches are created lazily the first time anyone asks for the current week; a cancelled one hands over to the next. */
 export async function ensureCurrentMatch(db: Db, now: Date = new Date()): Promise<Match> {
   const s = await getSettings(db);
-  const startsAt = currentMatchStart(now, s);
-  await db.insert(matches).values({ startsAt, venue: s.venue }).onConflictDoNothing();
-  const [match] = await db.select().from(matches).where(eq(matches.startsAt, startsAt));
-  return match;
+  let startsAt = currentMatchStart(now, s);
+  for (;;) {
+    await db.insert(matches).values({ startsAt, venue: s.venue }).onConflictDoNothing();
+    const [match] = await db.select().from(matches).where(eq(matches.startsAt, startsAt));
+    if (!match.cancelledAt) return match;
+    startsAt = nextMatchStart(startsAt, s);
+  }
+}
+
+export type CancelledMatch = Match & { cancelledByName: string | null };
+
+/** This week's match if an admin called it off; it stays announced until it would have rolled over. */
+export async function getCancelledMatch(db: Db, now: Date = new Date()): Promise<CancelledMatch | undefined> {
+  const s = await getSettings(db);
+  const [row] = await db
+    .select({ match: matches, cancelledByName: users.displayName })
+    .from(matches)
+    .leftJoin(users, eq(users.id, matches.cancelledBy))
+    .where(and(eq(matches.startsAt, currentMatchStart(now, s)), isNotNull(matches.cancelledAt)));
+  return row && { ...row.match, cancelledByName: row.cancelledByName };
 }
 
 export async function getSquad(db: Db, matchId: string): Promise<Squad> {

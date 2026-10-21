@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
 import { attendances, matches, users } from '@/lib/db/schema';
 
@@ -38,7 +38,12 @@ export async function attendanceStats(
     .from(users)
     .leftJoin(
       matches,
-      and(gte(matches.startsAt, attendanceFrom()), lte(matches.startsAt, now), gte(matches.startsAt, users.createdAt)),
+      and(
+        gte(matches.startsAt, attendanceFrom()),
+        lte(matches.startsAt, now),
+        gte(matches.startsAt, users.createdAt),
+        isNull(matches.cancelledAt),
+      ),
     )
     .leftJoin(attendances, and(eq(attendances.matchId, matches.id), eq(attendances.userId, users.id)))
     .where(userId ? and(eq(users.active, true), eq(users.id, userId)) : eq(users.active, true))
@@ -52,6 +57,6 @@ export async function countAttendanceMatches(db: Db, now: Date = new Date()): Pr
   const [row] = await db
     .select({ n: count() })
     .from(matches)
-    .where(and(gte(matches.startsAt, attendanceFrom()), lte(matches.startsAt, now)));
+    .where(and(gte(matches.startsAt, attendanceFrom()), lte(matches.startsAt, now), isNull(matches.cancelledAt)));
   return row.n;
 }

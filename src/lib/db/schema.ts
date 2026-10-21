@@ -79,6 +79,10 @@ export const matches = pgTable('matches', {
   colorGoals: smallint(),
   // Who last saved the score (admin or editor), shown on the match card.
   resultBy: uuid().references(() => users.id, { onDelete: 'set null' }),
+  // Set when an admin calls the match off; the next week's convocatoria opens straight away.
+  cancelledAt: timestamp({ withTimezone: true }),
+  cancelReason: varchar({ length: 100 }),
+  cancelledBy: uuid().references(() => users.id, { onDelete: 'set null' }),
 });
 
 export const attendances = pgTable(

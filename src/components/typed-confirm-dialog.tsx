@@ -16,6 +16,10 @@ type Props = {
   title: string;
   body: ReactNode;
   confirm: string;
+  /** Close button label, when the default "Cancelar" would read like the action itself. */
+  dismiss?: string;
+  /** Neutral for actions that aren't destructive but still need care (e.g. they notify everyone). */
+  tone?: 'danger' | 'neutral';
   onSuccess?: (state: FormState) => void;
 };
 
@@ -29,6 +33,8 @@ export function TypedConfirmDialog({
   title,
   body,
   confirm,
+  dismiss,
+  tone = 'danger',
   onSuccess,
 }: Props) {
   const t = useTranslations('confirmDialog');
@@ -64,7 +70,9 @@ export function TypedConfirmDialog({
     <>
       <button
         type="button"
-        className="btn mt-4 border-2 border-danger text-danger hover:bg-danger-bg"
+        className={
+          tone === 'danger' ? 'btn mt-4 border-2 border-danger text-danger hover:bg-danger-bg' : 'btn-secondary mt-4'
+        }
         aria-haspopup="dialog"
         disabled={disabled}
         onClick={open}
@@ -100,11 +108,13 @@ export function TypedConfirmDialog({
           />
           <div className="flex flex-wrap justify-end gap-3">
             <button type="button" className="btn-secondary" onClick={() => dialogRef.current?.close()}>
-              {t('cancel')}
+              {dismiss ?? t('cancel')}
             </button>
             <button
               type="submit"
-              className="btn bg-danger text-on-status hover:opacity-90 forced-colors:border"
+              className={
+                tone === 'danger' ? 'btn bg-danger text-on-status hover:opacity-90 forced-colors:border' : 'btn-primary'
+              }
               disabled={!confirmed || pending}
             >
               {confirm}

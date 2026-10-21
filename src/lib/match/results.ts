@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type { Db } from '@/lib/db/create';
 import { auditLog, matches, users, type Role } from '@/lib/db/schema';
 import { shownName } from '@/lib/db/shown-name';
@@ -35,6 +35,8 @@ export function listPlayedMatches(db: Db, now: Date = new Date()) {
       blancosGoals: matches.blancosGoals,
       colorGoals: matches.colorGoals,
       resultByName: shownName,
+      cancelledAt: matches.cancelledAt,
+      cancelReason: matches.cancelReason,
     })
     .from(matches)
     .leftJoin(users, eq(users.id, matches.resultBy))
@@ -53,7 +55,7 @@ export async function latestPlayedMatchId(db: Db, now: Date = new Date()): Promi
   const [row] = await db
     .select({ id: matches.id })
     .from(matches)
-    .where(and(gte(matches.startsAt, resultsFrom()), lte(matches.startsAt, now)))
+    .where(and(gte(matches.startsAt, resultsFrom()), lte(matches.startsAt, now), isNull(matches.cancelledAt)))
     .orderBy(desc(matches.startsAt))
     .limit(1);
   return row?.id;
@@ -69,7 +71,14 @@ export async function setMatchResult(
   const updated = await db
     .update(matches)
     .set({ blancosGoals: goals.blancos, colorGoals: goals.color, resultBy: actorId })
-    .where(and(eq(matches.id, matchId), gte(matches.startsAt, resultsFrom()), lte(matches.startsAt, now)))
+    .where(
+      and(
+        eq(matches.id, matchId),
+        gte(matches.startsAt, resultsFrom()),
+        lte(matches.startsAt, now),
+        isNull(matches.cancelledAt),
+      ),
+    )
     .returning({ id: matches.id });
   if (updated.length === 0) throw new DomainError('not_found');
   await db.insert(auditLog).values({

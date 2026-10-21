@@ -37,7 +37,11 @@
     "opensNewTab": "se abre en una pestaña nueva",
     "eventTitle": "Partido Blancolores",
     "eventDescription": "Di si vas, dudas o no vas: {url}",
-    "answerCta": "Apúntate al partido"
+    "answerCta": "Apúntate al partido",
+    "cancelledTitle": "Partido cancelado",
+    "cancelledReason": "Motivo: {reason}",
+    "cancelledNext": "Ya está abierta la convocatoria del siguiente.",
+    "cancelledShareText": "❌ Partido Blancolores cancelado\n📅 {day} a las {time}\nMotivo: {reason}\n{url}"
   },
   "squad": {
     "heading": "Quién va",
@@ -100,6 +104,8 @@
     "empty": "Todavía no se ha jugado ningún partido.",
     "pending": "Pendiente",
     "noResult": "Sin resultado",
+    "cancelled": "Cancelado",
+    "cancelledReason": "Motivo: {reason}",
     "editableUntil": "Se puede editar hasta el {day} a las {time}.",
     "locked": "Este partido ya está cerrado: solo se puede editar el último partido jugado.",
     "attendanceHeading": "Quién vino",
@@ -298,6 +304,34 @@
       "stale": "El partido ha cambiado desde que abriste la página. Recárgala y vuelve a intentarlo.",
       "started": "El partido ya ha empezado: no se puede reiniciar."
     },
+    "cancel": {
+      "heading": "Cancelar partido",
+      "intro": "Por si no hay gente o hace mal tiempo. Se avisa a todos los jugadores con notificaciones y se abre ya la convocatoria de la semana siguiente. Las respuestas se guardan por si lo reactivas.",
+      "reasonLegend": "Motivo",
+      "reasons": {
+        "players": "Pocos jugadores",
+        "weather": "Mal tiempo",
+        "pitch": "Pista no disponible",
+        "other": "Otro motivo"
+      },
+      "note": "Escribe el motivo",
+      "open": "Cancelar partido",
+      "confirmTitle": "¿Cancelar el partido del {day}?",
+      "confirmBody": "Motivo: {reason}. Se avisará a todos los jugadores con notificaciones activadas.",
+      "confirm": "Sí, cancelar",
+      "back": "Volver",
+      "done": "Partido cancelado. Se ha avisado a los jugadores con notificaciones activadas.",
+      "cancelledBy": "Cancelado por {name}.",
+      "cancelledTitle": "Partido cancelado",
+      "reasonValue": "Motivo: {reason}",
+      "restoreIntro": "Si ha sido un error, reactívalo: vuelve a ser el partido de esta semana, con las respuestas que tenía, y se avisa a los jugadores.",
+      "restoreOpen": "Reactivar partido",
+      "restoreTitle": "¿Reactivar el partido del {day}?",
+      "restoreBody": "Se avisará a todos los jugadores con notificaciones activadas de que vuelve a haber partido.",
+      "restoreConfirm": "Sí, reactivar",
+      "restored": "Partido reactivado. Se ha avisado a los jugadores con notificaciones activadas.",
+      "stale": "El partido ha cambiado desde que abriste la página. Recárgala y vuelve a intentarlo."
+    },
     "deleteUser": {
       "heading": "Eliminar jugador",
       "intro": "Borra su cuenta y sus respuestas y fichajes del próximo partido. Sus goles y partidos pasados se conservan como «{name} (Eliminado)».",
@@ -336,6 +370,11 @@
     "displayName": { "min": "Mínimo 2 caracteres.", "max": "Máximo 40 caracteres." },
     "settings": { "time": "Formato HH:MM." },
     "confirmWord": "Escribe {word} para confirmar.",
+    "cancel": {
+      "reason": "Elige un motivo.",
+      "note": "Escribe el motivo (mínimo 3 caracteres).",
+      "noteMax": "Máximo 100 caracteres."
+    },
     "result": {
       "required": "Pon los goles de este equipo.",
       "goals": "Entre 0 y 99 goles.",
@@ -389,6 +428,10 @@
     "editorBody": "Ya puedes poner los resultados y los goleadores de los partidos en Resultados.",
     "resetTitle": "Convocatoria reiniciada 🔄",
     "resetBody": "{day} · {time} — Se han borrado todas las respuestas. ¡Vuelve a apuntarte!",
+    "cancelTitle": "Partido cancelado ❌",
+    "cancelBody": "{day} · {time} — No hay partido. Motivo: {reason}",
+    "restoreTitle": "¡Vuelve a haber partido! ⚽",
+    "restoreBody": "{day} · {time} — El partido sigue en pie. ¡Apúntate!",
     "actionNotGoing": "❌ No voy",
     "confirmGoing": "Apuntado: VOY. ¡Nos vemos en el partido!",
     "confirmNotGoing": "Apuntado: NO VOY. ¡Otra vez será!",

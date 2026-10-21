@@ -4,8 +4,9 @@ import { requireAdmin } from '@/lib/auth/current';
 import { CalendarIcon } from '@/components/icons';
 import { capitalizeMonths } from '@/lib/dates';
 import { getDb } from '@/lib/db';
-import { ensureCurrentMatch, getSettings } from '@/lib/match/queries';
+import { ensureCurrentMatch, getCancelledMatch, getSettings, type Match } from '@/lib/match/queries';
 import { resetSummary } from '@/lib/match/reset';
+import { CancelMatch } from './cancel-match';
 import { ResetMatch } from './reset-match';
 import { SettingsForm } from './settings-form';
 
@@ -14,17 +15,24 @@ export const metadata: Metadata = { title: 'Partido semanal' };
 export default async function MatchSettingsPage() {
   await requireAdmin();
   const db = await getDb();
-  const [t, format, settings, match] = await Promise.all([
+  const [t, format, settings, match, cancelled] = await Promise.all([
     getTranslations('admin'),
     getFormatter(),
     getSettings(db),
     ensureCurrentMatch(db),
+    getCancelledMatch(db),
   ]);
   const summary = await resetSummary(db, match);
-  const rawDay = capitalizeMonths(
-    format.dateTime(match.startsAt, { weekday: 'long', day: 'numeric', month: 'long', timeZone: settings.timezone }),
-  );
-  const time = format.dateTime(match.startsAt, { hour: '2-digit', minute: '2-digit', timeZone: settings.timezone });
+  const dayOf = (m: Match) => {
+    const raw = capitalizeMonths(
+      format.dateTime(m.startsAt, { weekday: 'long', day: 'numeric', month: 'long', timeZone: settings.timezone }),
+    );
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  };
+  const timeOf = (m: Match) =>
+    format.dateTime(m.startsAt, { hour: '2-digit', minute: '2-digit', timeZone: settings.timezone });
+  const day = dayOf(match);
+  const time = timeOf(match);
 
   return (
     <div className="mx-auto max-w-xl">
@@ -53,11 +61,20 @@ export default async function MatchSettingsPage() {
         </details>
       </section>
       <section aria-labelledby="reset-heading" className="card mt-6">
-        <ResetMatch
-          matchId={match.id}
-          day={rawDay.charAt(0).toUpperCase() + rawDay.slice(1)}
-          time={time}
-          {...summary}
+        <ResetMatch matchId={match.id} day={day} time={time} {...summary} />
+      </section>
+      <section aria-labelledby="cancel-heading" className="card mt-6">
+        <CancelMatch
+          open={{ id: match.id, day, time }}
+          cancelled={
+            cancelled && {
+              id: cancelled.id,
+              day: dayOf(cancelled),
+              time: timeOf(cancelled),
+              reason: cancelled.cancelReason ?? '',
+              by: cancelled.cancelledByName,
+            }
+          }
         />
       </section>
     </div>

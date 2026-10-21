@@ -49,3 +49,19 @@ export async function composeResetNotice(match: Match, timezone: string) {
   ]);
   return { title: t('resetTitle'), body: t('resetBody', { day, time }), ...buttons };
 }
+
+/** "Partido cancelado", with the reason; no answer buttons. */
+export async function composeCancelNotice(match: Match, timezone: string, reason: string) {
+  const [t, { day, time }] = await Promise.all([getTranslations('push'), when(match, timezone)]);
+  return { title: t('cancelTitle'), body: t('cancelBody', { day, time, reason }) };
+}
+
+/** "Vuelve a haber partido", with the Voy / No voy buttons. */
+export async function composeRestoreNotice(match: Match, timezone: string) {
+  const [t, { day, time }, buttons] = await Promise.all([
+    getTranslations('push'),
+    when(match, timezone),
+    answerButtons(),
+  ]);
+  return { title: t('restoreTitle'), body: t('restoreBody', { day, time }), ...buttons };
+}

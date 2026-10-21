@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { RESET_WORD } from './match/reset-word';
+import { CANCEL_REASONS, CANCEL_WORD, RESET_WORD, RESTORE_WORD } from './match/reset-word';
 import { POSITIONS } from './positions';
 
 export const TEAMS = ['blancos', 'color'] as const;
@@ -91,6 +91,25 @@ export const resetMatchSchema = z.object({
     .toUpperCase()
     .refine((v) => v === RESET_WORD, 'confirmWord'),
 });
+
+const confirmWord = (word: string) =>
+  z
+    .string()
+    .trim()
+    .toUpperCase()
+    .refine((v) => v === word, 'confirmWord');
+
+/** "Otro" needs the admin's own words; the presets are translated when saving. */
+export const cancelMatchSchema = z
+  .object({
+    matchId: z.uuid(),
+    confirm: confirmWord(CANCEL_WORD),
+    reason: z.enum(CANCEL_REASONS, { message: 'cancel.reason' }),
+    note: z.string().trim().max(100, 'cancel.noteMax').default(''),
+  })
+  .refine((v) => v.reason !== 'other' || v.note.length >= 3, { message: 'cancel.note', path: ['note'] });
+
+export const restoreMatchSchema = z.object({ matchId: z.uuid(), confirm: confirmWord(RESTORE_WORD) });
 
 /** Answer sent by the service worker from a reminder's "Voy" / "No voy" buttons. */
 export const pushAnswerSchema = z.object({
