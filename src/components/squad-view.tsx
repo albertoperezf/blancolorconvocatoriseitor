@@ -25,6 +25,7 @@ type GroupProps = {
   open?: boolean;
   /** Phones have little room: drop the box entirely while nobody is in it. */
   hideEmptyOnMobile?: boolean;
+  className?: string;
   icon?: ReactNode;
   accent?: string;
   meLabel?: string;
@@ -38,6 +39,7 @@ function Group({
   empty,
   open = true,
   hideEmptyOnMobile = false,
+  className = '',
   icon,
   accent = 'border-border',
   meLabel,
@@ -85,7 +87,7 @@ function Group({
       )}
     </div>
   );
-  const box = `card border-l-4 p-0 sm:p-0 ${accent} ${hideEmptyOnMobile && names.length === 0 ? 'max-md:hidden' : ''}`;
+  const box = `card border-l-4 p-0 sm:p-0 ${accent} ${hideEmptyOnMobile && names.length === 0 ? 'max-md:hidden' : ''} ${className}`;
 
   // Long, low-interest lists start collapsed; headings stay out of <summary> to keep their semantics.
   if (!open) {
@@ -146,7 +148,7 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
         </h2>
         <LiveStatus renderedAt={new Date().toISOString()} />
       </div>
-      <div className="mt-2 grid gap-2 md:mt-3 md:grid-cols-3 md:gap-3">
+      <div className="mt-2 grid gap-2 fold:grid-cols-2 md:mt-3 md:grid-cols-3 md:gap-3">
         <Group
           {...shared}
           id="g-blancos"
@@ -175,6 +177,7 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
           empty={t('emptyGuests')}
           accent="border-l-going"
           hideEmptyOnMobile
+          className="fold:col-span-2 md:col-span-1"
         />
       </div>
       {squad.noTeam.length > 0 && (
@@ -190,7 +193,7 @@ export async function SquadView({ squad, meId, ctaHref }: SquadViewProps) {
         </div>
       )}
       {/* items-start: opening one collapsible group must not stretch its neighbour in the same row. */}
-      <div className="mt-2 grid items-start gap-2 md:mt-3 md:grid-cols-2 md:gap-3">
+      <div className="mt-2 grid items-start gap-2 fold:grid-cols-2 md:mt-3 md:gap-3">
         <Group
           {...shared}
           id="g-maybe"

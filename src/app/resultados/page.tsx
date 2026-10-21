@@ -130,7 +130,7 @@ export default async function ResultsPage() {
       {played.length === 0 ? (
         <p className="card mt-4 text-muted">{t('empty')}</p>
       ) : (
-        <ul className="mt-4 grid gap-3 md:grid-cols-2">
+        <ul className="mt-4 grid items-start gap-3 fold:grid-cols-2">
           {played.map((m) => {
             const raw = capitalizeMonths(
               format.dateTime(m.startsAt, {
@@ -144,7 +144,7 @@ export default async function ResultsPage() {
             const hasResult = m.blancosGoals !== null && m.colorGoals !== null;
             const winner = hasResult ? matchWinner(m.blancosGoals!, m.colorGoals!) : null;
             return (
-              <li key={m.id} className="card min-w-0">
+              <li key={m.id} className="card @container min-w-0">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h2 className="font-extrabold">
                     <time dateTime={m.startsAt.toISOString()}>{date}</time>
@@ -161,7 +161,8 @@ export default async function ResultsPage() {
                   )}
                 </div>
                 {hasResult && (
-                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 text-xl font-extrabold tabular-nums sm:text-2xl">
+                  // Sized by the card, not the screen: cards are half-width on foldables and desktop.
+                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 text-base font-extrabold tabular-nums @2xs:gap-x-3 @2xs:text-lg @xs:text-xl @md:text-2xl">
                     <span className="inline-flex items-center gap-1.5">
                       <ShirtIcon className="size-5" />
                       {t('blancos')}

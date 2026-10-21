@@ -21,6 +21,9 @@
   --color-on-status: light-dark(#ffffff, #000000);
 
   --radius-card: 1rem;
+
+  /* Unfolded foldables (~690–720px) and small tablets: room for two columns before the md layout. */
+  --breakpoint-fold: 37.5rem;
 }
 
 /* No data-theme = follow the OS; the header toggle pins light or dark (stored in a cookie). */

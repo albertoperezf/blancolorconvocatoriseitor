@@ -5,7 +5,7 @@ export default function Loading() {
     <PageSkeleton>
       <TitleSkeleton intro />
       <div className={`${block} mt-4 h-36`} />
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <div className="mt-4 grid gap-3 fold:grid-cols-2">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className={`${block} h-44`} />
         ))}

@@ -11,12 +11,12 @@ export default async function Loading() {
       <div aria-hidden>
         <div className={`${block} h-40`} />
         <div className="mt-8 h-6 w-40 animate-pulse rounded-lg bg-border/40" />
-        <div className="mt-3 grid gap-3 md:grid-cols-3">
+        <div className="mt-3 grid gap-3 fold:grid-cols-2 md:grid-cols-3">
           <div className={`${block} h-28`} />
           <div className={`${block} h-28`} />
-          <div className={`${block} h-28`} />
+          <div className={`${block} h-28 fold:col-span-2 md:col-span-1`} />
         </div>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <div className="mt-3 grid gap-3 fold:grid-cols-2">
           <div className={`${block} h-20`} />
           <div className={`${block} h-20`} />
         </div>

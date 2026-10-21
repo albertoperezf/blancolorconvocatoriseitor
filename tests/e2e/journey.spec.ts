@@ -290,6 +290,15 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await page.getByText('VOY', { exact: true }).click();
   await expect(page.getByRole('region', { name: 'BLANCOS' }).getByText('Admin E2E')).toBeVisible();
 
+  // Unfolded foldables (about 700px wide) show the two teams side by side.
+  const viewport = page.viewportSize()!;
+  await page.setViewportSize({ width: 700, height: 900 });
+  const blancos = await page.getByRole('region', { name: 'BLANCOS' }).boundingBox();
+  const color = await page.getByRole('region', { name: 'COLOR' }).boundingBox();
+  expect(Math.abs(blancos!.y - color!.y)).toBeLessThan(2);
+  expect(color!.x).toBeGreaterThan(blancos!.x + blancos!.width - 1);
+  await page.setViewportSize(viewport);
+
   // Forgot password: the player asks from the login page, an admin sees it and generates the link.
   const forgetful = await newPage(browser, baseURL);
   await forgetful.goto('/login');
