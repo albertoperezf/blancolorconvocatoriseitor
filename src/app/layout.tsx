@@ -7,6 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import { ExternalLink } from '@/components/external-link';
 import { MailIcon, NewspaperIcon, PlayIcon } from '@/components/icons';
 import { SiteHeader } from '@/components/site-header';
+import { SmoothDetails } from '@/components/smooth-details';
 import { TouchActive } from '@/components/touch-active';
 import { BLOG_URL, VIDEOS_URL } from '@/lib/links';
 import { siteUrl } from '@/lib/site-url';
@@ -88,6 +89,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
           </footer>
         </NextIntlClientProvider>
         <TouchActive />
+        <SmoothDetails />
         {/* Their scripts only exist on Vercel; elsewhere (local, CI Lighthouse) they 404 on every page. */}
         {process.env.VERCEL && (
           <>
