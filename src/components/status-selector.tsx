@@ -45,10 +45,11 @@ export function StatusSelector({ initial, onSave }: Props) {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgb(0_0_0/0.08)] md:static md:mt-6 md:rounded-[var(--radius-card)] md:border md:p-6 md:shadow-none">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgb(0_0_0/0.08)] md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:shadow-none">
       <fieldset id="tu-respuesta" disabled={pending} aria-busy={pending}>
-        {/* The three buttons explain themselves on phones; the title stays for screen readers. */}
-        <legend className="mb-2 font-extrabold max-md:sr-only">{t('legend')}</legend>
+        {/* The three buttons explain themselves on phones; the title stays for screen readers.
+            Desktop: as tall as the "Convocatoria" title beside it, so both columns line up. */}
+        <legend className="mb-2 font-extrabold max-md:sr-only md:mb-3 md:text-lg md:leading-9">{t('legend')}</legend>
         <div className="grid grid-cols-3 gap-2">
           {OPTIONS.map(({ value, Icon, checked }) => (
             <label key={value} className="relative">
@@ -61,7 +62,7 @@ export function StatusSelector({ initial, onSave }: Props) {
                 onChange={() => save(value, saved, true)}
               />
               <span
-                className={`flex min-h-14 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl border-2 px-2 text-sm font-extrabold tracking-wide peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand sm:flex-row sm:gap-2 sm:text-base ${optimistic === value ? checked : 'border-border bg-surface'}`}
+                className={`flex min-h-14 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl border-2 px-2 text-sm font-extrabold tracking-wide peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand sm:flex-row sm:gap-2 sm:text-base md:max-lg:flex-col md:max-lg:gap-0.5 md:max-lg:text-sm ${optimistic === value ? checked : 'border-border bg-surface'}`}
               >
                 <Icon className="size-5" />
                 {t(value)}

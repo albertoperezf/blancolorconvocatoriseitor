@@ -54,6 +54,16 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
   await expect(page).toHaveURL(/\/partido$/);
   await expect(page.getByText('Hola, Admin E2E')).toBeVisible();
 
+  // Answering comes first: beside the match details on desktop, a bar fixed to the bottom on phones.
+  const answers = page.locator('#tu-respuesta');
+  if (info.project.name === 'mobile') {
+    await expect(answers.locator('xpath=..')).toHaveCSS('position', 'fixed');
+  } else {
+    const matchCard = page.locator('main .card').filter({ has: page.getByRole('heading', { name: 'Convocatoria' }) });
+    await expect(matchCard.locator('#tu-respuesta')).toBeVisible();
+    await expect(answers).toBeInViewport({ ratio: 1 });
+  }
+
   // Answer, change, then undo back to the previous answer.
   const status = page.locator('main').getByRole('status').first();
   await page.getByText('DUDA', { exact: true }).click();
@@ -497,8 +507,12 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
     await expect(whoCame).toContainText('Admin E2E (añadido)');
     await editorCard.getByRole('button', { name: 'Guardar' }).click();
     await expect(editorCard.getByRole('status')).toHaveText('Resultado guardado.');
-    await player.reload();
-    await openWhoCame();
+    // That notice may still be showing from the save above: reload until this save is in.
+    await expect(async () => {
+      await player.reload();
+      await openWhoCame();
+      await expect(noShowAdmin).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 10_000 });
   }
   await expect(noShowAdmin).toBeVisible();
   // Contrast is measured once the editor has finished fading in.

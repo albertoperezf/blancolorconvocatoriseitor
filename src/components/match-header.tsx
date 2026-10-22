@@ -86,7 +86,7 @@ export async function MatchHeader({
           )}
         </span>
       </p>
-      <div className="col-start-2 row-start-1 flex items-center md:col-start-1 md:row-start-auto md:flex-wrap md:gap-x-6 md:gap-y-3">
+      <div className="col-start-2 row-start-1 flex items-center md:col-start-1 md:row-start-auto md:flex-wrap md:gap-x-4 md:gap-y-3 lg:gap-x-6">
         <CalendarMenu className="max-md:hidden" googleUrl={googleCalendarUrl(event)} labels={calendarLabels} />
         {shareText && <ShareButton text={shareText} label={t('share')} />}
       </div>

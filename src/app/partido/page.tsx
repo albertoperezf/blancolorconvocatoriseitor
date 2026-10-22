@@ -35,19 +35,22 @@ export default async function MatchPage() {
     <>
       <p className="text-lg font-semibold">{t('match.greeting', { name: user.displayName })}</p>
       {cancelled && <CancelledBanner match={cancelled} timezone={settings.timezone} />}
-      <div className="card mt-2">
-        <MatchHeader
-          match={match}
-          timezone={settings.timezone}
-          address={settings.address}
-          counts={{ going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length }}
-        />
+      {/* Desktop: answering sits beside the match details; phones keep it as a bar fixed to the bottom. */}
+      <div className="card mt-2 md:grid md:grid-cols-2">
+        <div className="md:pr-6 lg:pr-8">
+          <MatchHeader
+            match={match}
+            timezone={settings.timezone}
+            address={settings.address}
+            counts={{ going: goingCount(squad), maybe: squad.maybe.length, notGoing: squad.notGoing.length }}
+          />
+        </div>
+        <div data-match-id={match.id} className="md:border-l md:border-border md:pl-6 lg:pl-8">
+          <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
+        </div>
       </div>
       <SquadView squad={squad} meId={user.id} ctaHref="#tu-respuesta" />
       <PushBanner publicKey={vapidPublicKey()} />
-      <div data-match-id={match.id} className="contents">
-        <StatusSelector key={match.id} initial={decision} onSave={setAttendanceAction} />
-      </div>
       {user.canBringGuests && <GuestManager guests={guests} />}
     </>
   );
