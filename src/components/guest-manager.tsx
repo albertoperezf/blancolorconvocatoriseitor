@@ -8,6 +8,30 @@ import { Field, useAutoHide, useFocusAfterSubmit, useMessage } from './form';
 import { CheckIcon, XIcon } from './icons';
 import { Reveal } from './reveal';
 
+const REVEAL_MS = 320;
+const GAP = 12;
+
+/** Scrolls just enough for `el` to sit between the sticky header and whatever covers the bottom (keyboard, answer bar). */
+function keepInView(el: HTMLElement) {
+  const vv = window.visualViewport;
+  const viewTop = vv?.offsetTop ?? 0;
+  const viewBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+  const header = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+  // The fixed answer bar on phones; behind the keyboard it no longer covers anything.
+  const bar = document.querySelector('#tu-respuesta')?.closest<HTMLElement>('.fixed');
+  const barTop = bar && getComputedStyle(bar).position === 'fixed' ? bar.getBoundingClientRect().top : Infinity;
+  const top = Math.max(viewTop, header) + GAP;
+  const bottom = Math.min(viewBottom, barTop) - GAP;
+  const rect = el.getBoundingClientRect();
+  let delta = 0;
+  if (rect.bottom > bottom) delta = Math.min(rect.bottom - bottom, rect.top - top);
+  else if (rect.top < top) delta = rect.top - top;
+  if (Math.abs(delta) > 1) {
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollBy({ top: delta, behavior: smooth ? 'smooth' : 'auto' });
+  }
+}
+
 /** Current guests as chips; the add form stays folded behind "＋ Añadir fichaje" until needed. */
 export function GuestManager({ guests }: { guests: { id: string; name: string }[] }) {
   const t = useTranslations('guests');
@@ -24,7 +48,19 @@ export function GuestManager({ guests }: { guests: { id: string; name: string }[
     formRef.current?.querySelector<HTMLInputElement>('input[name="name"]')?.focus({ preventScroll: true });
 
   useEffect(() => {
-    if (open) focusName();
+    if (!open) return;
+    focusName();
+    // Once the form has slid open, and again when the phone keyboard shows up.
+    const timer = setTimeout(() => formRef.current && keepInView(formRef.current), REVEAL_MS);
+    const vv = window.visualViewport;
+    const onResize = () => formRef.current && keepInView(formRef.current);
+    vv?.addEventListener('resize', onResize);
+    const stop = setTimeout(() => vv?.removeEventListener('resize', onResize), 1_500);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(stop);
+      vv?.removeEventListener('resize', onResize);
+    };
   }, [open]);
 
   // Stays open after adding, ready for the next guest.
