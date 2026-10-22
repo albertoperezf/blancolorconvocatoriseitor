@@ -87,16 +87,24 @@ test('admin onboarding, answering, guests, enrolling a player and resetting a pa
 
   // Guests are allowed even when not going.
   const guest = `Íñigo ${suffix.slice(0, 3)}`;
-  // The add-guest form is folded behind "＋ Añadir fichaje" and opens with the name field focused.
-  await expect(page.getByLabel('Nombre del fichaje')).toBeHidden();
+  // The add-guest form is folded behind "＋ Añadir fichaje". With a mouse it opens with the name field focused;
+  // on touch screens it doesn't, so tapping the field lets the phone place it above its keyboard.
+  const touch = info.project.name === 'mobile';
+  const guestName = page.getByLabel('Nombre del fichaje');
+  await expect(guestName).toBeHidden();
   await page.getByRole('button', { name: 'Añadir fichaje' }).click();
-  await expect(page.getByLabel('Nombre del fichaje')).toBeFocused();
-  // Esc folds it again; it reopens focused.
+  if (touch) {
+    await expect(guestName).toBeVisible();
+    await expect(guestName).not.toBeFocused();
+    await guestName.focus();
+  } else await expect(guestName).toBeFocused();
+  // Esc folds it again; it reopens the same way.
   await page.keyboard.press('Escape');
-  await expect(page.getByLabel('Nombre del fichaje')).toBeHidden();
+  await expect(guestName).toBeHidden();
   await page.getByRole('button', { name: 'Añadir fichaje' }).click();
-  await expect(page.getByLabel('Nombre del fichaje')).toBeFocused();
-  await page.getByLabel('Nombre del fichaje').fill(guest);
+  if (touch) await expect(guestName).not.toBeFocused();
+  else await expect(guestName).toBeFocused();
+  await guestName.fill(guest);
   await page.getByRole('button', { name: 'Añadir', exact: true }).click();
   await expect(page.getByRole('region', { name: 'INVITADOS' }).getByText(guest)).toBeVisible();
   // Measure contrast at rest: pointer off the just-clicked button and the form fully faded in.
